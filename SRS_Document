@@ -1,0 +1,475 @@
+
+[ChopNow: Africa's Food Rescue and Affordable Meals Platform ]
+
+
+
+
+Description of the concept of their Mission;
+My mission is to reduce food waste and improve access to affordable meals across Africa by building a digital platform that connects local food vendors, restaurants, and consumers. The platform, ChopNow, allows food vendors to sell surplus meals at discounted prices to customers who need them, creating a win-win solution: vendors reduce losses, while consumers access affordable, quality food.
+This mission is relevant in Africa because food waste and hunger coexist as major societal challenges. Despite Africa producing enough food to feed its population, millions of people still go hungry due to inefficiencies in distribution and access. ChopNow addresses this issue by leveraging digital technology and mobile platforms, which are already widely used in Africa, to ensure that surplus food finds its way to families who need it.
+
+Problem statement:
+Food insecurity is one of Africa's most pressing challenges. According to the Food and Agriculture Organization (FAO), nearly 37% of food produced in Sub-Saharan Africa is lost or wasted before it reaches consumers. At the same time, more than 282 million Africans experience hunger (World Food Program, 2023).
+Who: Low-income families, students, and local vendors are most affected. Vendors lose revenue when food is unsold, while families cannot afford regular meals.
+
+What: The dual problem is food waste and lack of affordable access.
+
+When: This issue occurs daily, especially in urban areas with high food production and consumption cycles.
+
+Where: The problem is widespread across Africa, particularly in cities like Kigali, Lagos, Nairobi, and Johannesburg, where food supply chains are active but unevenly distributed.
+
+Why: Lack of affordable digital infrastructure to connect surplus food supply with demand. Vendors have no platform to sell excess food quickly, and consumers are unaware of where to find affordable options.
+
+How: By creating an accessible mobile-first application that matches vendors with surplus food to nearby consumers in real time, ChopNow solves both sides of the problem.
+Unlike existing food delivery apps, ChopNow focuses on affordability and food rescue, not just convenience. Its unique proposition is sustainability + social impact, making it different from traditional delivery platforms.
+
+
+
+Software development model
+For ChopNow, I will use the Agile Software Development Model.
+This model is most relevant because ChopNow requires constant testing, feedback, and iteration with both vendors and consumers. Since food waste and affordability are dynamic problems, the platform needs flexibility to adapt quickly.
+Steps I will use in Agile for ChopNow:
+Requirement Gathering: Conduct surveys and interviews with vendors and families.
+
+
+Planning: Define sprint goals (e.g., vendor onboarding, order flow, and payment).
+
+
+Development: Build features in small increments (ordering, notifications, discounts).
+
+
+Testing: Gather feedback from vendors and pilot users.
+
+
+Deployment: Launch an MVP in a small community or campus.
+
+
+Iteration: Improve the system based on user behavior and feedback.
+
+The hypothesis of their solution
+If ChopNow is deployed, food waste in pilot communities will reduce by at least 20% within the first year, while enabling thousands of families to access affordable meals. Vendors will save money by selling food that would otherwise go to waste, and consumers will benefit from discounted prices.
+This solution will not only improve affordability but also contribute to sustainability, reduce carbon emissions from waste, and improve community health.
+
+References
+
+Food and Agriculture Organization. (2019). The State of Food and Agriculture 2019: Moving forward on food loss and waste reduction. FAO. https://www.fao.org/3/ca6030en/ca6030en.pdf
+
+
+World Food Program. (2023). Hunger in Africa. WFP. https://www.wfp.org/africa
+
+
+Gustavsson, J., Cederberg, C., & Sonesson, U. (2011). Global Food Losses and Food Waste: Extent, Causes and Prevention. Food and Agriculture Organization of the United Nations. https://www.fao.org/3/i2697e/i2697e.pdf
+
+
+
+
+
+
+
+
+
+1. Introduction
+1.1 Purpose
+This Software Requirements Specification (SRS) document details the functional and non-functional requirements for ChopNow, a digital platform aimed at reducing food waste and improving access to affordable meals across Africa. This document serves as a foundational guide for the development team, stakeholders, and testers, ensuring a shared understanding of the system's objectives and functionalities. The scope of this SRS covers the entire ChopNow platform, encompassing both vendor and consumer-facing applications, as well as the backend infrastructure.
+1.2 Document Conventions
+This document adheres to the following conventions: * Bold text is used for emphasis and to highlight key terms. * Italic text is used for titles of documents or external references. * Code font is used for technical terms, code snippets, or specific UI elements. * Requirements are structured with unique identifiers (e.g., FR1, NFR1) for
+traceability. * All diagrams are presented using standard UML notation where applicable.
+1.3 Intended Audience and Reading Suggestions
+This SRS is intended for a diverse audience, including: * Developers: To understand the system's requirements for design and implementation. * Project Managers: To monitor project scope, progress, and resource allocation. * Quality Assurance (QA) Testers: To develop test plans and validate system functionality. * Stakeholders/Business Analysts: To ensure the system aligns with business objectives and user needs. * Technical Writers: To develop user manuals and other documentation.
+It is suggested that readers begin with the Introduction for an overview, proceed to the Overall Description for context, then delve into the detailed Functional and Non-functional Requirements. Sections on External Interface Requirements and System Features provide technical specifics, while the Appendices offer supplementary information.
+1.4 Product Scope
+ChopNow is a mobile-first digital platform designed to connect local food vendors with surplus food to consumers seeking affordable meals. The primary goal is to mitigate food waste and combat food insecurity in African urban centers. The platform will feature vendor registration, meal listing, discounted pricing, real-time notifications, secure payment processing, and order management. It will initially target key cities in Sub-Saharan Africa, with a focus on scalability and adaptability to diverse local contexts. The platform's success will be measured by reductions in food waste, increased access to affordable food, and improved economic opportunities for vendors.
+1.5 References
+Food and Agriculture Organization. (2019). The State of Food and Agriculture 2019: Moving forward on food loss and waste reduction. FAO.
+https://www.fao.org/3/ca6030en/ca6030en.pdf
+World Food Program. (2023). Hunger in Africa. WFP.
+https://www.wfp.org/africa
+Gustavsson, J., Cederberg, C., & Sonesson, U. (2011). Global Food Losses and Food Waste: Extent, Causes and Prevention. Food and Agriculture Organization of the United Nations. https://www.fao.org/3/i2697e/i2697e.pdf
+IEEE Std 830-1998, IEEE Recommended Practice for Software Requirements Specifications.
+2. Overall Description
+2.1 Product Perspective
+ChopNow is a new, self-contained product designed to address the unique challenges of food waste and food insecurity in Africa. It is not a replacement for existing food delivery systems but rather a complementary platform focused on sustainability and social impact. The system will interface with mobile operating systems (Android and iOS), payment gateways, and potentially third-party mapping services for location-based functionalities. The core components include a mobile application for consumers, a mobile/web application for vendors, and a robust backend server with a database.
+2.2 Product Functions
+The major functions of ChopNow include: * Vendor Management: Registration, profile creation, meal listing (with quantity, price, and pickup times), and order fulfillment. * Consumer Features: User registration, browsing available meals, filtering by location/cuisine/price, placing orders, and secure payment. * Order Management: Real-time order tracking, status updates, and cancellation handling. * Notification System: Alerts for new meal listings, order confirmations, and pickup reminders. * Payment Processing: Integration with local mobile money and card payment systems. * Rating and Review System: For both vendors and consumers to provide feedback. * Reporting and Analytics: For vendors to track sales and for administrators to monitor platform performance and social impact metrics.
+2.3 User Classes and Characteristics
+ChopNow will serve two primary user classes:
+Consumers:
+Characteristics: Low-income families, students, and individuals seeking affordable meal options. They are typically mobile-savvy but may have limited disposable income. They prioritize affordability, convenience, and food quality.
+Importance: High, as they represent the demand side and beneficiaries of the food rescue mission.
+Vendors:
+Characteristics: Local restaurants, bakeries, cafes, and food stalls with surplus food. They are motivated to reduce waste, recover costs, and reach new customer segments. They require an easy-to-use interface for listing meals and managing orders.
+Importance: High, as they provide the supply of discounted meals and are crucial for the platform's inventory.
+2.4 Operating Environment
+The ChopNow platform will operate in the following environment: * Hardware Platform: Mobile devices (smartphones and tablets) running Android and iOS. Backend servers will run on cloud infrastructure (e.g., AWS, Google Cloud, Azure). * Operating Systems: Android (version 8.0 and above), iOS (version 12.0 and above), Linux for backend servers. * Software Components: Database (e.g., PostgreSQL, MongoDB), payment gateway APIs (e.g., M-Pesa, Stripe), mapping APIs (e.g., Google Maps), notification services (e.g., Firebase Cloud Messaging). * Network: Requires stable internet connectivity (3G, 4G, Wi-Fi) for real-time updates and transactions.
+2.5 Design and Implementation Constraints
+Regulatory Policies: Adherence to local food safety regulations and data privacy laws (e.g., GDPR-like regulations in some African countries).
+Hardware Limitations: Optimization for diverse mobile devices, including those with lower specifications and varying screen sizes.
+Network Latency: Design must account for potentially inconsistent internet connectivity in some regions, ensuring offline capabilities where feasible and robust error handling.
+Security Considerations: Robust security measures for user data, payment information, and transaction integrity.
+Technology Stack: Preference for open-source technologies where possible to minimize licensing costs. Mobile development using cross-platform frameworks (e.g., React Native, Flutter) to ensure wider reach and faster development.
+Payment Integration: Integration with multiple local mobile money and card payment solutions prevalent in target African markets.
+2.6 User Documentation
+The following user documentation components will be delivered: * Consumer Mobile App Guide: In-app tutorials and a comprehensive help section covering registration, browsing, ordering, payment, and support. * Vendor Web/Mobile App Guide: A detailed guide for vendors on profile setup, meal listing, order management, and payout procedures. * FAQ Section: A publicly accessible FAQ section on the ChopNow website and within the apps. * Customer Support Portal: An online portal for submitting tickets and accessing further assistance.
+2.7 Assumptions and Dependencies
+Assumptions:
+
+Users (both consumers and vendors) will have access to smartphones and internet connectivity.
+
+Vendors are willing to sell surplus food at discounted prices. Consumers are willing to purchase surplus food through a digital platform.
+
+Reliable third-party payment gateway services will be available and integrated.
+
+Local regulations will permit the sale of surplus food through such a platform.
+
+
+Dependencies:
+
+Availability and stability of mobile network infrastructure.
+Integration with external payment processing APIs.
+Integration with mapping and location services APIs.
+Compliance with evolving local and international data
+protection and food safety regulations.
+3. External Interface Requirements
+3.1 User Interfaces
+The ChopNow platform will feature two primary user interfaces:
+Consumer Mobile Application:
+Layout: Intuitive, clean, and mobile-first design with easy navigation.
+Key Screens: Home (featured meals, search), Browse/Filter, Meal Details, Cart, Checkout, Order History, User Profile, Notifications.
+GUI Standards: Adherence to Material Design (Android) and Human Interface Guidelines (iOS) for native look and feel. Consistent branding and color palette (e.g., warm, inviting colors).
+Elements: Standard buttons (e.g.,
+Add to Cart, Checkout, Help), search bars, filters, image carousels for meal photos. * Error Messages: Clear, concise, and actionable error messages are displayed prominently. * Accessibility: Support for screen readers and adjustable font sizes.
+Vendor Mobile/Web Application:
+
+Layout: Responsive design suitable for both mobile and web browsers, focusing on efficiency for managing inventory and orders.
+Key Screens: Dashboard (overview of sales, active listings, pending orders), Add/Edit Meal, Order List, Order Details, Payouts, Profile Settings.
+GUI Standards: Consistent with consumer app branding, but optimized for business operations. Data visualization for sales trends.
+Elements: Forms for meal creation, tables for order management, status toggles for meal availability, and secure login/logout.
+Error Messages: Real-time validation feedback on forms, clear notifications for failed transactions or order issues.
+Accessibility: Keyboard navigation support for the web interface, clear visual hierarchy.
+3.2 Hardware Interfaces
+ChopNow will primarily interface with standard mobile device hardware and cloud server infrastructure:
+Mobile Devices:
+Touchscreens: For user interaction (tapping, swiping, pinch-to-zoom). Cameras: For vendors to upload meal photos.
+GPS/Location Services: For matching consumers with nearby vendors and for delivery/pickup point identification.
+Microphone/Speaker: For potential in-app customer support or voice commands (future enhancement).
+Vibration Motor: For notifications.
+Backend Servers:
+Processors: Multi-core CPUs for handling concurrent requests and data processing.
+Memory: Sufficient RAM for database operations and application server processes.
+Storage: High-speed SSDs for database and application data storage, with redundancy for data integrity.
+Network Interfaces: High-bandwidth network cards for efficient data transfer.
+3.3 Software Interfaces
+ChopNow will integrate with several third-party software components and APIs:
+Operating Systems: Android OS (Google APIs) and iOS (Apple APIs) for mobile application functionality.
+Payment Gateways:
+Mobile Money APIs: Integration with popular African mobile money services (e.g., M-Pesa, MTN Mobile Money, Airtel Money) for secure transactions.
+Card Payment APIs: Integration with international payment processors (e.g., Stripe, Paystack) for credit/debit card payments.
+Mapping Services: Google Maps API or OpenStreetMap API for location-based services, displaying vendor locations, and calculating distances.
+Notification Services: Firebase Cloud Messaging (FCM) for push notifications to both consumers and vendors.
+Database Management System: PostgreSQL or MongoDB for data storage and retrieval.
+Cloud Services: AWS, Google Cloud Platform, or Azure for hosting backend services, databases, and storage.
+Analytics Tools: Google Analytics or similar for tracking user behavior and platform performance.
+Email Service Providers: SendGrid or Mailgun for transactional emails (e.g., order confirmations, password resets).
+3.4 Communications Interfaces
+The ChopNow platform will rely on various communication protocols and standards:
+Internet Protocols:
+HTTP/HTTPS: For secure client-server communication between mobile apps and backend services.
+TCP/IP: Underlying network protocol for all internet-based communication.
+Data Formats:
+JSON: Primary data interchange format for API requests and responses.
+XML: Potentially for integration with legacy systems or specific payment gateways.
+Security Protocols:
+SSL/TLS: For encrypting all data in transit, ensuring secure communication. OAuth 2.0: For secure API authentication and authorization.
+Communication Standards:
+RESTful APIs: For well-defined and stateless communication between components.
+Push Notifications: Via FCM for real-time alerts.
+Data Transfer Rates: Optimized for varying network conditions, with mechanisms for data compression and efficient caching to minimize bandwidth usage.
+Synchronization Mechanisms: Real-time data synchronization for order status updates, meal availability, and location tracking.
+4. System Feature 1: User Authentication and Profile Management
+
+Description: This feature allows users (both consumers and vendors) to register, log in, manage their profiles, and securely access the ChopNow platform. It includes functionalities for creating accounts, password management, and viewing/editing personal or business information.
+
+
+4.1 System Feature 1: User Registration and Authentication
+
+ReqID
+Requiremet
+Description
+FR1.1
+User Registration
+The system shall allow new users to register as either a Consumer or Vendor by providing a valid email address/phone number and password.
+FR1.2
+Verification
+The system shall send a verification link/code to the user’s registered email/phone number upon registration.
+FR1.3
+Login
+The system shall allow registered users to log in using their verified credentials.
+FR1.4
+Password Recovery
+The system shall provide a Forgot Password functionality to reset passwords via email/phone verification.
+FR1.5
+Consumer Profile
+The system shall allow consumers to view and edit their personal profile information (e.g., name, contact details, profile picture, preferred payment methods).
+FR1.6
+Vendor Profile
+The system shall allow vendors to view and edit their business profile information (e.g., business name, address, contact details, operating hours, food hygiene certifications, bank details for payouts).
+FR1.7
+Credential Storage
+The system shall securely store user credentials using industry-standard encryption.
+FR1.8
+Password Policy
+The system shall enforce strong password policies (e.g., minimum length, combination of characters).
+
+
+
+
+
+4.2 System Feature 2: Meal Listing and Discovery
+Req ID
+Requirement
+Description
+FR2.1
+Create Listings
+The system shall allow authenticated vendors to create new meal listings, including meal name, description, original price, discounted price, quantity available, pickup/delivery options, and available pickup times.
+FR2.2
+Upload Images
+The system shall allow vendors to upload high-quality images for each meal listing.
+FR2.3
+Update/Remove Listings
+The system shall allow vendors to update or remove existing meal listings.
+FR2.4
+Display Listings
+The system shall display available meal listings to consumers based on their current location or a specified location.
+FR2.5
+Filters
+The system shall allow consumers to filter meal listings by cuisine type, price range, dietary restrictions, and distance from their location.
+FR2.6
+Search
+The system shall allow consumers to search for specific meals or vendors.
+FR2.7
+Meal Details
+The system shall display detailed information for each meal listing, including vendor name, rating, meal description, prices, quantity, and pickup instructions.
+FR2.8
+Real-Time Availability
+The system shall provide a mechanism for vendors to mark meals as sold out or unavailable in real-time.
+
+
+
+4.3 System Feature 3: Order Placement and Management
+
+Req ID
+Requirement
+Description
+FR3.1
+Add to Cart
+The system shall allow authenticated consumers to add available meals to a shopping cart.
+FR3.2
+Cart Review
+The system shall allow consumers to review their shopping cart before checkout.
+FR3.3
+Payment Selection
+The system shall allow consumers to select a preferred payment method (e.g., mobile money, card payment) during checkout.
+FR3.4
+Payment Processing
+The system shall process secure payments for orders.
+FR3.5
+Order Confirmation
+The system shall generate an order confirmation for the consumer upon successful payment.
+FR3.6
+Vendor Notification
+The system shall notify the vendor immediately upon a new order placement.
+FR3.7
+Order View
+The system shall allow vendors to view a list of pending, accepted, and completed orders.
+FR3.8
+Accept/Reject Orders
+The system shall allow vendors to accept or reject an order.
+FR3.9
+Order Status Updates
+The system shall allow vendors to update the status of an order (e.g., Preparing, Ready for Pickup, Picked Up).
+FR3.10
+Consumer Notifications
+The system shall notify consumers of changes in their order status in real-time.
+FR3.11
+Order History
+The system shall provide an order history for both consumers and vendors.
+
+
+4.4 System Feature 4: Notifications and Communication
+
+Req ID
+Requirement
+Description
+FR4.1
+Consumer Notifications
+The system shall send push notifications to consumers for new meal listings from their favorite vendors or in their preferred area.
+FR4.2
+Order Notifications
+The system shall send push notifications to consumers for order confirmations, status updates, and cancellations.
+FR4.3
+Vendor Notifications
+The system shall send push notifications to vendors for new orders, order modifications, and customer inquiries.
+FR4.4
+Consumer Messaging
+The system shall provide an in-app messaging feature for consumers to communicate with vendors regarding specific orders.
+FR4.5
+Vendor Messaging
+The system shall provide an in-app messaging feature for vendors to communicate with consumers regarding specific orders.
+FR4.6
+Email Notifications
+The system shall send email notifications for critical account-related activities (e.g., password reset, account verification).
+
+
+
+4.5 System Feature 5: Rating and Review System
+
+Req ID
+Requirement
+Description
+FR5.1
+Ratings
+The system shall allow consumers to rate vendors and individual meals after an order has been completed.
+FR5.2
+Reviews
+The system shall allow consumers to write text reviews for vendors and meals.
+FR5.3
+Display Reviews
+The system shall display average ratings and reviews for vendors and meals to other consumers.
+FR5.4
+Vendor Responses
+The system shall allow vendors to respond to consumer reviews.
+FR5.5
+Moderation
+The system shall implement a moderation process for reviews to prevent abusive or inappropriate content.
+
+5. Nonfunctional Requirements
+Req ID
+Requirement
+Description
+NFR1.1
+Response Time
+The system shall respond to user requests (e.g., loading meal listings, processing orders) within 3 seconds under normal load conditions.
+NFR1.2
+Scalability
+The system shall be able to support up to 1,000 concurrent users and process 100 orders per minute without significant degradation in performance.
+NFR1.3
+Availability
+The system shall be available 99.9% of the time, excluding scheduled maintenance.
+NFR1.4
+Throughput
+The system shall be capable of handling a minimum of 50 transactions per second during peak hours.
+
+
+5.2 Safety Requirements
+Req ID
+Requirement
+Description
+NFR2.1
+Food Safety
+The system shall require vendors to confirm adherence to local food safety standards before listing meals.
+NFR2.2
+Allergen Information
+The system shall provide fields for vendors to list common allergens present in meals, and allow consumers to filter by allergen information.
+NFR2.3
+Safe Handling
+The system shall provide guidelines for safe food handling and pickup/delivery practices for vendors.
+
+
+5.3 Security Requirements
+
+Req ID
+Requirement
+Description
+NFR3.1
+Data Encryption
+All sensitive user data (e.g., passwords, payment information) shall be encrypted both in transit (SSL/TLS) and at rest (AES-256 or higher).
+NFR3.2
+Authentication
+The system shall implement multi-factor authentication (MFA) for vendor accounts and optionally for consumer accounts.
+NFR3.3
+Authorization
+The system shall ensure that users can only access data and perform actions for which they have explicit permissions.
+NFR3.4
+Payment Security
+The system shall comply with PCI DSS standards for handling payment card information or rely on PCI-compliant third-party payment gateways.
+NFR3.5
+Vulnerability Management
+Regular security audits and penetration testing shall be conducted to identify and address vulnerabilities.
+
+
+Software Quality Attributes
+
+
+Req ID
+Requirement
+Description
+NFR4.1
+Usability
+The mobile applications shall have an intuitive and easy-to-learn interface, requiring minimal training.
+NFR4.2
+Maintainability
+The codebase shall be well-documented, modular, and follow established coding standards.
+NFR4.3
+Portability
+The mobile applications shall be compatible with major versions of Android and iOS, and the web application shall be accessible across modern browsers.
+NFR4.4
+Reliability
+The system shall minimize data loss and provide robust error handling mechanisms.
+NFR4.5
+Testability
+The system shall be designed to allow comprehensive and automated testing of all requirements.
+
+
+Business Rules
+
+
+Req ID
+Requirement
+Description
+BR1.1
+Discount Policy
+All meals listed on ChopNow must be offered at a discount of at least 20% off their original price.
+BR1.2
+Vendor Payouts
+Vendors shall receive payouts for completed orders within 24–48 hours, minus a platform service fee.
+BR1.3
+Order Cancellation
+Consumers can cancel orders before the vendor accepts them without penalty. After acceptance, cancellations may incur a fee or be subject to vendor discretion.
+BR1.4
+Meal Expiry
+Vendors must specify a pickup time window, and meals not picked up within this window may be forfeited without refund.
+BR1.5
+Geographic Scope
+The platform will initially operate in selected urban areas within specific African countries.
+
+
+6. Appendix
+Appendix A: Glossary
+ChopNow: The digital platform for food rescue and affordable meals. Consumer: A user who purchases discounted surplus meals from vendors.
+Vendor: A local food business (restaurant, bakery, etc.) that sells surplus meals on ChopNow.
+SRS: Software Requirements Specification.
+MVP: Minimum Viable Product.
+API: Application Programming Interface.
+UI: User Interface.
+UX: User Experience.
+FAO: Food and Agriculture Organization.
+WFP: World Food Program.
+Agile: An iterative and incremental approach to software development.
+Functional Requirement (FR): A requirement that specifies a function that a system or component must be able to perform.
+Non-Functional Requirement (NFR): A requirement that specifies criteria that can be used to judge the operation of a system, rather than specific behaviors (e.g., performance, security).
+Appendix B: Analysis Models
+This section will include diagrams such as Use Case Diagrams, Class Diagrams, Activity Diagrams, and Data Flow Diagrams to visually represent the system's architecture and functionality. These diagrams will be generated in a subsequent phase.
+Appendix B: Analysis Models
+This section provides visual representations of the ChopNow system's architecture and functionality through various diagrams.
+Use Case Diagram
+The Use Case Diagram illustrates the interactions between the primary actors (Consumer, Vendor, Payment Gateway, and Mapping Service) and the ChopNow system. It delineates the main functionalities offered by the platform from the perspective of its users, providing a high-level overview of the system's scope and behavior.
+
+Class Diagram
+The Class Diagram presents the static structure of the ChopNow system, showcasing the main classes, their attributes, methods, and relationships. This diagram is crucial for understanding the system's data model and how different components interact at a conceptual level.
+Activity Diagram: Order Placement
+The Activity Diagram for Order Placement visualizes the workflow of a consumer placing an order and a vendor managing it. It details the sequence of activities, decisions, and parallel processes involved in the core functionality of the ChopNow platform, from meal browsing to order completion.
+
+Sequence Diagram
+
+
+The Sequence Diagram for ChopNow illustrates how different components of the system interact step-by-step when a consumer places an order for a discounted meal. It focuses on the communication flow between the user interface, backend services, vendor system, payment gateway, and database.gateways, and mapping services.
