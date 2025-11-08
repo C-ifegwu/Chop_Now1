@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Consumer Dashboard - ChopNow</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="container">
+            <div class="logo" style="font-size: 1.5rem; font-weight: 700; letter-spacing: -0.5px;">ChopNow</div>
+            <ul class="nav-links">
+                <li><a href="index.html">Home</a></li>
+                <li><a href="browse.html">Browse Meals</a></li>
+                <li><a href="#" onclick="logout()">Logout</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <main class="container" style="padding: 40px 0;">
+        <div class="dashboard-header">
+            <h1>Welcome back!</h1>
+            <p>Manage your orders and discover new meals</p>
+        </div>
+
+        <!-- Quick Stats -->
+        <div class="dashboard-grid">
+            <div class="dashboard-card">
+                <h3>Total Orders</h3>
+                <p style="font-size: 2rem; font-weight: 700; color: var(--primary); margin-top: 8px;" id="totalOrders">-</p>
+            </div>
+            <div class="dashboard-card">
+                <h3>Active Orders</h3>
+                <p style="font-size: 2rem; font-weight: 700; color: var(--accent); margin-top: 8px;" id="activeOrders">-</p>
+            </div>
+            <div class="dashboard-card">
+                <h3>Total Spent</h3>
+                <p style="font-size: 2rem; font-weight: 700; color: var(--success); margin-top: 8px;" id="totalSpent">-</p>
+            </div>
+        </div>
+
+        <!-- Orders Section -->
+        <section style="margin-top: 40px;">
+            <h2 style="font-size: 1.5rem; font-weight: 600; margin-bottom: 24px; color: var(--text-primary);">My Orders</h2>
+            <div id="ordersList">
+                <div style="text-align: center; padding: 40px; color: var(--text-secondary);">
+                    <p>Loading your orders...</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Profile Section -->
+        <section style="margin-top: 60px;">
+            <h2 style="font-size: 1.5rem; font-weight: 600; margin-bottom: 24px; color: var(--text-primary);">Profile Information</h2>
+            <div class="dashboard-card">
+                <div id="profileInfo">
+                    <p style="color: var(--text-secondary);">Loading profile...</p>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h3>ChopNow</h3>
+                    <p>Africa's Food Rescue Platform</p>
+                </div>
+                <div class="footer-section">
+                    <h4>Quick Links</h4>
+                    <ul>
+                        <li><a href="index.html">Home</a></li>
+                        <li><a href="browse.html">Browse Meals</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2025 ChopNow. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="js/mockData.js"></script>
+    <script src="js/auth.js"></script>
+    <script>
+        // Check authentication
+        if (!isAuthenticated()) {
+            window.location.href = 'login.html';
+        }
+
+        // Load user data
+        async function loadUserData() {
+            try {
+                // Wait for mock data
+                await new Promise(resolve => setTimeout(resolve, 200));
+                
+                // Load profile
+                const userId = parseInt(localStorage.getItem('userId')) || 1;
+                const profile = await mockAPI.getProfile(userId);
+                
+                document.getElementById('profileInfo').innerHTML = `
+                    <div style="display: grid; gap: 16px;">
+                        <div>
+                            <strong style="color: var(--text-secondary); font-size: 0.9rem;">Full Name</strong>
+                            <p style="font-size: 1.1rem; margin-top: 4px; color: var(--text-primary);">${profile.name || 'N/A'}</p>
+                        </div>
+                        <div>
+                            <strong style="color: var(--text-secondary); font-size: 0.9rem;">Email</strong>
+                            <p style="font-size: 1.1rem; margin-top: 4px; color: var(--text-primary);">${profile.email}</p>
+                        </div>
+                        <div>
+                            <strong style="color: var(--text-secondary); font-size: 0.9rem;">Phone</strong>
+                            <p style="font-size: 1.1rem; margin-top: 4px; color: var(--text-primary);">${profile.phone || 'N/A'}</p>
+                        </div>
+                        <div>
+                            <strong style="color: var(--text-secondary); font-size: 0.9rem;">Address</strong>
+                            <p style="font-size: 1.1rem; margin-top: 4px; color: var(--text-primary);">${profile.address || 'N/A'}</p>
+                        </div>
+                    </div>
+                `;
+
+                // Load orders
+                const orders = await mockAPI.getConsumerOrders(userId);
+                
+                // Calculate stats
+                const totalOrders = orders.length;
+                const activeOrders = orders.filter(o => !['completed', 'cancelled'].includes(o.status)).length;
+                const totalSpent = orders
+                    .filter(o => o.status === 'completed')
+                    .reduce((sum, o) => sum + o.total_amount, 0);
+                
+                document.getElementById('totalOrders').textContent = totalOrders;
+                document.getElementById('activeOrders').textContent = activeOrders;
+                document.getElementById('totalSpent').textContent = 
+                    totalSpent.toLocaleString('en-NG', { style: 'currency', currency: 'NGN', minimumFractionDigits: 0 });
+                
+                if (orders.length === 0) {
+                    document.getElementById('ordersList').innerHTML = `
+                        <div style="text-align: center; padding: 60px; background: var(--bg-secondary); border-radius: 16px; border: 1px solid var(--border);">
+                            <p style="font-size: 1.1rem; color: var(--text-secondary); margin-bottom: 16px;">No orders yet.</p>
+                            <a href="browse.html" class="btn-primary">Browse Meals</a>
+                        </div>
+                    `;
+                } else {
+                    document.getElementById('ordersList').innerHTML = orders.map(order => {
+                        const formattedDate = new Date(order.created_at).toLocaleDateString('en-US', { 
+                            year: 'numeric', 
+                            month: 'long', 
+                            day: 'numeric',
+                            hour: '2-digit',
+                            minute: '2-digit'
+                        });
+                        const formattedAmount = order.total_amount.toLocaleString('en-NG', { 
+                            style: 'currency', 
+                            currency: 'NGN', 
+                            minimumFractionDigits: 0 
+                        });
+                        
+                        return `
+                            <div class="order-card">
+                                <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 12px;">
+                                    <div>
+                                        <h4>${order.meal_name}</h4>
+                                        <p style="color: var(--text-secondary); font-size: 0.9rem; margin-top: 4px;">${formattedDate}</p>
+                                    </div>
+                                    <span class="order-status ${order.status}">${order.status}</span>
+                                </div>
+                                <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--border-light);">
+                                    <div>
+                                        <span style="color: var(--text-secondary); font-size: 0.9rem;">Quantity: </span>
+                                        <strong>${order.quantity}</strong>
+                                    </div>
+                                    <div style="font-size: 1.2rem; font-weight: 700; color: var(--primary);">
+                                        ${formattedAmount}
+                                    </div>
+                                </div>
+                            </div>
+                        `;
+                    }).join('');
+                }
+            } catch (error) {
+                console.error('Error loading data:', error);
+                document.getElementById('ordersList').innerHTML = `
+                    <div style="text-align: center; padding: 40px; color: var(--error);">
+                        Error loading data. Please refresh the page.
+                    </div>
+                `;
+            }
+        }
+
+        loadUserData();
+    </script>
+</body>
+</html>

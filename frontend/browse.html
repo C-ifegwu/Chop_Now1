@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Browse Meals - ChopNow</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="container">
+            <div class="logo" style="font-size: 1.5rem; font-weight: 700; letter-spacing: -0.5px;">ChopNow</div>
+            <ul class="nav-links">
+                <li><a href="index.html">Home</a></li>
+                <li><a href="browse.html">Browse Meals</a></li>
+                <li><a href="login.html">Login</a></li>
+                <li><a href="register.html" class="btn-nav btn-primary">Get Started</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <main class="container" style="padding: 60px 0;">
+        <div style="text-align: center; margin-bottom: 48px;">
+            <h1 style="font-size: 2.5rem; font-weight: 700; margin-bottom: 16px; color: var(--text-primary); letter-spacing: -0.5px;">Browse Available Meals</h1>
+            <p style="font-size: 1.1rem; color: var(--text-secondary); max-width: 600px; margin: 0 auto;">Discover affordable, quality meals from local vendors</p>
+        </div>
+        
+        <!-- Filters -->
+        <section style="margin-bottom: 48px; padding: 32px; background: var(--bg-secondary); border-radius: 16px; border: 1px solid var(--border);">
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; align-items: end;">
+                <div class="form-group" style="margin-bottom: 0;">
+                    <label for="searchInput">Search Meals</label>
+                    <input type="text" id="searchInput" placeholder="Search by name or vendor...">
+                </div>
+                <div class="form-group" style="margin-bottom: 0;">
+                    <label for="cuisineFilter">Cuisine Type</label>
+                    <select id="cuisineFilter">
+                        <option value="">All Cuisines</option>
+                        <option value="african">African</option>
+                        <option value="asian">Asian</option>
+                        <option value="western">Western</option>
+                    </select>
+                </div>
+                <div class="form-group" style="margin-bottom: 0;">
+                    <label for="maxPrice">Max Price (₦)</label>
+                    <input type="number" id="maxPrice" placeholder="No limit">
+                </div>
+                <button class="btn-primary" onclick="loadMeals()" style="height: fit-content;">Apply Filters</button>
+            </div>
+        </section>
+
+        <!-- Meals Grid -->
+        <section>
+            <div class="meals-grid" id="mealsGrid">
+                <div style="text-align: center; padding: 60px; color: var(--text-secondary);">
+                    <p>Loading meals...</p>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h3>ChopNow</h3>
+                    <p>Africa's Food Rescue Platform</p>
+                </div>
+                <div class="footer-section">
+                    <h4>Quick Links</h4>
+                    <ul>
+                        <li><a href="index.html">Home</a></li>
+                        <li><a href="browse.html">Browse Meals</a></li>
+                        <li><a href="login.html">Login</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2025 ChopNow. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="js/mockData.js"></script>
+    <script src="js/main.js"></script>
+    <script>
+        // Load meals with filters
+        async function loadMeals() {
+            const search = document.getElementById('searchInput').value;
+            const cuisine = document.getElementById('cuisineFilter').value;
+            const maxPrice = document.getElementById('maxPrice').value;
+            
+            const filters = {};
+            if (search) filters.search = search;
+            if (cuisine) filters.cuisine = cuisine;
+            if (maxPrice) filters.maxPrice = parseFloat(maxPrice);
+            
+            const mealsGrid = document.getElementById('mealsGrid');
+            mealsGrid.innerHTML = '<div style="text-align: center; padding: 60px; color: var(--text-secondary);"><p>Loading meals...</p></div>';
+            
+            try {
+                await new Promise(resolve => setTimeout(resolve, 600));
+                const meals = await mockAPI.getMeals(filters);
+                
+                if (meals.length === 0) {
+                    mealsGrid.innerHTML = `
+                        <div style="text-align: center; padding: 60px; background: var(--bg-secondary); border-radius: 16px; border: 1px solid var(--border); grid-column: 1 / -1;">
+                            <p style="font-size: 1.1rem; color: var(--text-secondary); margin-bottom: 16px;">No meals found.</p>
+                            <p style="color: var(--text-light);">Try adjusting your filters or check back later.</p>
+                        </div>
+                    `;
+                } else {
+                    mealsGrid.innerHTML = meals.map(meal => createMealCard(meal)).join('');
+                }
+            } catch (error) {
+                console.error('Error loading meals:', error);
+                mealsGrid.innerHTML = `
+                    <div style="text-align: center; padding: 40px; color: var(--error); grid-column: 1 / -1;">
+                        Error loading meals. Please try again later.
+                    </div>
+                `;
+            }
+        }
+
+        // Load meals on page load
+        document.addEventListener('DOMContentLoaded', () => {
+            loadMeals();
+        });
+
+        // Allow Enter key to search
+        document.getElementById('searchInput').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                loadMeals();
+            }
+        });
+    </script>
+</body>
+</html>
