@@ -10,10 +10,15 @@ const db = new sqlite3.Database(dbPath, (err) => {
     }
 });
 
+// Store original methods
+const originalRun = db.run.bind(db);
+const originalGet = db.get.bind(db);
+const originalAll = db.all.bind(db);
+
 // Promisify database methods for easier async/await usage
 db.run = function(sql, params = []) {
     return new Promise((resolve, reject) => {
-        this.run(sql, params, function(err) {
+        originalRun(sql, params, function(err) {
             if (err) {
                 reject(err);
             } else {
@@ -25,7 +30,7 @@ db.run = function(sql, params = []) {
 
 db.get = function(sql, params = []) {
     return new Promise((resolve, reject) => {
-        this.get(sql, params, (err, row) => {
+        originalGet(sql, params, (err, row) => {
             if (err) {
                 reject(err);
             } else {
@@ -37,7 +42,7 @@ db.get = function(sql, params = []) {
 
 db.all = function(sql, params = []) {
     return new Promise((resolve, reject) => {
-        this.all(sql, params, (err, rows) => {
+        originalAll(sql, params, (err, rows) => {
             if (err) {
                 reject(err);
             } else {

@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const db = require('../config/database');
 const { authenticateToken } = require('../middleware/auth');
+const { notifyVendorNewOrder, notifyConsumerOrderStatus } = require('../services/notification.service');
 
 // Create new order (Consumer only)
 router.post('/', authenticateToken, async (req, res) => {
@@ -38,8 +39,8 @@ router.post('/', authenticateToken, async (req, res) => {
             [quantity, mealId]
         );
 
-        // Notify vendor (in real implementation, use push notifications)
-        const vendor = await db.get('SELECT id FROM users WHERE id = ?', [meal.vendor_id]);
+        // Notify vendor of new order
+        await notifyVendorNewOrder(meal.vendor_id, result.lastID, meal.name);
 
         res.status(201).json({
             message: 'Order placed successfully',
@@ -122,6 +123,18 @@ router.put('/:id/status', authenticateToken, async (req, res) => {
         }
 
         await db.run('UPDATE orders SET status = ? WHERE id = ?', [status, orderId]);
+
+        // Get meal and consumer info for notification
+        const orderDetails = await db.get(
+            `SELECT o.consumer_id, m.name as meal_name
+             FROM orders o
+             JOIN meals m ON o.meal_id = m.id
+             WHERE o.id = ?`,
+            [orderId]
+        );
+
+        // Notify consumer of status change
+        await notifyConsumerOrderStatus(orderDetails.consumer_id, orderId, status, orderDetails.meal_name);
 
         res.json({ message: 'Order status updated successfully' });
     } catch (error) {

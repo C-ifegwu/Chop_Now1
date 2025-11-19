@@ -9,6 +9,17 @@
     box-sizing: border-box;
 }
 
+html {
+    overflow-y: scroll;
+    overflow-x: hidden;
+    height: 100%;
+}
+
+html, body {
+    min-height: 100%;
+    position: relative;
+}
+
 :root {
     /* Premium Color Palette */
     --primary: #2563eb;
@@ -38,6 +49,9 @@ body {
     background-color: var(--bg-primary);
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+    overflow-x: hidden;
+    overflow-y: auto;
+    padding-bottom: 60px;
 }
 
 .container {
@@ -547,6 +561,7 @@ section {
     line-height: 1.6;
     display: -webkit-box;
     -webkit-line-clamp: 2;
+    line-clamp: 2;
     -webkit-box-orient: vertical;
     overflow: hidden;
 }

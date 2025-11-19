@@ -81,10 +81,9 @@
         </div>
     </footer>
 
-    <script src="js/mockData.js"></script>
-    <script src="js/main.js"></script>
+    <script src="js/api.js"></script>
     <script>
-        // Load meals with filters
+        // Load meals with filters using real API
         async function loadMeals() {
             const search = document.getElementById('searchInput').value;
             const cuisine = document.getElementById('cuisineFilter').value;
@@ -99,10 +98,9 @@
             mealsGrid.innerHTML = '<div style="text-align: center; padding: 60px; color: var(--text-secondary);"><p>Loading meals...</p></div>';
             
             try {
-                await new Promise(resolve => setTimeout(resolve, 600));
-                const meals = await mockAPI.getMeals(filters);
+                const meals = await API.Meals.getAll(filters);
                 
-                if (meals.length === 0) {
+                if (!meals || meals.length === 0) {
                     mealsGrid.innerHTML = `
                         <div style="text-align: center; padding: 60px; background: var(--bg-secondary); border-radius: 16px; border: 1px solid var(--border); grid-column: 1 / -1;">
                             <p style="font-size: 1.1rem; color: var(--text-secondary); margin-bottom: 16px;">No meals found.</p>
@@ -110,7 +108,34 @@
                         </div>
                     `;
                 } else {
-                    mealsGrid.innerHTML = meals.map(meal => createMealCard(meal)).join('');
+                    mealsGrid.innerHTML = meals.map(meal => {
+                        const originalPrice = meal.original_price || meal.originalPrice;
+                        const discountedPrice = meal.discounted_price || meal.discountedPrice;
+                        const discount = Math.round(((originalPrice - discountedPrice) / originalPrice) * 100);
+                        const formattedOriginal = originalPrice.toLocaleString('en-NG', { style: 'currency', currency: 'NGN', minimumFractionDigits: 0 });
+                        const formattedDiscounted = discountedPrice.toLocaleString('en-NG', { style: 'currency', currency: 'NGN', minimumFractionDigits: 0 });
+                        const vendorName = meal.vendor_name || meal.vendorName || 'Vendor';
+                        const imageUrl = meal.image_url ? meal.image_url : 'images/default-meal.jpg';
+                        
+                        return `
+                            <div class="meal-card">
+                                <img src="${imageUrl}" alt="${meal.name}" class="meal-image" />
+                                <div class="meal-info">
+                                    <div class="meal-title">${meal.name}</div>
+                                    <div class="meal-description">${meal.description || ''}</div>
+                                    <div class="meal-price">
+                                        ${formattedDiscounted}
+                                        <span class="meal-original-price">${formattedOriginal}</span>
+                                        <span class="meal-discount">-${discount}%</span>
+                                    </div>
+                                    <div class="meal-meta">
+                                        <span class="meal-vendor">${vendorName}</span>
+                                        <span class="meal-availability">Available: ${meal.quantity_available}</span>
+                                    </div>
+                                </div>
+                            </div>
+                        `;
+                    }).join('');
                 }
             } catch (error) {
                 console.error('Error loading meals:', error);

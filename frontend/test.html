@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ChopNow - Test Page</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+        }
+        .test-section {
+            background: #f5f5f5;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+        }
+        button {
+            background: #4CAF50;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover {
+            background: #45a049;
+        }
+        .result {
+            background: white;
+            padding: 10px;
+            margin-top: 10px;
+            border-radius: 4px;
+            white-space: pre-wrap;
+        }
+        .success {
+            color: green;
+        }
+        .error {
+            color: red;
+        }
+    </style>
+</head>
+<body>
+    <h1>ChopNow API Test Page</h1>
+    
+    <div class="test-section">
+        <h2>1. Health Check</h2>
+        <button onclick="testHealth()">Test API Health</button>
+        <div id="healthResult" class="result"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>2. Register Consumer</h2>
+        <button onclick="registerConsumer()">Register Test Consumer</button>
+        <div id="registerConsumerResult" class="result"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>3. Register Vendor</h2>
+        <button onclick="registerVendor()">Register Test Vendor</button>
+        <div id="registerVendorResult" class="result"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>4. Login</h2>
+        <button onclick="loginTest()">Login as Consumer</button>
+        <button onclick="loginVendorTest()">Login as Vendor</button>
+        <div id="loginResult" class="result"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>5. Get Meals</h2>
+        <button onclick="getMeals()">Get All Meals</button>
+        <div id="mealsResult" class="result"></div>
+    </div>
+
+    <script src="js/api.js"></script>
+    <script>
+        async function testHealth() {
+            const result = document.getElementById('healthResult');
+            try {
+                const response = await fetch('http://localhost:3000/api/health');
+                const data = await response.json();
+                result.innerHTML = '<span class="success">✓ API is running!</span>\n' + JSON.stringify(data, null, 2);
+            } catch (error) {
+                result.innerHTML = '<span class="error">✗ Error: ' + error.message + '</span>';
+            }
+        }
+
+        async function registerConsumer() {
+            const result = document.getElementById('registerConsumerResult');
+            try {
+                const data = await API.Auth.register({
+                    email: 'consumer@test.com',
+                    password: 'password123',
+                    userType: 'consumer',
+                    name: 'Test Consumer',
+                    phone: '08012345678',
+                    address: 'Lagos, Nigeria'
+                });
+                result.innerHTML = '<span class="success">✓ Consumer registered!</span>\n' + JSON.stringify(data, null, 2);
+            } catch (error) {
+                result.innerHTML = '<span class="error">✗ Error: ' + error.message + '</span>';
+            }
+        }
+
+        async function registerVendor() {
+            const result = document.getElementById('registerVendorResult');
+            try {
+                const data = await API.Auth.register({
+                    email: 'vendor@test.com',
+                    password: 'password123',
+                    userType: 'vendor',
+                    name: 'Test Vendor',
+                    businessName: 'Test Restaurant',
+                    phone: '08087654321',
+                    address: 'Ikeja, Lagos'
+                });
+                result.innerHTML = '<span class="success">✓ Vendor registered!</span>\n' + JSON.stringify(data, null, 2);
+            } catch (error) {
+                result.innerHTML = '<span class="error">✗ Error: ' + error.message + '</span>';
+            }
+        }
+
+        async function loginTest() {
+            const result = document.getElementById('loginResult');
+            try {
+                const data = await API.Auth.login('consumer@test.com', 'password123');
+                result.innerHTML = '<span class="success">✓ Login successful!</span>\n' + JSON.stringify(data, null, 2);
+            } catch (error) {
+                result.innerHTML = '<span class="error">✗ Error: ' + error.message + '</span>';
+            }
+        }
+
+        async function loginVendorTest() {
+            const result = document.getElementById('loginResult');
+            try {
+                const data = await API.Auth.login('vendor@test.com', 'password123');
+                result.innerHTML = '<span class="success">✓ Vendor login successful!</span>\n' + JSON.stringify(data, null, 2);
+            } catch (error) {
+                result.innerHTML = '<span class="error">✗ Error: ' + error.message + '</span>';
+            }
+        }
+
+        async function getMeals() {
+            const result = document.getElementById('mealsResult');
+            try {
+                const data = await API.Meals.getAll();
+                result.innerHTML = '<span class="success">✓ Meals loaded!</span>\nFound ' + data.length + ' meals\n' + JSON.stringify(data, null, 2);
+            } catch (error) {
+                result.innerHTML = '<span class="error">✗ Error: ' + error.message + '</span>';
+            }
+        }
+    </script>
+</body>
+</html>

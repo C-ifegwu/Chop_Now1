@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const db = require('../config/database');
 const { authenticateToken, authorizeVendor } = require('../middleware/auth');
+const upload = require('../middleware/upload');
 
 // Get all available meals (with filters)
 router.get('/', async (req, res) => {
@@ -70,7 +71,7 @@ router.get('/:id', async (req, res) => {
 });
 
 // Create new meal listing (Vendor only)
-router.post('/', authenticateToken, authorizeVendor, async (req, res) => {
+router.post('/', authenticateToken, authorizeVendor, upload.single('image'), async (req, res) => {
     try {
         const { name, description, originalPrice, discountedPrice, quantityAvailable, 
                 cuisineType, pickupOptions, pickupTimes, allergens } = req.body;
@@ -84,19 +85,21 @@ router.post('/', authenticateToken, authorizeVendor, async (req, res) => {
         }
 
         const vendorId = req.user.userId;
+        const imageUrl = req.file ? `/uploads/${req.file.filename}` : null;
 
         const result = await db.run(
             `INSERT INTO meals (vendor_id, name, description, original_price, discounted_price,
                                quantity_available, cuisine_type, pickup_options, pickup_times,
-                               allergens, is_available, created_at)
-             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 1, datetime('now'))`,
+                               allergens, image_url, is_available, created_at)
+             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 1, datetime('now'))`,
             [vendorId, name, description, originalPrice, discountedPrice, quantityAvailable,
-             cuisineType, pickupOptions, pickupTimes, allergens]
+             cuisineType, pickupOptions, pickupTimes, allergens, imageUrl]
         );
 
         res.status(201).json({
             message: 'Meal listing created successfully',
-            mealId: result.lastID
+            mealId: result.lastID,
+            imageUrl: imageUrl
         });
     } catch (error) {
         console.error('Create meal error:', error);
@@ -151,6 +154,27 @@ router.delete('/:id', authenticateToken, authorizeVendor, async (req, res) => {
     } catch (error) {
         console.error('Delete meal error:', error);
         res.status(500).json({ message: 'Failed to delete meal listing', error: error.message });
+    }
+});
+
+// Get vendor's own meals
+router.get('/vendor/my-meals', authenticateToken, authorizeVendor, async (req, res) => {
+    try {
+        const vendorId = req.user.userId;
+        const meals = await db.all(
+            `SELECT m.*, COUNT(o.id) as total_orders
+             FROM meals m
+             LEFT JOIN orders o ON m.id = o.meal_id
+             WHERE m.vendor_id = ?
+             GROUP BY m.id
+             ORDER BY m.created_at DESC`,
+            [vendorId]
+        );
+
+        res.json(meals);
+    } catch (error) {
+        console.error('Get vendor meals error:', error);
+        res.status(500).json({ message: 'Failed to fetch vendor meals', error: error.message });
     }
 });
 

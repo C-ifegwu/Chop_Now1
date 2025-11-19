@@ -1,4 +1,4 @@
-const sqlite3 = require('sqlite3').verbose();
+const sqlite3 = require('../backend/node_modules/sqlite3').verbose();
 const fs = require('fs');
 const path = require('path');
 
@@ -11,7 +11,7 @@ const db = new sqlite3.Database(dbPath, (err) => {
         console.error('Error opening database:', err.message);
         return;
     }
-    console.log('Connected to SQLite database');
+    console.log('✓ Connected to SQLite database');
 });
 
 // Read schema file
@@ -20,9 +20,10 @@ const schema = fs.readFileSync(schemaPath, 'utf8');
 // Execute schema
 db.exec(schema, (err) => {
     if (err) {
-        console.error('Error executing schema:', err.message);
+        console.error('✗ Error executing schema:', err.message);
     } else {
-        console.log('Database schema initialized successfully');
+        console.log('✓ Database schema initialized successfully');
+        console.log('✓ Tables created: users, meals, orders, reviews, notifications');
     }
     db.close();
 });
