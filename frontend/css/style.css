@@ -254,8 +254,8 @@ body::after {
    BUTTONS
    ============================================ */
 .btn-primary {
-    background: linear-gradient(120deg, var(--primary), var(--primary-dark));
-    color: #fff6ed;
+    background: linear-gradient(120deg, var(--primary-dark), #1f2933);
+    color: #ffffff;
     padding: 12px 28px;
     border: none;
     border-radius: 999px;
@@ -277,9 +277,9 @@ body::after {
 }
 
 .btn-secondary {
-    background: rgba(255, 255, 255, 0.2);
+    background: #ffffff;
     color: var(--primary-dark);
-    border: 1.5px solid rgba(249, 115, 22, 0.4);
+    border: 1.5px solid rgba(120, 53, 15, 0.6);
     padding: 12px 28px;
     border-radius: 999px;
     cursor: pointer;
@@ -293,7 +293,7 @@ body::after {
 }
 
 .btn-secondary:hover {
-    background: rgba(249, 115, 22, 0.08);
+    background: #fef3c7;
     color: var(--primary-dark);
     transform: translateY(-1px);
 }
