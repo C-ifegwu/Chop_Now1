@@ -4,21 +4,20 @@ package-lock.json
 yarn.lock
 
 # Environment variables
-.env
-backend/.env
+# .env
 
-# Database
-*.db
-*.sqlite
-*.sqlite3
-database/*.db
+# Node.js
+/node_modules
+npm-debug.log
+yarn-error.log
+/dist
+/build
 
-# Logs
-logs/
-*.log
-npm-debug.log*
+# SQLite
+/database/*.db
+/database/*.db-journal
 
-# OS files
+# OS-specific
 .DS_Store
 Thumbs.db
 
