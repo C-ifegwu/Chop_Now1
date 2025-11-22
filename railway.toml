@@ -1,5 +1,7 @@
-[[services]]
-name = "backend"
-rootDir = "backend"
-startCommand = "npm start"
+[build]
+builder = "nixpacks"
+buildCommand = "cd backend && npm install"
+
+[deploy]
+startCommand = "cd backend && npm start"
 healthcheckPath = "/api/health"
