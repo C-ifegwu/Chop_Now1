@@ -110,12 +110,7 @@ router.post('/', authenticateToken, authorizeVendor, upload.single('image'), val
 });
 
 // Update meal listing (Vendor only)
-router.put('/:id', authenticateToken, authorizeVendor, validateMeal, async (req, res) => {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-        return res.status(400).json({ errors: errors.array() });
-    }
-
+router.put('/:id', authenticateToken, authorizeVendor, validate(mealSchema), async (req, res) => {
     try {
         const mealId = req.params.id;
         const vendorId = req.user.userId;
