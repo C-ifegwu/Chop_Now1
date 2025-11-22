@@ -1,5 +1,5 @@
 [[services]]
 name = "backend"
 rootDir = "backend"
-startCommand = "npm start"
+startCommand = "./start.sh"
 healthcheckPath = "/api/health"
