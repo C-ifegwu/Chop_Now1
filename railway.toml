@@ -1,0 +1,8 @@
+[build]
+builder = "nixpacks"
+
+[[services]]
+name = "backend"
+rootDir = "backend"
+startCommand = "npm start"
+healthcheckPath = "/api/health"
