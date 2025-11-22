@@ -2,8 +2,8 @@ const sqlite3 = require('sqlite3').verbose();
 const path = require('path');
 const fs = require('fs');
 
-const dbPath = process.env.DATABASE_PATH || path.join(__dirname, '../../database/chopnow.db');
-const schemaPath = path.join(__dirname, '../../database/schema.sql');
+const dbPath = process.env.DATABASE_PATH || path.join(__dirname, '../database/chopnow.db');
+const schemaPath = path.join(__dirname, '../database/schema.sql');
 const db = new sqlite3.Database(dbPath, (err) => {
     if (err) {
         console.error('Error opening database:', err.message);
