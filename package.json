@@ -4,7 +4,7 @@
   "description": "Backend API for ChopNow food rescue platform",
   "main": "server.js",
   "scripts": {
-    "start": "node server.js",
+    "start": "mkdir -p uploads && node server.js",
     "build": "echo 'No build step required' && exit 0",
     "dev": "nodemon server.js",
     "test": "jest"
