@@ -177,30 +177,27 @@ function displayConsumerOrders(orders) {
     if (!container) return;
 
     if (orders.length === 0) {
-        container.innerHTML = '<p>No orders yet.</p>';
+        container.innerHTML = '<tr><td colspan="7" class="text-center">No orders yet.</td></tr>';
         return;
     }
 
     container.innerHTML = orders.map(order => `
-        <div class="order-card">
-            <div class="order-header">
-                <h4>Order #${order.id}</h4>
-                <span class="status-badge status-${order.status}">${order.status}</span>
-            </div>
-            <p><strong>Meal:</strong> ${order.meal_name}</p>
-            <p><strong>Vendor:</strong> ${order.vendor_name}</p>
-            <p><strong>Quantity:</strong> ${order.quantity}</p>
-            <p><strong>Total:</strong> ₦${order.total_amount}</p>
-            <p><strong>Date:</strong> ${new Date(order.created_at).toLocaleString()}</p>
-            <div class="order-actions">
+        <tr>
+            <td>#${order.id}</td>
+            <td>${order.meal_name}</td>
+            <td>${order.vendor_name}</td>
+            <td>₦${order.total_amount}</td>
+            <td><span class="badge bg-info text-dark">${order.status}</span></td>
+            <td>${new Date(order.created_at).toLocaleDateString()}</td>
+            <td>
                 ${order.status === 'pending' ? `
-                    <button class="btn btn-danger btn-sm" onclick="cancelOrder(${order.id})">Cancel Order</button>
+                    <button class="btn btn-danger btn-sm" onclick="cancelOrder(${order.id})">Cancel</button>
                 ` : ''}
                 ${order.status === 'completed' ? `
-                    <a href="review.html?meal_id=${order.meal_id}&order_id=${order.id}" class="btn btn-secondary btn-sm">Leave a Review</a>
+                    <a href="review.html?meal_id=${order.meal_id}&order_id=${order.id}" class="btn btn-secondary btn-sm">Review</a>
                 ` : ''}
-            </div>
-        </div>
+            </td>
+        </tr>
     `).join('');
 }
 
@@ -271,13 +268,12 @@ function connectWebSocket() {
 }
 
 function showToast(message) {
-    const toast = document.getElementById('toast');
-    if (toast) {
-        toast.textContent = message;
-        toast.classList.add('show');
-        setTimeout(() => {
-            toast.classList.remove('show');
-        }, 5000); // Hide after 5 seconds
+    const toastEl = document.getElementById('toast');
+    const toastBody = toastEl.querySelector('.toast-body');
+    if (toastBody) {
+        toastBody.textContent = message;
+        const toast = new bootstrap.Toast(toastEl);
+        toast.show();
     }
 }
 
@@ -295,24 +291,26 @@ function displayVendorMeals(meals) {
     if (!container) return;
 
     if (meals.length === 0) {
-        container.innerHTML = '<p>No meals listed yet. Add your first meal!</p>';
+        container.innerHTML = '<div class="col-12 text-center"><p>No meals listed yet. Add your first meal!</p></div>';
         return;
     }
 
     container.innerHTML = meals.map(meal => `
-        <div class="meal-card">
-            <img src="${meal.image_url || 'images/default-meal.jpg'}" alt="${meal.name}">
-            <div class="meal-info">
-                <h3>${meal.name}</h3>
-                <p>${meal.description || ''}</p>
-                <p><strong>Price:</strong> ₦${meal.discounted_price} <span class="text-muted">(was ₦${meal.original_price})</span></p>
-                <p><strong>Available:</strong> ${meal.quantity_available}</p>
-                <p><strong>Total Orders:</strong> ${meal.total_orders || 0}</p>
-                <p><strong>Status:</strong> ${meal.is_available ? 'Available' : 'Unavailable'}</p>
-                <button class="btn btn-sm btn-warning" onclick="toggleMealAvailability(${meal.id}, ${meal.is_available})">
-                    ${meal.is_available ? 'Mark Unavailable' : 'Mark Available'}
-                </button>
-                <button class="btn btn-sm btn-danger" onclick="deleteMeal(${meal.id})">Delete</button>
+        <div class="col">
+            <div class="card h-100 shadow-sm">
+                <img src="${meal.image_url || 'https://via.placeholder.com/300x200'}" class="card-img-top" alt="${meal.name}">
+                <div class="card-body">
+                    <h5 class="card-title">${meal.name}</h5>
+                    <p class="card-text small text-muted">${meal.is_available ? 'Available' : 'Unavailable'}</p>
+                    <p class="card-text"><strong>Price:</strong> ₦${meal.discounted_price}</p>
+                    <p class="card-text"><strong>Available:</strong> ${meal.quantity_available}</p>
+                </div>
+                <div class="card-footer bg-transparent border-0 p-3">
+                    <button class="btn btn-sm btn-outline-secondary" onclick="toggleMealAvailability(${meal.id}, ${meal.is_available})">
+                        ${meal.is_available ? 'Mark Unavailable' : 'Mark Available'}
+                    </button>
+                    <button class="btn btn-sm btn-outline-danger" onclick="deleteMeal(${meal.id})">Delete</button>
+                </div>
             </div>
         </div>
     `).join('');
@@ -378,39 +376,30 @@ function displayVendorOrders(orders) {
     if (!container) return;
 
     if (orders.length === 0) {
-        container.innerHTML = '<p>No orders yet.</p>';
+        container.innerHTML = '<tr><td colspan="7" class="text-center">No orders yet.</td></tr>';
         return;
     }
 
     container.innerHTML = orders.map(order => `
-        <div class="order-card">
-            <div class="order-header">
-                <h4>Order #${order.id}</h4>
-                <span class="status-badge status-${order.status}">${order.status}</span>
-            </div>
-            <p><strong>Meal:</strong> ${order.meal_name}</p>
-            <p><strong>Customer:</strong> ${order.consumer_name}</p>
-            <p><strong>Phone:</strong> ${order.consumer_phone || 'N/A'}</p>
-            <p><strong>Quantity:</strong> ${order.quantity}</p>
-            <p><strong>Total:</strong> ₦${order.total_amount}</p>
-            <p><strong>Payment:</strong> ${order.payment_method}</p>
-            <p><strong>Date:</strong> ${new Date(order.created_at).toLocaleString()}</p>
-            <div class="order-actions">
-                ${order.status === 'pending' ? `
-                    <button class="btn btn-success btn-sm" onclick="updateOrderStatus(${order.id}, 'accepted')">Accept</button>
-                    <button class="btn btn-danger btn-sm" onclick="updateOrderStatus(${order.id}, 'cancelled')">Reject</button>
-                ` : ''}
-                ${order.status === 'accepted' ? `
-                    <button class="btn btn-primary btn-sm" onclick="updateOrderStatus(${order.id}, 'preparing')">Start Preparing</button>
-                ` : ''}
-                ${order.status === 'preparing' ? `
-                    <button class="btn btn-primary btn-sm" onclick="updateOrderStatus(${order.id}, 'ready')">Mark Ready</button>
-                ` : ''}
-                ${order.status === 'ready' ? `
-                    <button class="btn btn-success btn-sm" onclick="updateOrderStatus(${order.id}, 'completed')">Mark Completed</button>
-                ` : ''}
-            </div>
-        </div>
+        <tr>
+            <td>#${order.id}</td>
+            <td>${order.meal_name}</td>
+            <td>${order.consumer_name || 'N/A'}</td>
+            <td>₦${order.total_amount}</td>
+            <td><span class="badge bg-info text-dark">${order.status}</span></td>
+            <td>${new Date(order.created_at).toLocaleDateString()}</td>
+            <td>
+                <div class="btn-group btn-group-sm">
+                    ${order.status === 'pending' ? `
+                        <button class="btn btn-success" onclick="updateOrderStatus(${order.id}, 'accepted')">Accept</button>
+                        <button class="btn btn-danger" onclick="updateOrderStatus(${order.id}, 'cancelled')">Reject</button>
+                    ` : ''}
+                    ${order.status === 'accepted' ? `<button class="btn btn-primary" onclick="updateOrderStatus(${order.id}, 'preparing')">Prepare</button>` : ''}
+                    ${order.status === 'preparing' ? `<button class="btn btn-primary" onclick="updateOrderStatus(${order.id}, 'ready')">Ready</button>` : ''}
+                    ${order.status === 'ready' ? `<button class="btn btn-success" onclick="updateOrderStatus(${order.id}, 'completed')">Complete</button>` : ''}
+                </div>
+            </td>
+        </tr>
     `).join('');
 }
 

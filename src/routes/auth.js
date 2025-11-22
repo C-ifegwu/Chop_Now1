@@ -2,18 +2,17 @@ const express = require('express');
 const router = express.Router();
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
+const crypto = require('crypto');
 const db = require('../config/database');
 const { authenticateToken } = require('../middleware/auth');
+const validate = require('../middleware/validation');
+const { registerSchema } = require('../validation/schemas');
+const emailService = require('../services/email');
 
 // Register new user (Consumer or Vendor)
-router.post('/register', async (req, res) => {
+router.post('/register', validate(registerSchema), async (req, res) => {
     try {
         const { email, password, userType, phone, name, businessName, address } = req.body;
-
-        // Validate input
-        if (!email || !password || !userType) {
-            return res.status(400).json({ message: 'Email, password, and userType are required' });
-        }
 
         // Check if user already exists
         const existingUser = await db.get('SELECT * FROM users WHERE email = ?', [email]);
@@ -87,6 +86,66 @@ router.post('/login', async (req, res) => {
     } catch (error) {
         console.error('Login error:', error);
         res.status(500).json({ message: 'Login failed', error: error.message });
+    }
+});
+
+// Forgot Password
+router.post('/forgot-password', async (req, res) => {
+    try {
+        const { email } = req.body;
+        const user = await db.get('SELECT * FROM users WHERE email = ?', [email]);
+        if (!user) {
+            return res.status(404).json({ message: 'No user with that email found.' });
+        }
+
+        // Generate token
+        const token = crypto.randomBytes(32).toString('hex');
+        const expires = Date.now() + 3600000; // 1 hour
+
+        await db.run(
+            'UPDATE users SET reset_password_token = ?, reset_password_expires = ? WHERE id = ?',
+            [token, expires, user.id]
+        );
+
+        // Send email
+        await emailService.sendPasswordResetEmail(user.email, token);
+
+        res.json({ message: 'Password reset email sent.' });
+
+    } catch (error) {
+        console.error('Forgot password error:', error);
+        res.status(500).json({ message: 'Error sending password reset email.' });
+    }
+});
+
+// Reset Password
+router.post('/reset-password', async (req, res) => {
+    try {
+        const { token, password } = req.body;
+
+        const user = await db.get(
+            'SELECT * FROM users WHERE reset_password_token = ? AND reset_password_expires > ?',
+            [token, Date.now()]
+        );
+
+        if (!user) {
+            return res.status(400).json({ message: 'Password reset token is invalid or has expired.' });
+        }
+
+        // Hash new password
+        const hashedPassword = await bcrypt.hash(password, 10);
+
+        // Update password and clear token
+        await db.run(
+            'UPDATE users SET password = ?, reset_password_token = NULL, reset_password_expires = NULL WHERE id = ?',
+            [hashedPassword, user.id]
+        );
+
+        res.json({ message: 'Password has been reset successfully.' });
+
+    } catch (error) {
+        console.error('Reset password error:', error);
+        res.status(500).json({ message: 'Error resetting password.' });
     }
 });
 

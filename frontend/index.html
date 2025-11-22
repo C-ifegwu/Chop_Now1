@@ -4,333 +4,148 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ChopNow - Africa's Food Rescue Platform</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+    <!-- Custom CSS -->
     <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
-    <!-- Navigation -->
-    <nav class="navbar">
+
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-light bg-light fixed-top">
         <div class="container">
-            <div class="logo" style="font-size: 1.5rem; font-weight: 700; letter-spacing: -0.5px;">ChopNow</div>
-            <ul class="nav-links">
-                <li><a href="#home">Home</a></li>
-                <li><a href="#how-it-works">How It Works</a></li>
-                <li><a href="#about">About</a></li>
-                <li><a href="login.html" class="btn-nav">Login</a></li>
-                <li><a href="register.html" class="btn-nav btn-primary">Get Started</a></li>
-            </ul>
+            <a class="navbar-brand fw-bold" href="#">ChopNow</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link active" aria-current="page" href="#">Home</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="browse.html">Browse Meals</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="login.html">Login</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="btn btn-primary" href="register.html">Get Started</a>
+                    </li>
+                </ul>
+            </div>
         </div>
     </nav>
 
-    <!-- Main Content -->
-    <main>
-        <!-- Hero Section -->
-        <section class="hero" id="home">
-            <div class="container">
-                <div class="hero-grid">
-                    <div class="hero-copy">
-                        <p class="eyebrow">Signature flavours, zero waste</p>
-                        <h1>Savour premium African plates while rescuing fresh food</h1>
-                        <p class="hero-subtitle">
-                            ChopNow curates chef-made meals that would have gone to waste and delivers them to food lovers who want gourmet taste without the premium price tag.
-                        </p>
-                        <div class="hero-badges">
-                            <span>Chef-vetted kitchens</span>
-                            <span>Same-day pickups</span>
-                            <span>Secure payments</span>
-                        </div>
-                        <div class="hero-buttons">
-                            <a href="register.html" class="btn-primary btn-large">Reserve a plate</a>
-                            <a href="login.html" class="btn-secondary btn-large">I already have an account</a>
-                        </div>
-                        <div class="hero-meta">
-                            <div class="meta-card">
-                                <p class="meta-label">Partner kitchens</p>
-                                <p class="meta-value">120+</p>
-                            </div>
-                            <div class="meta-card">
-                                <p class="meta-label">Meals rescued</p>
-                                <p class="meta-value">14k</p>
-                            </div>
-                            <div class="meta-card">
-                                <p class="meta-label">Cities served</p>
-                                <p class="meta-value">9</p>
-                            </div>
+    <!-- Hero Section -->
+    <header class="py-5">
+        <div class="container px-5">
+            <div class="row gx-5 align-items-center justify-content-center">
+                <div class="col-lg-8 col-xl-7 col-xxl-6">
+                    <div class="my-5 text-center text-xl-start">
+                        <h1 class="display-5 fw-bolder text-dark mb-2">Savour the Flavour, Fight the Waste.</h1>
+                        <p class="lead fw-normal text-dark-50 mb-4">Discover delicious meals from local chefs at a discount, and help reduce food waste in your community.</p>
+                        <div class="d-grid gap-3 d-sm-flex justify-content-sm-center justify-content-xl-start">
+                            <a class="btn btn-primary btn-lg px-4 me-sm-3" href="browse.html">Find a Meal</a>
+                            <a class="btn btn-outline-dark btn-lg px-4" href="register.html">Become a Vendor</a>
                         </div>
                     </div>
-                    <div class="hero-showcase">
-                        <article class="hero-card primary">
-                            <span class="card-badge">Hot pick</span>
-                            <h3>Smoky Jollof & Firewood Chicken</h3>
-                            <p>Slow-smoked rice, firewood-charred chicken, plantain relish and ata dindin glaze.</p>
-                            <div class="card-price">
-                                <span class="price-now">₦1,800</span>
-                                <span class="price-before">₦2,600</span>
-                            </div>
-                            <div class="card-meta">
-                                <span>Chef Bimpe, VI Lagos</span>
-                                <span>⭐ 4.9 rating</span>
-                            </div>
-                            <ul>
-                                <li>Ready in 20 mins</li>
-                                <li>Spice Level: Medium</li>
-                                <li>Vegan sides available</li>
-                            </ul>
-                        </article>
-                        <article class="hero-card secondary">
-                            <h3>What you get with ChopNow</h3>
-                            <ul>
-                                <li>📦 Luxury plating packed for pickup</li>
-                                <li>🌿 Fresh ingredients within 6 hours of prep</li>
-                                <li>💳 Card, transfer & mobile money payments</li>
-                                <li>🛎️ Instant notifications when meals are ready</li>
-                            </ul>
-                        </article>
-                    </div>
                 </div>
-                <div class="hero-stats" style="margin-top: 48px;">
-                    <div class="stat-item">
-                        <h3>22%</h3>
-                        <p>Average savings per plate</p>
-                    </div>
-                    <div class="stat-item">
-                        <h3>48 tons</h3>
-                        <p>Food kept out of landfills</p>
-                    </div>
-                    <div class="stat-item">
-                        <h3>4.8/5</h3>
-                        <p>Community satisfaction</p>
-                    </div>
-                </div>
+                <div class="col-xl-5 col-xxl-6 d-none d-xl-block text-center"><img class="img-fluid rounded-3 my-5" src="https://via.placeholder.com/600x400" alt="..." /></div>
             </div>
-        </section>
+        </div>
+    </header>
 
-        <!-- Taste Highlights -->
-        <section class="taste-highlights">
-            <div class="container">
-                <div class="section-heading">
-                    <p class="eyebrow">Curated bites</p>
-                    <h2>Premium flavours, thoughtfully rescued</h2>
-                    <p>Every ChopNow plate goes through a freshness check, flavour review, and impact scoring so you can dine consciously.</p>
-                </div>
-                <div class="highlight-grid">
-                    <article class="highlight-card">
-                        <div class="icon">🥘</div>
-                        <h3>Slow Fire Classics</h3>
-                        <p>Chef-favorite stews, rice bowls and grills rescued within hours.</p>
-                        <ul>
-                            <li>Hand-picked by local culinary teams</li>
-                            <li>Ideal for lunch or chic dinners</li>
-                            <li>Packaging keeps flavours sealed</li>
-                        </ul>
-                    </article>
-                    <article class="highlight-card">
-                        <div class="icon">🥗</div>
-                        <h3>Fresh Market Bowls</h3>
-                        <p>Seasonal greens, grains and proteins for the wellness crowd.</p>
-                        <ul>
-                            <li>Farm-to-table vegetables</li>
-                            <li>Nutrition tags for every meal</li>
-                            <li>Ready-to-eat in under 5 minutes</li>
-                        </ul>
-                    </article>
-                    <article class="highlight-card">
-                        <div class="icon">🧁</div>
-                        <h3>Sweet Finishes</h3>
-                        <p>Artisan pastries and desserts that still deserve lime-light.</p>
-                        <ul>
-                            <li>Zero compromise on presentation</li>
-                            <li>Perfect for gifting or events</li>
-                            <li>Pairs with specialty drinks</li>
-                        </ul>
-                    </article>
-                </div>
+    <!-- How it Works Section -->
+    <section class="py-5 bg-light">
+        <div class="container px-5 my-5">
+            <div class="text-center mb-5">
+                <h2 class="fw-bolder">How It Works</h2>
+                <p class="lead fw-normal text-muted mb-0">From kitchen heat to community delight in 3 simple steps.</p>
             </div>
-        </section>
-
-        <!-- How It Works Section -->
-        <section class="how-it-works" id="how-it-works">
-            <div class="container">
-                <div class="section-heading">
-                    <p class="eyebrow">How it works</p>
-                    <h2>From kitchen heat to community delight</h2>
-                    <p>We make it effortless for vendors to stay profitable and for consumers to eat boldly without inflating budgets.</p>
-                </div>
-                <div class="steps-grid">
-                    <div class="step-card">
-                        <div class="step-number">1</div>
-                        <h3>Curated by vendors</h3>
-                        <p>Restaurants flag surplus plates, set pickup windows and upload mouth-watering descriptions.</p>
-                    </div>
-                    <div class="step-card">
-                        <div class="step-number">2</div>
-                        <h3>Discovered by food lovers</h3>
-                        <p>Consumers browse by cuisine, dietary tags or distance and reserve their favourite dishes.</p>
-                    </div>
-                    <div class="step-card">
-                        <div class="step-number">3</div>
-                        <h3>Trusted ordering</h3>
-                        <p>Secure payments, live status updates and instant chat keep every handoff smooth.</p>
-                    </div>
-                    <div class="step-card">
-                        <div class="step-number">4</div>
-                        <h3>Impact unlocked</h3>
-                        <p>Vendors recover costs, consumers dine premium, and food waste is drastically reduced.</p>
+            <div class="row gx-5">
+                <div class="col-lg-4 mb-5 mb-lg-0">
+                    <div class="card h-100 shadow border-0">
+                        <div class="card-body p-4">
+                            <div class="badge bg-primary bg-gradient rounded-pill mb-2">1</div>
+                            <h5 class="card-title mb-3">Discover</h5>
+                            <p class="card-text">Browse delicious, surplus meals from a variety of local vendors at a discounted price.</p>
+                        </div>
                     </div>
                 </div>
-            </div>
-        </section>
-
-        <!-- Benefits Section -->
-        <section class="benefits">
-            <div class="container">
-                <div class="section-heading">
-                    <p class="eyebrow">Why ChopNow</p>
-                    <h2>Premium hospitality, conscious lifestyle</h2>
-                    <p>Vendors stay profitable, communities eat better, and the planet breathes easier.</p>
-                </div>
-                <div class="benefits-grid">
-                    <div class="benefit-card">
-                        <div class="benefit-icon">💰</div>
-                        <h3>Affordable Meals</h3>
-                        <p>Get quality meals at 20% or more discount from original prices</p>
-                    </div>
-                    <div class="benefit-card">
-                        <div class="benefit-icon">🌍</div>
-                        <h3>Reduce Waste</h3>
-                        <p>Help reduce food waste and contribute to environmental sustainability</p>
-                    </div>
-                    <div class="benefit-card">
-                        <div class="benefit-icon">📍</div>
-                        <h3>Local Focus</h3>
-                        <p>Support local vendors and discover great food in your neighborhood</p>
-                    </div>
-                    <div class="benefit-card">
-                        <div class="benefit-icon">⚡</div>
-                        <h3>Easy & Fast</h3>
-                        <p>Simple ordering process with secure payments and quick pickup</p>
-                    </div>
-                    <div class="benefit-card">
-                        <div class="benefit-icon">💼</div>
-                        <h3>Vendor Benefits</h3>
-                        <p>Recover costs on surplus food and reach new customer segments</p>
-                    </div>
-                    <div class="benefit-card">
-                        <div class="benefit-icon">⭐</div>
-                        <h3>Quality Assured</h3>
-                        <p>All vendors follow food safety standards and are rated by customers</p>
+                <div class="col-lg-4 mb-5 mb-lg-0">
+                    <div class="card h-100 shadow border-0">
+                        <div class="card-body p-4">
+                            <div class="badge bg-primary bg-gradient rounded-pill mb-2">2</div>
+                            <h5 class="card-title mb-3">Order</h5>
+                            <p class="card-text">Reserve your meal through our secure platform. It's quick, easy, and convenient.</p>
+                        </div>
                     </div>
                 </div>
-            </div>
-        </section>
-
-        <section class="impact-banner">
-            <div class="container impact-grid">
-                <div class="impact-card primary-card">
-                    <p class="eyebrow" style="letter-spacing: 0.4em; text-transform: uppercase; font-size: 0.75rem;">Impact</p>
-                    <h2 style="margin: 12px 0;">Every rescued plate keeps food out of landfills</h2>
-                    <p>Each ChopNow order is a vote for circular kitchens, thriving vendors, and a nourished continent.</p>
-                </div>
-                <div class="impact-metrics">
-                    <div class="impact-metric">
-                        <span class="metric-value">48 tons</span>
-                        <span class="metric-label">of meals kept in circulation</span>
-                    </div>
-                    <div class="impact-metric">
-                        <span class="metric-value">₦56M</span>
-                        <span class="metric-label">recovered vendor revenue</span>
-                    </div>
-                    <div class="impact-metric">
-                        <span class="metric-value">72%</span>
-                        <span class="metric-label">repeat diners every month</span>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <!-- About Section -->
-        <section class="about" id="about">
-            <div class="container">
-                <div class="about-content">
-                    <div class="about-text">
-                        <h2>Built for African food artisans & diners</h2>
-                        <p>Nearly 37% of food produced in Sub-Saharan Africa never gets plated—even though kitchens work tirelessly and diners crave memorable meals.</p>
-                        <p>ChopNow pairs culinary excellence with impact tech so that every surplus dish reaches someone who will savour it. Vendors recover their cost, consumers enjoy elevated cuisine, and cities cut down on waste.</p>
-                        <a href="register.html" class="btn-primary">Become part of the movement</a>
-                    </div>
-                    <div class="about-image">
-                        <div class="about-placeholder">
-                            <p>🌍</p>
-                            <p>Making Food Accessible Across Africa</p>
+                <div class="col-lg-4">
+                    <div class="card h-100 shadow border-0">
+                        <div class="card-body p-4">
+                            <div class="badge bg-primary bg-gradient rounded-pill mb-2">3</div>
+                            <h5 class="card-title mb-3">Collect</h5>
+                            <p class="card-text">Pick up your freshly prepared meal at the designated time. Enjoy great food and a great deal!</p>
                         </div>
                     </div>
                 </div>
             </div>
-        </section>
+        </div>
+    </section>
 
-        <!-- CTA Section -->
-        <section class="cta-section">
-            <div class="container">
-                <h2>Ready to taste change?</h2>
-                <p>Join ChopNow today and enjoy premium dishes with a purpose. Vendors, list your surplus meals. Food lovers, reserve your next crave-worthy plate.</p>
-                <div class="cta-buttons">
-                    <a href="register.html" class="btn-primary btn-large">Sign Up as Consumer</a>
-                    <a href="register.html" class="btn-secondary btn-large">Sign Up as Vendor</a>
-                </div>
-                <p class="cta-login">Already have an account? <a href="login.html">Login here</a></p>
-            </div>
-        </section>
-
-        <!-- Featured Meals Preview (Optional) -->
-        <section class="featured-meals-preview">
-            <div class="container">
-                <div class="section-heading">
-                    <p class="eyebrow">Weekly curation</p>
-                    <h2>Featured Plates</h2>
-                    <p>Browse the most loved dishes from Lagos, Abuja, Port Harcourt and beyond.</p>
-                </div>
-                <div class="meals-grid" id="mealsGrid">
-                    <p>Loading featured meals...</p>
-                </div>
-                <div style="text-align: center; margin-top: 2rem;">
-                    <a href="browse.html" class="btn-primary">View All Meals</a>
-                </div>
-            </div>
-        </section>
-    </main>
-
-    <footer>
-        <div class="container">
-            <div class="footer-content">
-                <div class="footer-section">
-                    <h3>ChopNow</h3>
-                    <p>Africa's Food Rescue Platform</p>
-                </div>
-                <div class="footer-section">
-                    <h4>Quick Links</h4>
-                    <ul>
-                        <li><a href="index.html">Home</a></li>
-                        <li><a href="browse.html">Browse Meals</a></li>
-                        <li><a href="login.html">Login</a></li>
-                        <li><a href="register.html">Register</a></li>
-                    </ul>
-                </div>
-                <div class="footer-section">
-                    <h4>Support</h4>
-                    <ul>
-                        <li><a href="#about">About Us</a></li>
-                        <li><a href="#how-it-works">How It Works</a></li>
-                        <li><a href="#">Contact</a></li>
-                        <li><a href="#">FAQ</a></li>
-                    </ul>
+    <!-- Features Section -->
+    <section class="py-5">
+        <div class="container px-5 my-5">
+            <div class="row gx-5">
+                <div class="col-lg-4 mb-5 mb-lg-0"><h2 class="fw-bolder mb-0">Good for you, your wallet, and the planet.</h2></div>
+                <div class="col-lg-8">
+                    <div class="row gx-5 row-cols-1 row-cols-md-2">
+                        <div class="col mb-5 h-100">
+                            <div class="feature bg-primary bg-gradient text-white rounded-3 mb-3"><i class="bi bi-collection"></i></div>
+                            <h2 class="h5">Affordable Meals</h2>
+                            <p class="mb-0">Get quality meals at 20% or more discount from original prices.</p>
+                        </div>
+                        <div class="col mb-5 h-100">
+                            <div class="feature bg-primary bg-gradient text-white rounded-3 mb-3"><i class="bi bi-building"></i></div>
+                            <h2 class="h5">Reduce Waste</h2>
+                            <p class="mb-0">Help reduce food waste and contribute to environmental sustainability.</p>
+                        </div>
+                        <div class="col mb-5 mb-md-0 h-100">
+                            <div class="feature bg-primary bg-gradient text-white rounded-3 mb-3"><i class="bi bi-toggles2"></i></div>
+                            <h2 class="h5">Local Focus</h2>
+                            <p class="mb-0">Support local vendors and discover great food in your neighborhood.</p>
+                        </div>
+                        <div class="col h-100">
+                            <div class="feature bg-primary bg-gradient text-white rounded-3 mb-3"><i class="bi bi-toggles2"></i></div>
+                            <h2 class="h5">Quality Assured</h2>
+                            <p class="mb-0">All vendors follow food safety standards and are rated by customers.</p>
+                        </div>
+                    </div>
                 </div>
             </div>
-            <div class="footer-bottom">
-                <p>&copy; 2025 ChopNow. All rights reserved.</p>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-dark py-4 mt-auto">
+        <div class="container px-5">
+            <div class="row align-items-center justify-content-between flex-column flex-sm-row">
+                <div class="col-auto"><div class="small m-0 text-white">Copyright &copy; ChopNow 2025</div></div>
+                <div class="col-auto">
+                    <a class="link-light small" href="#!">Privacy</a>
+                    <span class="text-white mx-1">&middot;</span>
+                    <a class="link-light small" href="#!">Terms</a>
+                    <span class="text-white mx-1">&middot;</span>
+                    <a class="link-light small" href="#!">Contact</a>
+                </div>
             </div>
         </div>
     </footer>
 
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
     <script src="js/main.js"></script>
 </body>
 </html>
-

@@ -3,12 +3,13 @@ const router = express.Router();
 const db = require('../config/database');
 const { authenticateToken, authorizeVendor } = require('../middleware/auth');
 const upload = require('../middleware/upload');
-const { body, validationResult } = require('express-validator');
+const validate = require('../middleware/validation');
+const { mealSchema } = require('../validation/schemas');
 
 // Get all available meals (with filters)
 router.get('/', async (req, res) => {
     try {
-        const { cuisine, maxPrice, minPrice, location, search } = req.query;
+        const { cuisine, maxPrice, minPrice, search } = req.query;
         
         let query = `SELECT m.*, u.business_name as vendor_name, u.address as vendor_address, u.latitude, u.longitude
                      FROM meals m
@@ -71,21 +72,8 @@ router.get('/:id', async (req, res) => {
     }
 });
 
-const validateMeal = [
-    body('name').trim().notEmpty().withMessage('Name is required'),
-    body('description').trim().notEmpty().withMessage('Description is required'),
-    body('originalPrice').isFloat({ gt: 0 }).withMessage('Original price must be a positive number'),
-    body('discountedPrice').isFloat({ gt: 0 }).withMessage('Discounted price must be a positive number'),
-    body('quantityAvailable').isInt({ gt: -1 }).withMessage('Quantity available must be a non-negative integer'),
-];
-
 // Create new meal listing (Vendor only)
-router.post('/', authenticateToken, authorizeVendor, upload.single('image'), validateMeal, async (req, res) => {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-        return res.status(400).json({ errors: errors.array() });
-    }
-
+router.post('/', authenticateToken, authorizeVendor, upload.single('image'), validate(mealSchema), async (req, res) => {
     try {
         const { name, description, originalPrice, discountedPrice, quantityAvailable, 
                 cuisineType, pickupOptions, pickupTimes, allergens } = req.body;

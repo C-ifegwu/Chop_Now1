@@ -13,6 +13,8 @@ CREATE TABLE IF NOT EXISTS users (
     address TEXT,
     latitude REAL,
     longitude REAL,
+    reset_password_token TEXT,
+    reset_password_expires INTEGER,
     created_at TEXT NOT NULL
 );
 
