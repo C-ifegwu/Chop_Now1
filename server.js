@@ -1,16 +1,13 @@
-console.log('[SERVER] Starting...');
 const express = require('express');
 const cors = require('cors');
 const path = require('path');
 require('dotenv').config();
 
-console.log('[SERVER] Loading routes...');
 const authRoutes = require('./routes/auth');
 const mealRoutes = require('./routes/meals');
 const orderRoutes = require('./routes/orders');
 const reviewRoutes = require('./routes/reviews');
 const notificationRoutes = require('./routes/notifications');
-console.log('[SERVER] Routes loaded.');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -50,10 +47,9 @@ app.use((err, req, res, next) => {
 });
 
 // Start server
-console.log(`[SERVER] Attempting to start server on port ${PORT}...`);
 app.listen(PORT, '0.0.0.0', () => {
-    console.log(`[SERVER] ChopNow server is running on port ${PORT}`);
-    console.log(`[SERVER] API Base URL: http://localhost:${PORT}/api`);
+    console.log(`ChopNow server is running on port ${PORT}`);
+    console.log(`API Base URL: http://localhost:${PORT}/api`);
 });
 
 module.exports = app;

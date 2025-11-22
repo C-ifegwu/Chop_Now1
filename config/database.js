@@ -1,48 +1,32 @@
-console.log('[DB] Loading database configuration...');
 const sqlite3 = require('sqlite3').verbose();
 const path = require('path');
 const fs = require('fs');
 
 const dbPath = process.env.DATABASE_PATH || path.join(__dirname, '../database/chopnow.db');
 const schemaPath = path.join(__dirname, '../database/schema.sql');
-
-console.log(`[DB] Database path: ${dbPath}`);
-console.log(`[DB] Schema path: ${schemaPath}`);
-
-let db;
-try {
-    db = new sqlite3.Database(dbPath, (err) => {
-        if (err) {
-            console.error('[DB] Error opening database:', err.message);
-        } else {
-            console.log('[DB] Connected to SQLite database.');
-        }
-    });
-} catch (error) {
-    console.error('[DB] FATAL: Could not create database instance.', error);
-    process.exit(1);
-}
-
+const db = new sqlite3.Database(dbPath, (err) => {
+    if (err) {
+        console.error('Error opening database:', err.message);
+    } else {
+        console.log('Connected to SQLite database');
+    }
+});
 
 // Ensure schema exists before handling requests
-console.log('[DB] Setting up database serialization...');
 db.serialize(() => {
     try {
-        console.log('[DB] Reading schema file...');
         const schema = fs.readFileSync(schemaPath, 'utf8');
-        console.log('[DB] Executing schema...');
         db.exec(schema, (err) => {
             if (err) {
-                console.error('[DB] Error ensuring database schema:', err.message);
+                console.error('Error ensuring database schema:', err.message);
             } else {
-                console.log('[DB] Database schema verified.');
+                console.log('Database schema verified');
             }
         });
     } catch (error) {
-        console.warn('[DB] Unable to read or execute schema.sql.', error.message);
+        console.warn('Unable to read schema.sql. Ensure the database directory exists.', error.message);
     }
 });
-console.log('[DB] Database serialization setup complete.');
 
 // Store original methods
 const originalRun = db.run.bind(db);
@@ -86,6 +70,5 @@ db.all = function(sql, params = []) {
     });
 };
 
-console.log('[DB] Database configuration loaded.');
 module.exports = db;
 
