@@ -1,7 +1,10 @@
 const express = require('express');
 const cors = require('cors');
 const path = require('path');
+const http = require('http');
 require('dotenv').config();
+
+const { initWebSocket } = require('./services/websocket');
 
 const authRoutes = require('./routes/auth');
 const mealRoutes = require('./routes/meals');
@@ -49,8 +52,12 @@ app.use((err, req, res, next) => {
     });
 });
 
+// Create HTTP server and initialize WebSocket server
+const server = http.createServer(app);
+initWebSocket(server);
+
 // Start server
-app.listen(PORT, '0.0.0.0', () => {
+server.listen(PORT, '0.0.0.0', () => {
     console.log(`ChopNow server is running on port ${PORT}`);
     console.log(`API Base URL: http://localhost:${PORT}/api`);
 });

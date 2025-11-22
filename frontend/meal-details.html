@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Meal Details - ChopNow</title>
+    <link rel="stylesheet" href="css/style.css">
+    <style>
+        .review-card {
+            background: var(--bg-secondary);
+            padding: 16px;
+            border-radius: 8px;
+            margin-bottom: 16px;
+            border: 1px solid var(--border);
+        }
+        .review-card .rating {
+            font-weight: bold;
+            color: #ffc700;
+        }
+        .review-card .comment {
+            margin-top: 8px;
+        }
+        .review-card .date {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            margin-top: 8px;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <!-- Navbar -->
+    </nav>
+
+    <main class="container" id="mealDetailsContainer" style="padding: 60px 0;">
+        <!-- Meal details will be rendered here -->
+    </main>
+
+    <script src="js/api.js"></script>
+    <script src="js/cart.js"></script>
+    <script>
+        async function renderMealDetails() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const mealId = urlParams.get('id');
+            const container = document.getElementById('mealDetailsContainer');
+
+            if (!mealId) {
+                container.innerHTML = '<p style="text-align: center;">Meal not found.</p>';
+                return;
+            }
+
+            container.innerHTML = '<p style="text-align: center;">Loading meal details...</p>';
+
+            try {
+                const meal = await API.Meals.getById(mealId);
+                const reviews = await API.Reviews.getMealReviews(mealId);
+
+                const originalPrice = meal.original_price || meal.originalPrice;
+                const discountedPrice = meal.discounted_price || meal.discountedPrice;
+                const discount = Math.round(((originalPrice - discountedPrice) / originalPrice) * 100);
+                const formattedOriginal = originalPrice.toLocaleString('en-NG', { style: 'currency', currency: 'NGN', minimumFractionDigits: 0 });
+                const formattedDiscounted = discountedPrice.toLocaleString('en-NG', { style: 'currency', currency: 'NGN', minimumFractionDigits: 0 });
+                const vendorName = meal.vendor_name || meal.vendorName || 'Vendor';
+                const imageUrl = meal.image_url ? meal.image_url : 'images/default-meal.jpg';
+
+                const reviewsHtml = reviews.length > 0
+                    ? reviews.map(review => `
+                        <div class="review-card">
+                            <div class="rating">★ ${review.rating}</div>
+                            <p class="comment">${review.comment}</p>
+                            <p class="date">${new Date(review.created_at).toLocaleDateString()}</p>
+                        </div>
+                    `).join('')
+                    : '<p>No reviews yet.</p>';
+
+                container.innerHTML = `
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 40px;">
+                        <div>
+                            <img src="${imageUrl}" alt="${meal.name}" style="width: 100%; border-radius: 16px;">
+                        </div>
+                        <div>
+                            <h1 style="font-size: 2.5rem; font-weight: 700;">${meal.name}</h1>
+                            <p style="color: var(--text-secondary); margin-top: 8px;">from <strong>${vendorName}</strong></p>
+                            <div class="meal-price" style="font-size: 1.5rem; margin: 24px 0;">
+                                ${formattedDiscounted}
+                                <span class="meal-original-price" style="font-size: 1rem;">${formattedOriginal}</span>
+                                <span class="meal-discount" style="font-size: 1rem;">-${discount}%</span>
+                            </div>
+                            <p>${meal.description || ''}</p>
+                            <p style="margin-top: 16px;"><strong>Available:</strong> ${meal.quantity_available}</p>
+                            <button class="btn-primary" style="width: 100%; margin-top: 24px;" onclick="Cart.addToCart(${meal.id})">Add to Cart</button>
+                        </div>
+                    </div>
+                    <div style="margin-top: 60px;">
+                        <h2 style="font-size: 2rem; font-weight: 600; margin-bottom: 24px;">Reviews</h2>
+                        ${reviewsHtml}
+                    </div>
+                `;
+
+            } catch (error) {
+                console.error('Error loading meal details:', error);
+                container.innerHTML = '<p style="text-align: center; color: var(--error);">Failed to load meal details.</p>';
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', renderMealDetails);
+    </script>
+</body>
+</html>

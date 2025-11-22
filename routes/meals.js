@@ -10,7 +10,7 @@ router.get('/', async (req, res) => {
     try {
         const { cuisine, maxPrice, minPrice, location, search } = req.query;
         
-        let query = `SELECT m.*, u.business_name as vendor_name, u.address as vendor_address
+        let query = `SELECT m.*, u.business_name as vendor_name, u.address as vendor_address, u.latitude, u.longitude
                      FROM meals m
                      JOIN users u ON m.vendor_id = u.id
                      WHERE m.is_available = 1 AND m.quantity_available > 0`;
@@ -51,7 +51,7 @@ router.get('/', async (req, res) => {
 router.get('/:id', async (req, res) => {
     try {
         const meal = await db.get(
-            `SELECT m.*, u.business_name as vendor_name, u.address as vendor_address,
+            `SELECT m.*, u.business_name as vendor_name, u.address as vendor_address, u.latitude, u.longitude,
                     AVG(r.rating) as average_rating, COUNT(r.id) as review_count
              FROM meals m
              JOIN users u ON m.vendor_id = u.id

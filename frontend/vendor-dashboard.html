@@ -5,6 +5,28 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Vendor Dashboard - ChopNow</title>
     <link rel="stylesheet" href="css/style.css">
+<style>
+        .toast {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background-color: var(--success);
+            color: white;
+            padding: 16px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(20px);
+            transition: all 0.3s ease;
+        }
+        .toast.show {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+        }
+    </style>
 </head>
 <body>
     <nav class="navbar">
@@ -105,6 +127,8 @@
             </div>
         </section>
     </main>
+
+    <div id="toast" class="toast"></div>
 
     <footer>
         <div class="container">

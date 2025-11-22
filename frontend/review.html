@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Leave a Review - ChopNow</title>
+    <link rel="stylesheet" href="css/style.css">
+    <style>
+        .star-rating {
+            display: flex;
+            flex-direction: row-reverse;
+            justify-content: center;
+            font-size: 2rem;
+            cursor: pointer;
+        }
+        .star-rating input {
+            display: none;
+        }
+        .star-rating label {
+            color: #ccc;
+            transition: color 0.2s;
+        }
+        .star-rating input:checked ~ label,
+        .star-rating label:hover,
+        .star-rating label:hover ~ label {
+            color: #ffc700;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <!-- Navbar content -->
+    </nav>
+
+    <main class="container" style="padding: 60px 0;">
+        <div style="text-align: center; margin-bottom: 48px;">
+            <h1 style="font-size: 2.5rem; font-weight: 700;">Leave a Review</h1>
+        </div>
+        
+        <form id="reviewForm" class="form-container" style="max-width: 600px; margin: auto;">
+            <input type="hidden" id="mealId" name="mealId">
+            <input type="hidden" id="orderId" name="orderId">
+            
+            <div class="form-group">
+                <label>Rating</label>
+                <div class="star-rating">
+                    <input type="radio" id="star5" name="rating" value="5" /><label for="star5">★</label>
+                    <input type="radio" id="star4" name="rating" value="4" /><label for="star4">★</label>
+                    <input type="radio" id="star3" name="rating" value="3" /><label for="star3">★</label>
+                    <input type="radio" id="star2" name="rating" value="2" /><label for="star2">★</label>
+                    <input type="radio" id="star1" name="rating" value="1" /><label for="star1">★</label>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="comment">Comment</label>
+                <textarea id="comment" name="comment" rows="5" placeholder="Tell us about your experience..."></textarea>
+            </div>
+
+            <button type="submit" class="btn-primary" style="width: 100%;">Submit Review</button>
+        </form>
+    </main>
+
+    <script src="js/api.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const urlParams = new URLSearchParams(window.location.search);
+            const mealId = urlParams.get('meal_id');
+            const orderId = urlParams.get('order_id');
+
+            if (!mealId || !orderId) {
+                alert('Invalid review link.');
+                window.location.href = 'consumer-dashboard.html';
+                return;
+            }
+
+            document.getElementById('mealId').value = mealId;
+            document.getElementById('orderId').value = orderId;
+        });
+
+        document.getElementById('reviewForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const mealId = document.getElementById('mealId').value;
+            const rating = document.querySelector('input[name="rating"]:checked');
+            const comment = document.getElementById('comment').value;
+
+            if (!rating) {
+                alert('Please select a rating.');
+                return;
+            }
+
+            const reviewData = {
+                meal_id: parseInt(mealId),
+                rating: parseInt(rating.value),
+                comment: comment
+            };
+
+            try {
+                await API.Reviews.create(reviewData);
+                alert('Thank you for your review!');
+                window.location.href = 'consumer-dashboard.html';
+            } catch (error) {
+                console.error('Failed to submit review:', error);
+                alert(`Failed to submit review: ${error.message}`);
+            }
+        });
+    </script>
+</body>
+</html>

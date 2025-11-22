@@ -192,9 +192,14 @@ function displayConsumerOrders(orders) {
             <p><strong>Quantity:</strong> ${order.quantity}</p>
             <p><strong>Total:</strong> ₦${order.total_amount}</p>
             <p><strong>Date:</strong> ${new Date(order.created_at).toLocaleString()}</p>
-            ${order.status === 'pending' ? `
-                <button class="btn btn-danger btn-sm" onclick="cancelOrder(${order.id})">Cancel Order</button>
-            ` : ''}
+            <div class="order-actions">
+                ${order.status === 'pending' ? `
+                    <button class="btn btn-danger btn-sm" onclick="cancelOrder(${order.id})">Cancel Order</button>
+                ` : ''}
+                ${order.status === 'completed' ? `
+                    <a href="review.html?meal_id=${order.meal_id}&order_id=${order.id}" class="btn btn-secondary btn-sm">Leave a Review</a>
+                ` : ''}
+            </div>
         </div>
     `).join('');
 }
@@ -219,11 +224,60 @@ async function cancelOrder(orderId) {
 async function initVendorDashboard() {
     await loadVendorMeals();
     await loadVendorOrders();
+    connectWebSocket();
     
     // Add meal form
     const addMealForm = document.getElementById('addMealForm');
     if (addMealForm) {
         addMealForm.addEventListener('submit', handleAddMeal);
+    }
+}
+
+function connectWebSocket() {
+    const user = getCurrentUser();
+    if (!user || !user.userId) return;
+
+    const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+    const wsUrl = `${protocol}//${window.location.host}`;
+    
+    const ws = new WebSocket(wsUrl);
+
+    ws.onopen = () => {
+        console.log('[WS] Connected to server.');
+        // Register the client with their userId
+        ws.send(JSON.stringify({ type: 'register', userId: user.userId }));
+    };
+
+    ws.onmessage = (event) => {
+        try {
+            const data = JSON.parse(event.data);
+            if (data.type === 'new_order') {
+                showToast(data.message);
+                loadVendorOrders(); // Refresh the order list
+            }
+        } catch (e) {
+            console.error('[WS] Error processing message:', e);
+        }
+    };
+
+    ws.onclose = () => {
+        console.log('[WS] Disconnected from server. Reconnecting in 5s...');
+        setTimeout(connectWebSocket, 5000); // Attempt to reconnect
+    };
+
+    ws.onerror = (error) => {
+        console.error('[WS] WebSocket error:', error);
+    };
+}
+
+function showToast(message) {
+    const toast = document.getElementById('toast');
+    if (toast) {
+        toast.textContent = message;
+        toast.classList.add('show');
+        setTimeout(() => {
+            toast.classList.remove('show');
+        }, 5000); // Hide after 5 seconds
     }
 }
 

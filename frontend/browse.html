@@ -5,6 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Browse Meals - ChopNow</title>
     <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
 </head>
 <body>
     <nav class="navbar">
@@ -13,6 +15,7 @@
             <ul class="nav-links">
                 <li><a href="index.html">Home</a></li>
                 <li><a href="browse.html">Browse Meals</a></li>
+                <li><a href="cart.html">Cart</a></li>
                 <li><a href="login.html">Login</a></li>
                 <li><a href="register.html" class="btn-nav btn-primary">Get Started</a></li>
             </ul>
@@ -26,7 +29,7 @@
         </div>
         
         <!-- Filters -->
-        <section style="margin-bottom: 48px; padding: 32px; background: var(--bg-secondary); border-radius: 16px; border: 1px solid var(--border);">
+        <section style="margin-bottom: 24px; padding: 32px; background: var(--bg-secondary); border-radius: 16px; border: 1px solid var(--border);">
             <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; align-items: end;">
                 <div class="form-group" style="margin-bottom: 0;">
                     <label for="searchInput">Search Meals</label>
@@ -49,13 +52,17 @@
             </div>
         </section>
 
-        <!-- Meals Grid -->
+        <!-- View Toggle -->
+        <div style="text-align: right; margin-bottom: 24px;">
+            <button id="toggleViewBtn" class="btn-secondary">Switch to Map View</button>
+        </div>
+
+        <!-- Meals Grid / Map -->
         <section>
             <div class="meals-grid" id="mealsGrid">
-                <div style="text-align: center; padding: 60px; color: var(--text-secondary);">
-                    <p>Loading meals...</p>
-                </div>
+                <!-- Grid view content -->
             </div>
+            <div id="mapView" style="height: 500px; display: none;"></div>
         </section>
     </main>
 
@@ -71,6 +78,7 @@
                     <ul>
                         <li><a href="index.html">Home</a></li>
                         <li><a href="browse.html">Browse Meals</a></li>
+                        <li><a href="cart.html">Cart</a></li>
                         <li><a href="login.html">Login</a></li>
                     </ul>
                 </div>
@@ -82,8 +90,36 @@
     </footer>
 
     <script src="js/api.js"></script>
+    <script src="js/cart.js"></script>
     <script>
-        // Load meals with filters using real API
+        let currentView = 'grid'; // 'grid' or 'map'
+        let map;
+        const mealsGrid = document.getElementById('mealsGrid');
+        const mapView = document.getElementById('mapView');
+        const toggleBtn = document.getElementById('toggleViewBtn');
+
+        function toggleView() {
+            if (currentView === 'grid') {
+                currentView = 'map';
+                mealsGrid.style.display = 'none';
+                mapView.style.display = 'block';
+                toggleBtn.textContent = 'Switch to Grid View';
+                if (!map) {
+                    // Centered on Lagos, Nigeria
+                    map = L.map('mapView').setView([6.5244, 3.3792], 10);
+                    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                    }).addTo(map);
+                }
+            } else {
+                currentView = 'grid';
+                mealsGrid.style.display = 'grid';
+                mapView.style.display = 'none';
+                toggleBtn.textContent = 'Switch to Map View';
+            }
+            loadMeals();
+        }
+
         async function loadMeals() {
             const search = document.getElementById('searchInput').value;
             const cuisine = document.getElementById('cuisineFilter').value;
@@ -94,34 +130,63 @@
             if (cuisine) filters.cuisine = cuisine;
             if (maxPrice) filters.maxPrice = parseFloat(maxPrice);
             
-            const mealsGrid = document.getElementById('mealsGrid');
-            mealsGrid.innerHTML = '<div style="text-align: center; padding: 60px; color: var(--text-secondary);"><p>Loading meals...</p></div>';
+            if (currentView === 'grid') {
+                mealsGrid.innerHTML = '<div style="text-align: center; padding: 60px; color: var(--text-secondary);"><p>Loading meals...</p></div>';
+            }
             
             try {
                 const meals = await API.Meals.getAll(filters);
                 
-                if (!meals || meals.length === 0) {
+                if (currentView === 'grid') {
+                    renderGridView(meals);
+                } else {
+                    renderMapView(meals);
+                }
+
+            } catch (error) {
+                console.error('Error loading meals:', error);
+                if (currentView === 'grid') {
                     mealsGrid.innerHTML = `
-                        <div style="text-align: center; padding: 60px; background: var(--bg-secondary); border-radius: 16px; border: 1px solid var(--border); grid-column: 1 / -1;">
-                            <p style="font-size: 1.1rem; color: var(--text-secondary); margin-bottom: 16px;">No meals found.</p>
-                            <p style="color: var(--text-light);">Try adjusting your filters or check back later.</p>
+                        <div style="text-align: center; padding: 40px; color: var(--error); grid-column: 1 / -1;">
+                            Error loading meals. Please try again later.
                         </div>
                     `;
                 } else {
-                    mealsGrid.innerHTML = meals.map(meal => {
-                        const originalPrice = meal.original_price || meal.originalPrice;
-                        const discountedPrice = meal.discounted_price || meal.discountedPrice;
-                        const discount = Math.round(((originalPrice - discountedPrice) / originalPrice) * 100);
-                        const formattedOriginal = originalPrice.toLocaleString('en-NG', { style: 'currency', currency: 'NGN', minimumFractionDigits: 0 });
-                        const formattedDiscounted = discountedPrice.toLocaleString('en-NG', { style: 'currency', currency: 'NGN', minimumFractionDigits: 0 });
-                        const vendorName = meal.vendor_name || meal.vendorName || 'Vendor';
-                        const imageUrl = meal.image_url ? meal.image_url : 'images/default-meal.jpg';
-                        
-                        return `
+                    alert('Error loading meals for map view.');
+                }
+            }
+        }
+
+        function renderGridView(meals) {
+            if (!meals || meals.length === 0) {
+                mealsGrid.innerHTML = `
+                    <div style="text-align: center; padding: 60px; background: var(--bg-secondary); border-radius: 16px; border: 1px solid var(--border); grid-column: 1 / -1;">
+                        <p style="font-size: 1.1rem; color: var(--text-secondary); margin-bottom: 16px;">No meals found.</p>
+                        <p style="color: var(--text-light);">Try adjusting your filters or check back later.</p>
+                    </div>
+                `;
+            } else {
+                mealsGrid.innerHTML = meals.map(meal => {
+                    const originalPrice = meal.original_price || meal.originalPrice;
+                    const discountedPrice = meal.discounted_price || meal.discountedPrice;
+                    const discount = Math.round(((originalPrice - discountedPrice) / originalPrice) * 100);
+                    const formattedOriginal = originalPrice.toLocaleString('en-NG', { style: 'currency', currency: 'NGN', minimumFractionDigits: 0 });
+                    const formattedDiscounted = discountedPrice.toLocaleString('en-NG', { style: 'currency', currency: 'NGN', minimumFractionDigits: 0 });
+                    const vendorName = meal.vendor_name || meal.vendorName || 'Vendor';
+                    const imageUrl = meal.image_url ? meal.image_url : 'images/default-meal.jpg';
+                    const averageRating = meal.average_rating ? meal.average_rating.toFixed(1) : 'N/A';
+                    const reviewCount = meal.review_count || 0;
+                    
+                    return `
+                        <a href="meal-details.html?id=${meal.id}" class="meal-card-link">
                             <div class="meal-card">
                                 <img src="${imageUrl}" alt="${meal.name}" class="meal-image" />
                                 <div class="meal-info">
                                     <div class="meal-title">${meal.name}</div>
+                                    <div class="meal-rating">
+                                        <span>★ ${averageRating}</span>
+                                        <span>(${reviewCount} reviews)</span>
+                                    </div>
                                     <div class="meal-description">${meal.description || ''}</div>
                                     <div class="meal-price">
                                         ${formattedDiscounted}
@@ -132,24 +197,51 @@
                                         <span class="meal-vendor">${vendorName}</span>
                                         <span class="meal-availability">Available: ${meal.quantity_available}</span>
                                     </div>
+                                    <button class="btn-primary" style="width: 100%; margin-top: 16px;" onclick="event.preventDefault(); event.stopPropagation(); Cart.addToCart(${meal.id});">Add to Cart</button>
                                 </div>
                             </div>
-                        `;
-                    }).join('');
-                }
-            } catch (error) {
-                console.error('Error loading meals:', error);
-                mealsGrid.innerHTML = `
-                    <div style="text-align: center; padding: 40px; color: var(--error); grid-column: 1 / -1;">
-                        Error loading meals. Please try again later.
-                    </div>
-                `;
+                        </a>
+                    `;
+                }).join('');
             }
         }
 
-        // Load meals on page load
+        function renderMapView(meals) {
+            // Clear existing markers
+            if (map) {
+                map.eachLayer((layer) => {
+                    if (layer instanceof L.Marker) {
+                        map.removeLayer(layer);
+                    }
+                });
+            }
+
+            const mealsWithCoords = meals.filter(meal => meal.latitude && meal.longitude);
+
+            if (mealsWithCoords.length === 0) {
+                // Optionally show a message
+                return;
+            }
+
+            mealsWithCoords.forEach(meal => {
+                const marker = L.marker([meal.latitude, meal.longitude]).addTo(map);
+                const formattedDiscounted = (meal.discounted_price || 0).toLocaleString('en-NG', { style: 'currency', currency: 'NGN', minimumFractionDigits: 0 });
+
+                const popupContent = `
+                    <div style="font-family: var(--font-family);">
+                        <h4 style="margin-bottom: 8px;">${meal.name}</h4>
+                        <p>${formattedDiscounted}</p>
+                        <a href="meal-details.html?id=${meal.id}">View Details</a>
+                        <button class="btn-primary btn-sm" style="margin-top: 8px; width: 100%;" onclick="Cart.addToCart(${meal.id})">Add to Cart</button>
+                    </div>
+                `;
+                marker.bindPopup(popupContent);
+            });
+        }
+
         document.addEventListener('DOMContentLoaded', () => {
             loadMeals();
+            toggleBtn.addEventListener('click', toggleView);
         });
 
         // Allow Enter key to search
@@ -159,5 +251,3 @@
             }
         });
     </script>
-</body>
-</html>

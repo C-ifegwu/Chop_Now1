@@ -4,61 +4,61 @@ A web application that connects local food vendors with consumers to reduce food
 
 ## Project Structure
 
+The project has a monolithic structure where the Node.js backend serves the frontend application.
+
 ```
 ChopNow/
-├── frontend/          # Frontend application (HTML, CSS, JavaScript)
-├── backend/          # Backend API server (Node.js/Express)
-├── database/         # Database schemas and migrations
-├── docs/            # Documentation files
-└── config/          # Configuration files
+├── frontend/        # Frontend assets (HTML, CSS, JavaScript)
+├── database/        # Database schema and initialization files
+├── routes/          # API route definitions
+├── config/          # Configuration files (database, etc.)
+├── server.js        # Main Express.js server file
+└── package.json     # Node.js project file
 ```
 
 ## Getting Started
 
 ### Prerequisites
 - Node.js (v14 or higher)
-- npm or yarn
-- SQLite (for development) or PostgreSQL (for production)
+- npm
 
-### Installation
+### Installation & Setup
 
-1. Install backend dependencies:
-```bash
-cd backend
-npm install
+1. **Install Dependencies:**
+   Run this command in the root directory to install all backend dependencies:
+   ```bash
+   npm install
+   ```
+
+2. **Database Setup:**
+   The application uses a SQLite database. The database file `database/chopnow.db` will be created automatically when the server starts for the first time, based on the `database/schema.sql` file.
+
+3. **Start the Server:**
+   ```bash
+   npm start
+   ```
+   The server will start, and you can access the application by navigating to `http://localhost:3000` in your browser.
+
+## Map View Feature: Adding Coordinates
+
+To enable the map view, you need to add latitude and longitude coordinates to your vendor records in the database.
+
+You can use an online tool like [latlong.net](https://www.latlong.net/) to find the coordinates for an address.
+
+Once you have the coordinates, you can update a vendor's location in the database using a SQL command like this:
+
+```sql
+UPDATE users
+SET 
+  latitude = 9.0765, 
+  longitude = 7.3986
+WHERE id = 2; -- Replace with the actual vendor's user ID
 ```
-
-2. Set up the database:
-```bash
-cd database
-# Run the schema.sql file to create tables
-```
-
-3. Start the backend server:
-```bash
-cd backend
-npm start
-```
-
-4. Open the frontend:
-```bash
-cd frontend
-# Open index.html in a browser or use a local server
-```
-
-## Features
-
-- User Authentication (Consumer & Vendor)
-- Meal Listing & Discovery
-- Order Placement & Management
-- Payment Processing
-- Rating & Review System
-- Notifications
 
 ## Technology Stack
 
-- Frontend: HTML, CSS, JavaScript
-- Backend: Node.js, Express.js
-- Database: SQLite (dev) / PostgreSQL (production)
-- Authentication: JWT
+- **Backend:** Node.js, Express.js
+- **Frontend:** HTML, CSS, JavaScript
+- **Database:** SQLite
+- **Authentication:** JWT
 

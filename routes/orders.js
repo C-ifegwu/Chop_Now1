@@ -1,54 +1,63 @@
 const express = require('express');
 const router = express.Router();
 const db = require('../config/database');
-const { authenticateToken } = require('../middleware/auth');
-const { notifyVendorNewOrder, notifyConsumerOrderStatus } = require('../services/notification.service');
+const { authenticateToken, authorizeConsumer, authorizeVendor } = require('../middleware/auth');
+const { sendNotificationToVendor } = require('../services/websocket');
 
-// Create new order (Consumer only)
-router.post('/', authenticateToken, async (req, res) => {
+// Create a new order (Consumer only)
+router.post('/', authenticateToken, authorizeConsumer, async (req, res) => {
     try {
         const consumerId = req.user.userId;
-        const { mealId, quantity, paymentMethod } = req.body;
+        const { vendor_id, items } = req.body; // items is an array of { meal_id, quantity }
 
-        if (req.user.userType !== 'consumer') {
-            return res.status(403).json({ message: 'Only consumers can place orders' });
+        if (!vendor_id || !items || !Array.isArray(items) || items.length === 0) {
+            return res.status(400).json({ message: 'Invalid order data' });
         }
 
-        // Get meal details
-        const meal = await db.get('SELECT * FROM meals WHERE id = ? AND is_available = 1', [mealId]);
-        if (!meal) {
-            return res.status(404).json({ message: 'Meal not available' });
+        // Calculate total amount and verify meals
+        let totalAmount = 0;
+        for (const item of items) {
+            const meal = await db.get('SELECT * FROM meals WHERE id = ? AND vendor_id = ? AND is_available = 1 AND quantity_available >= ?', 
+                [item.meal_id, vendor_id, item.quantity]);
+            
+            if (!meal) {
+                return res.status(400).json({ message: `Meal with ID ${item.meal_id} is not available or quantity is insufficient.` });
+            }
+            totalAmount += meal.discounted_price * item.quantity;
         }
 
-        if (meal.quantity_available < quantity) {
-            return res.status(400).json({ message: 'Insufficient quantity available' });
-        }
-
-        const totalAmount = meal.discounted_price * quantity;
-
-        // Create order
-        const result = await db.run(
-            `INSERT INTO orders (consumer_id, meal_id, quantity, total_amount, payment_method, status, created_at)
-             VALUES (?, ?, ?, ?, ?, 'pending', datetime('now'))`,
-            [consumerId, mealId, quantity, totalAmount, paymentMethod]
+        // Create the order
+        const orderResult = await db.run(
+            `INSERT INTO orders (consumer_id, vendor_id, total_amount, status, created_at)
+             VALUES (?, ?, ?, 'pending', datetime('now'))`,
+            [consumerId, vendor_id, totalAmount]
         );
+        const orderId = orderResult.lastID;
 
-        // Update meal quantity
-        await db.run(
-            'UPDATE meals SET quantity_available = quantity_available - ? WHERE id = ?',
-            [quantity, mealId]
-        );
+        // Create order items and update meal quantities
+        for (const item of items) {
+            await db.run('INSERT INTO order_items (order_id, meal_id, quantity) VALUES (?, ?, ?)',
+                [orderId, item.meal_id, item.quantity]);
+            
+            await db.run('UPDATE meals SET quantity_available = quantity_available - ? WHERE id = ?',
+                [item.quantity, item.meal_id]);
+        }
 
-        // Notify vendor of new order
-        await notifyVendorNewOrder(meal.vendor_id, result.lastID, meal.name);
-
-        res.status(201).json({
-            message: 'Order placed successfully',
-            orderId: result.lastID
+        // Send real-time notification to vendor
+        sendNotificationToVendor(vendor_id, {
+            type: 'new_order',
+            message: `You have a new order! Order #${orderId}`,
+            orderId: orderId
         });
+
+        res.status(201).json({ 
+            message: 'Order created successfully', 
+            orderId: orderId 
+        });
+
     } catch (error) {
         console.error('Create order error:', error);
-        res.status(500).json({ message: 'Failed to place order', error: error.message });
+        res.status(500).json({ message: 'Failed to create order', error: error.message });
     }
 });
 

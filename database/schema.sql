@@ -6,13 +6,14 @@ CREATE TABLE IF NOT EXISTS users (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     email TEXT UNIQUE NOT NULL,
     password TEXT NOT NULL,
-    user_type TEXT NOT NULL CHECK(user_type IN ('consumer', 'vendor')),
+    user_type TEXT NOT NULL CHECK (user_type IN ('consumer', 'vendor')),
     phone TEXT,
     name TEXT,
     business_name TEXT,
     address TEXT,
-    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+    latitude REAL,
+    longitude REAL,
+    created_at TEXT NOT NULL
 );
 
 -- Meals Table
