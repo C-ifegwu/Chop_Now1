@@ -95,23 +95,28 @@
             }
 
             try {
-                // The backend expects an array of { meal_id, quantity }
-                const orderItems = cart.map(item => ({ meal_id: item.mealId, quantity: item.quantity }));
-                
-                // For simplicity, we are using the first item's mealId to get vendorId.
-                // A more robust solution would group items by vendor.
-                const firstMeal = await API.Meals.getById(orderItems[0].meal_id);
-                const vendorId = firstMeal.vendor_id;
+                // Group items by vendor
+                const ordersByVendor = {};
 
-                const orderData = {
-                    vendor_id: vendorId,
-                    items: orderItems,
-                    // The backend will calculate the total price
-                };
+                for (const item of cart) {
+                    const meal = await API.Meals.getById(item.mealId);
+                    const vendorId = meal.vendor_id;
+                    if (!ordersByVendor[vendorId]) {
+                        ordersByVendor[vendorId] = {
+                            vendor_id: vendorId,
+                            items: []
+                        };
+                    }
+                    ordersByVendor[vendorId].items.push({ meal_id: item.mealId, quantity: item.quantity });
+                }
 
-                await API.Orders.create(orderData);
+                // Create an order for each vendor
+                for (const vendorId in ordersByVendor) {
+                    const orderData = ordersByVendor[vendorId];
+                    await API.Orders.create(orderData);
+                }
 
-                alert('Order placed successfully!');
+                alert('Order(s) placed successfully!');
                 Cart.save([]); // Clear the cart
                 window.location.href = 'consumer-dashboard.html'; // Redirect to dashboard
 
