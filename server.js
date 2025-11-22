@@ -20,6 +20,9 @@ app.use(express.urlencoded({ extended: true }));
 // Serve static files (uploaded images)
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
+// Serve frontend static files
+app.use(express.static('frontend'));
+
 // Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/meals', mealRoutes);

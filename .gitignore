@@ -4,7 +4,7 @@ package-lock.json
 yarn.lock
 
 # Environment variables
-# .env
+.env
 
 # Node.js
 /node_modules
