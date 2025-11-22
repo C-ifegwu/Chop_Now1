@@ -32,6 +32,11 @@ app.get('/api/health', (req, res) => {
     res.json({ status: 'OK', message: 'ChopNow API is running' });
 });
 
+// 404 handler for undefined routes
+app.use((req, res, next) => {
+    res.status(404).json({ message: 'Not Found' });
+});
+
 // Error handling middleware
 app.use((err, req, res, next) => {
     console.error(err.stack);

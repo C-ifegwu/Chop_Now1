@@ -3,6 +3,7 @@ const router = express.Router();
 const db = require('../config/database');
 const { authenticateToken, authorizeVendor } = require('../middleware/auth');
 const upload = require('../middleware/upload');
+const { body, validationResult } = require('express-validator');
 
 // Get all available meals (with filters)
 router.get('/', async (req, res) => {
@@ -70,8 +71,21 @@ router.get('/:id', async (req, res) => {
     }
 });
 
+const validateMeal = [
+    body('name').trim().notEmpty().withMessage('Name is required'),
+    body('description').trim().notEmpty().withMessage('Description is required'),
+    body('originalPrice').isFloat({ gt: 0 }).withMessage('Original price must be a positive number'),
+    body('discountedPrice').isFloat({ gt: 0 }).withMessage('Discounted price must be a positive number'),
+    body('quantityAvailable').isInt({ gt: -1 }).withMessage('Quantity available must be a non-negative integer'),
+];
+
 // Create new meal listing (Vendor only)
-router.post('/', authenticateToken, authorizeVendor, upload.single('image'), async (req, res) => {
+router.post('/', authenticateToken, authorizeVendor, upload.single('image'), validateMeal, async (req, res) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+        return res.status(400).json({ errors: errors.array() });
+    }
+
     try {
         const { name, description, originalPrice, discountedPrice, quantityAvailable, 
                 cuisineType, pickupOptions, pickupTimes, allergens } = req.body;
@@ -108,7 +122,12 @@ router.post('/', authenticateToken, authorizeVendor, upload.single('image'), asy
 });
 
 // Update meal listing (Vendor only)
-router.put('/:id', authenticateToken, authorizeVendor, async (req, res) => {
+router.put('/:id', authenticateToken, authorizeVendor, validateMeal, async (req, res) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+        return res.status(400).json({ errors: errors.array() });
+    }
+
     try {
         const mealId = req.params.id;
         const vendorId = req.user.userId;
