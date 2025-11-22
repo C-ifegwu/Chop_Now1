@@ -1,9 +1,0 @@
-# backend/nixpacks.toml
-
-providers = ["node"]
-
-[phases.install]
-cmds = ["npm install"]
-
-[start]
-cmd = "npm start"
