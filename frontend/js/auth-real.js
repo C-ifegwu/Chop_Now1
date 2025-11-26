@@ -80,7 +80,7 @@ async function register(userData) {
 document.addEventListener('DOMContentLoaded', () => {
     // Redirect if already logged in
     const currentPage = window.location.pathname.split('/').pop();
-    if (isAuthenticated() && (currentPage === 'login.html' || currentPage === 'register.html' || currentPage === 'index.html')) {
+    if (isAuthenticated() && (currentPage === 'login.html' || currentPage === 'register.html')) {
         const userType = localStorage.getItem('userType');
         if (userType === 'vendor') {
             window.location.href = 'vendor-dashboard.html';
