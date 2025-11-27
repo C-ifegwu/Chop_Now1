@@ -3,8 +3,24 @@ const router = express.Router();
 const db = require('../config/database');
 const { authenticateToken, authorizeVendor } = require('../middleware/auth');
 const upload = require('../middleware/upload');
-const validate = require('../middleware/validation');
-const { mealSchema } = require('../validation/schemas');
+const { validateMeal } = require('../middleware/validation');
+
+// Get vendor's meals
+router.get('/vendor', authenticateToken, authorizeVendor, async (req, res) => {
+    try {
+        const vendorId = req.user.userId;
+        
+        const meals = await db.all(
+            'SELECT * FROM meals WHERE vendor_id = ? ORDER BY created_at DESC',
+            [vendorId]
+        );
+        
+        res.json(meals);
+    } catch (error) {
+        console.error('Get vendor meals error:', error);
+        res.status(500).json({ message: 'Failed to fetch vendor meals', error: error.message });
+    }
+});
 
 // Get all available meals (with filters)
 router.get('/', async (req, res) => {
@@ -16,33 +32,32 @@ router.get('/', async (req, res) => {
                      JOIN users u ON m.vendor_id = u.id
                      WHERE m.is_available = 1 AND m.quantity_available > 0`;
         
-        let paramIndex = 1;
         const params = [];
 
         if (cuisine) {
-            query += ` AND m.cuisine_type = $${paramIndex++}`;
+            query += ` AND m.cuisine_type = ?`;
             params.push(cuisine);
         }
 
         if (minPrice) {
-            query += ` AND m.discounted_price >= $${paramIndex++}`;
+            query += ` AND m.discounted_price >= ?`;
             params.push(minPrice);
         }
 
         if (maxPrice) {
-            query += ` AND m.discounted_price <= $${paramIndex++}`;
+            query += ` AND m.discounted_price <= ?`;
             params.push(maxPrice);
         }
 
         if (search) {
-            query += ` AND (m.name ILIKE $${paramIndex++} OR m.description ILIKE $${paramIndex++})`; // ILIKE for case-insensitive
+            query += ` AND (m.name LIKE ? OR m.description LIKE ?)`;
             params.push(`%${search}%`, `%${search}%`);
         }
 
         query += ' ORDER BY m.created_at DESC';
 
-        const mealsResult = await db.query(query, params);
-        res.json(mealsResult.rows);
+        const meals = await db.all(query, params);
+        res.json(meals);
     } catch (error) {
         console.error('Get meals error:', error);
         res.status(500).json({ message: 'Failed to fetch meals', error: error.message });
@@ -52,21 +67,26 @@ router.get('/', async (req, res) => {
 // Get single meal by ID
 router.get('/:id', async (req, res) => {
     try {
-        const mealResult = await db.query(
-            `SELECT m.*, u.business_name as vendor_name, u.address as vendor_address, u.latitude, u.longitude,
-                    AVG(r.rating) as average_rating, COUNT(r.id) as review_count
+        const meal = await db.get(
+            `SELECT m.*, u.business_name as vendor_name, u.address as vendor_address, u.latitude, u.longitude
              FROM meals m
              JOIN users u ON m.vendor_id = u.id
-             LEFT JOIN reviews r ON m.id = r.meal_id
-             WHERE m.id = $1
-             GROUP BY m.id, u.business_name, u.address, u.latitude, u.longitude`, // Added GROUP BY for aggregate functions
+             WHERE m.id = ?`,
             [req.params.id]
         );
-        const meal = mealResult.rows[0];
 
         if (!meal) {
             return res.status(404).json({ message: 'Meal not found' });
         }
+
+        // Get reviews separately
+        const reviews = await db.all(
+            'SELECT AVG(rating) as average_rating, COUNT(*) as review_count FROM reviews WHERE meal_id = ?',
+            [req.params.id]
+        );
+
+        meal.average_rating = reviews[0]?.average_rating || 0;
+        meal.review_count = reviews[0]?.review_count || 0;
 
         res.json(meal);
     } catch (error) {
@@ -76,7 +96,7 @@ router.get('/:id', async (req, res) => {
 });
 
 // Create new meal listing (Vendor only)
-router.post('/', authenticateToken, authorizeVendor, upload.single('image'), validate(mealSchema), async (req, res) => {
+router.post('/', authenticateToken, authorizeVendor, upload.single('image'), validateMeal, async (req, res) => {
     try {
         const { name, description, originalPrice, discountedPrice, quantityAvailable, 
                 cuisineType, pickupOptions, pickupTimes, allergens } = req.body;
@@ -92,18 +112,18 @@ router.post('/', authenticateToken, authorizeVendor, upload.single('image'), val
         const vendorId = req.user.userId;
         const imageUrl = req.file ? `/uploads/${req.file.filename}` : null;
 
-        const result = await db.query(
+        const result = await db.run(
             `INSERT INTO meals (vendor_id, name, description, original_price, discounted_price,
                                quantity_available, cuisine_type, pickup_options, pickup_times,
                                allergens, image_url, is_available)
-             VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, TRUE) RETURNING id`,
+             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 1)`,
             [vendorId, name, description, originalPrice, discountedPrice, quantityAvailable,
              cuisineType, pickupOptions, pickupTimes, allergens, imageUrl]
         );
 
         res.status(201).json({
             message: 'Meal listing created successfully',
-            mealId: result.rows[0].id,
+            mealId: result.lastID,
             imageUrl: imageUrl
         });
     } catch (error) {
@@ -113,25 +133,25 @@ router.post('/', authenticateToken, authorizeVendor, upload.single('image'), val
 });
 
 // Update meal listing (Vendor only)
-router.put('/:id', authenticateToken, authorizeVendor, validate(mealSchema), async (req, res) => {
+router.put('/:id', authenticateToken, authorizeVendor, validateMeal, async (req, res) => {
     try {
         const mealId = req.params.id;
         const vendorId = req.user.userId;
 
         // Verify meal belongs to vendor
-        const mealResult = await db.query('SELECT * FROM meals WHERE id = $1 AND vendor_id = $2', [mealId, vendorId]);
-        if (mealResult.rows.length === 0) {
+        const meal = await db.get('SELECT * FROM meals WHERE id = ? AND vendor_id = ?', [mealId, vendorId]);
+        if (!meal) {
             return res.status(404).json({ message: 'Meal not found or unauthorized' });
         }
 
         const { name, description, originalPrice, discountedPrice, quantityAvailable,
                 cuisineType, pickupOptions, pickupTimes, allergens, isAvailable } = req.body;
 
-        await db.query(
-            `UPDATE meals SET name = $1, description = $2, original_price = $3, discounted_price = $4,
-                             quantity_available = $5, cuisine_type = $6, pickup_options = $7,
-                             pickup_times = $8, allergens = $9, is_available = $10, updated_at = NOW()
-             WHERE id = $11 AND vendor_id = $12`,
+        await db.run(
+            `UPDATE meals SET name = ?, description = ?, original_price = ?, discounted_price = ?,
+                             quantity_available = ?, cuisine_type = ?, pickup_options = ?,
+                             pickup_times = ?, allergens = ?, is_available = ?, updated_at = datetime('now')
+             WHERE id = ? AND vendor_id = ?`,
             [name, description, originalPrice, discountedPrice, quantityAvailable,
              cuisineType, pickupOptions, pickupTimes, allergens, isAvailable, mealId, vendorId]
         );
@@ -149,7 +169,7 @@ router.delete('/:id', authenticateToken, authorizeVendor, async (req, res) => {
         const mealId = req.params.id;
         const vendorId = req.user.userId;
 
-        const result = await db.query('DELETE FROM meals WHERE id = $1 AND vendor_id = $2', [mealId, vendorId]);
+        const result = await db.run('DELETE FROM meals WHERE id = ? AND vendor_id = ?', [mealId, vendorId]);
         
         if (result.rowCount === 0) {
             return res.status(404).json({ message: 'Meal not found or unauthorized' });
@@ -166,18 +186,18 @@ router.delete('/:id', authenticateToken, authorizeVendor, async (req, res) => {
 router.get('/vendor/my-meals', authenticateToken, authorizeVendor, async (req, res) => {
     try {
         const vendorId = req.user.userId;
-        const mealsResult = await db.query(
+        const mealsResult = await db.all(
             `SELECT m.*, COUNT(o.id) as total_orders
              FROM meals m
              LEFT JOIN order_items oi ON m.id = oi.meal_id
              LEFT JOIN orders o ON oi.order_id = o.id
-             WHERE m.vendor_id = $1
+             WHERE m.vendor_id = ?
              GROUP BY m.id
              ORDER BY m.created_at DESC`,
             [vendorId]
         );
 
-        res.json(mealsResult.rows);
+        res.json(mealsResult);
     } catch (error) {
         console.error('Get vendor meals error:', error);
         res.status(500).json({ message: 'Failed to fetch vendor meals', error: error.message });

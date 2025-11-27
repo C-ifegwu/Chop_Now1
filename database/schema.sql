@@ -15,6 +15,7 @@ CREATE TABLE IF NOT EXISTS users (
     longitude REAL,
     reset_password_token TEXT,
     reset_password_expires INTEGER,
+    last_login DATETIME,
     created_at DATETIME NOT NULL
 );
 
@@ -37,6 +38,18 @@ CREATE TABLE IF NOT EXISTS meals (
     updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
 );
 
+-- Cart Items Table
+CREATE TABLE IF NOT EXISTS cart_items (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id INTEGER NOT NULL,
+    meal_id INTEGER NOT NULL,
+    quantity INTEGER NOT NULL DEFAULT 1,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+    FOREIGN KEY (meal_id) REFERENCES meals(id) ON DELETE CASCADE
+);
+
 -- Orders Table
 CREATE TABLE IF NOT EXISTS orders (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -44,8 +57,13 @@ CREATE TABLE IF NOT EXISTS orders (
     vendor_id INTEGER NOT NULL,
     total_amount REAL NOT NULL,
     status TEXT DEFAULT 'pending',
+    payment_method TEXT,
+    payment_status TEXT DEFAULT 'pending',
+    delivery_address TEXT,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (consumer_id) REFERENCES users(id),
+    FOREIGN KEY (vendor_id) REFERENCES users(id)
 );
 
 -- Order Items Table
@@ -54,7 +72,8 @@ CREATE TABLE IF NOT EXISTS order_items (
     order_id INTEGER NOT NULL,
     meal_id INTEGER NOT NULL,
     quantity INTEGER NOT NULL,
-    price REAL NOT NULL
+    price REAL NOT NULL,
+    FOREIGN KEY (meal_id) REFERENCES meals(id) ON DELETE CASCADE
 );
 
 -- Reviews Table
@@ -66,7 +85,8 @@ CREATE TABLE IF NOT EXISTS reviews (
     comment TEXT,
     vendor_response TEXT,
     response_date DATETIME,
-    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (meal_id) REFERENCES meals(id) ON DELETE CASCADE
 );
 
 -- Notifications Table

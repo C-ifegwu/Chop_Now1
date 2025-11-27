@@ -3,50 +3,866 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ChopNow</title>
+    <title>ChopNow - Rescue Food, Save Money</title>
+    <meta name="description" content="Discover discounted meals from local vendors. Reduce food waste while enjoying delicious, affordable food delivered to your doorstep.">
     <link rel="stylesheet" href="style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@300;400;500;600;700&family=Product+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="icon" type="image/x-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🥗</text></svg>">
 </head>
 <body>
-    <header>
-        <h1>ChopNow</h1>
-        <nav>
-            <ul>
-                <li><a href="index.html">Home</a></li>
-                <li><a href="meals.html">Meals</a></li>
-                <li id="auth-links">
-                    <a href="login.html">Login</a>
-                    <a href="register.html">Register</a>
-                </li>
-                <li><a href="cart.html" id="cart-link" style="display:none;">Cart (<span id="cart-count">0</span>)</a></li>
-                <li><a href="#" id="dashboard-link" style="display:none;">Dashboard</a></li>
-                <li><a href="#" id="logout-button" style="display:none;">Logout</a></li>
-            </ul>
-        </nav>
+    <!-- Header -->
+    <header class="header">
+        <div class="container">
+            <nav class="navbar">
+                <a href="index.html" class="logo">
+                    <div class="logo-icon">🥗</div>
+                    <span>ChopNow</span>
+                </a>
+                
+                <ul class="nav-menu" id="navMenu">
+                    <li><a href="index.html" class="nav-link active">Home</a></li>
+                    <li><a href="meals.html" class="nav-link">Browse Meals</a></li>
+                    <li><a href="#how-it-works" class="nav-link">How it Works</a></li>
+                    <li><a href="#about" class="nav-link">About</a></li>
+                    <li><a href="#contact" class="nav-link">Contact</a></li>
+                </ul>
+                
+                <div class="nav-actions">
+                    <div class="auth-buttons" id="authButtons">
+                        <a href="login.html" class="btn btn-ghost">Sign In</a>
+                        <a href="register.html" class="btn btn-primary">Get Started</a>
+                    </div>
+                    
+                    <div class="user-menu" id="userMenu" style="display: none;">
+                        <a href="cart.html" class="btn btn-ghost">
+                            <i class="fas fa-shopping-cart"></i>
+                            Cart <span class="cart-count" id="cartCount">0</span>
+                        </a>
+                        <button class="btn btn-ghost" onclick="logout()">
+                            <i class="fas fa-sign-out-alt"></i>
+                            Logout
+                        </button>
+                    </div>
+                    
+                    <button class="mobile-menu-toggle" id="mobileMenuToggle">
+                        <i class="fas fa-bars"></i>
+                    </button>
+                </div>
+            </nav>
+        </div>
     </header>
 
-    <main>
-        <section id="hero">
-            <h2>Rescue delicious food, prevent waste.</h2>
-            <p>Find great deals on surplus food from local vendors.</p>
-            <a href="meals.html" class="button">Browse Meals</a>
-        </section>
-
-        <section id="features">
-            <div class="feature-item">
-                <h3>For Consumers</h3>
-                <p>Discover affordable meals near you and help reduce food waste.</p>
+    <!-- Hero Section -->
+    <section class="hero-google">
+        <div class="container">
+            <div class="hero-content-google">
+                <div class="hero-badge">
+                    <span class="badge-text">🌱 Reducing food waste across Africa</span>
+                </div>
+                
+                <h1 class="hero-title-google">
+                    Rescue food.<br>
+                    <span class="hero-accent">Save money.</span><br>
+                    <span class="hero-light">Help the planet.</span>
+                </h1>
+                
+                <p class="hero-subtitle-google">
+                    Connect with local vendors to discover amazing meals at discounted prices while making a positive impact on your community and environment.
+                </p>
+                
+                <div class="hero-search-google">
+                    <div class="search-container-google">
+                        <div class="search-icon">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <circle cx="11" cy="11" r="8"></circle>
+                                <path d="m21 21-4.35-4.35"></path>
+                            </svg>
+                        </div>
+                        <input type="text" placeholder="Enter your location to find nearby meals" id="locationSearchGoogle" class="search-input-google">
+                        <button class="search-btn-google" onclick="findNearbyMeals()">
+                            <span>Find Food</span>
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <line x1="5" y1="12" x2="19" y2="12"></line>
+                                <polyline points="12,5 19,12 12,19"></polyline>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="hero-stats-google">
+                    <div class="stat-item">
+                        <div class="stat-number">10K+</div>
+                        <div class="stat-label">Meals rescued</div>
+                    </div>
+                    <div class="stat-divider"></div>
+                    <div class="stat-item">
+                        <div class="stat-number">500+</div>
+                        <div class="stat-label">Partner vendors</div>
+                    </div>
+                    <div class="stat-divider"></div>
+                    <div class="stat-item">
+                        <div class="stat-number">50%</div>
+                        <div class="stat-label">Average savings</div>
+                    </div>
+                </div>
+                
+                <div class="hero-actions-google">
+                    <a href="meals.html" class="btn-google-primary">
+                        <span>Browse Meals</span>
+                    </a>
+                    <a href="register.html?type=vendor" class="btn-google-secondary">
+                        <span>Join as Partner</span>
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <line x1="7" y1="17" x2="17" y2="7"></line>
+                            <polyline points="7,7 17,7 17,17"></polyline>
+                        </svg>
+                    </a>
+                </div>
             </div>
-            <div class="feature-item">
-                <h3>For Vendors</h3>
-                <p>Sell your surplus food, reduce waste, and reach new customers.</p>
+            
+            <div class="hero-visual-google">
+                <div class="floating-card card-1">
+                    <div class="card-image">
+                        <img src="https://images.unsplash.com/photo-1567620905732-2d1ec7ab7445?w=200&h=120&fit=crop&crop=center" alt="Food">
+                    </div>
+                    <div class="card-content">
+                        <div class="card-title">Jollof Rice Special</div>
+                        <div class="card-price">₦1,200 <span class="original-price">₦2,000</span></div>
+                        <div class="card-badge">40% OFF</div>
+                    </div>
+                </div>
+                
+                <div class="floating-card card-2">
+                    <div class="card-image">
+                        <img src="https://images.unsplash.com/photo-1565299624946-b28f40a0ca4b?w=200&h=120&fit=crop&crop=center" alt="Pizza">
+                    </div>
+                    <div class="card-content">
+                        <div class="card-title">Margherita Pizza</div>
+                        <div class="card-price">₦2,500 <span class="original-price">₦4,000</span></div>
+                        <div class="card-badge">35% OFF</div>
+                    </div>
+                </div>
+                
+                <div class="floating-card card-3">
+                    <div class="card-image">
+                        <img src="https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=200&h=120&fit=crop&crop=center" alt="Salad">
+                    </div>
+                    <div class="card-content">
+                        <div class="card-title">Fresh Garden Salad</div>
+                        <div class="card-price">₦800 <span class="original-price">₦1,200</span></div>
+                        <div class="card-badge">30% OFF</div>
+                    </div>
+                </div>
             </div>
-        </section>
-    </main>
+        </div>
+    </section>
 
-    <footer>
-        <p>&copy; 2025 ChopNow. All rights reserved.</p>
+    <!-- Categories -->
+    <section class="section-google categories-google">
+        <div class="container">
+            <div class="section-header-google">
+                <div class="section-badge">
+                    <span>🍽️ Explore</span>
+                </div>
+                <h2 class="section-title-google">Popular food categories</h2>
+                <p class="section-subtitle-google">
+                    Discover amazing deals across different cuisines and help reduce food waste in your community
+                </p>
+            </div>
+            
+            <div class="categories-grid-google">
+                <div class="category-card-google" onclick="filterByCategory('african')" data-category="african">
+                    <div class="category-visual">
+                        <div class="category-gradient african-gradient"></div>
+                        <div class="category-icon-google">
+                            <img src="https://images.unsplash.com/photo-1586190848861-99aa4a171e90?w=80&h=80&fit=crop&crop=center" alt="African Cuisine" class="category-image">
+                        </div>
+                    </div>
+                    <div class="category-content">
+                        <h3 class="category-title">African Cuisine</h3>
+                        <p class="category-description">Jollof rice, fufu, and traditional favorites</p>
+                        <div class="category-stats">120+ meals available</div>
+                    </div>
+                    <div class="category-arrow">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <line x1="7" y1="17" x2="17" y2="7"></line>
+                            <polyline points="7,7 17,7 17,17"></polyline>
+                        </svg>
+                    </div>
+                </div>
+                
+                <div class="category-card-google" onclick="filterByCategory('asian')" data-category="asian">
+                    <div class="category-visual">
+                        <div class="category-gradient asian-gradient"></div>
+                        <div class="category-icon-google">
+                            <img src="https://images.unsplash.com/photo-1569718212165-3a8278d5f624?w=80&h=80&fit=crop&crop=center" alt="Asian Cuisine" class="category-image">
+                        </div>
+                    </div>
+                    <div class="category-content">
+                        <h3 class="category-title">Asian Delights</h3>
+                        <p class="category-description">Noodles, rice dishes, and Asian specialties</p>
+                        <div class="category-stats">85+ meals available</div>
+                    </div>
+                    <div class="category-arrow">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <line x1="7" y1="17" x2="17" y2="7"></line>
+                            <polyline points="7,7 17,7 17,17"></polyline>
+                        </svg>
+                    </div>
+                </div>
+                
+                <div class="category-card-google" onclick="filterByCategory('fast-food')" data-category="fast-food">
+                    <div class="category-visual">
+                        <div class="category-gradient fastfood-gradient"></div>
+                        <div class="category-icon-google">
+                            <img src="https://images.unsplash.com/photo-1571091718767-18b5b1457add?w=80&h=80&fit=crop&crop=center" alt="Fast Food" class="category-image">
+                        </div>
+                    </div>
+                    <div class="category-content">
+                        <h3 class="category-title">Fast Food</h3>
+                        <p class="category-description">Burgers, pizza, and quick bites</p>
+                        <div class="category-stats">200+ meals available</div>
+                    </div>
+                    <div class="category-arrow">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <line x1="7" y1="17" x2="17" y2="7"></line>
+                            <polyline points="7,7 17,7 17,17"></polyline>
+                        </svg>
+                    </div>
+                </div>
+                
+                <div class="category-card-google" onclick="filterByCategory('mediterranean')" data-category="mediterranean">
+                    <div class="category-visual">
+                        <div class="category-gradient mediterranean-gradient"></div>
+                        <div class="category-icon-google">
+                            <img src="https://images.unsplash.com/photo-1540189549336-e6e99c3679fe?w=80&h=80&fit=crop&crop=center" alt="Mediterranean" class="category-image">
+                        </div>
+                    </div>
+                    <div class="category-content">
+                        <h3 class="category-title">Mediterranean</h3>
+                        <p class="category-description">Shawarma, falafel, and healthy options</p>
+                        <div class="category-stats">65+ meals available</div>
+                    </div>
+                    <div class="category-arrow">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <line x1="7" y1="17" x2="17" y2="7"></line>
+                            <polyline points="7,7 17,7 17,17"></polyline>
+                        </svg>
+                    </div>
+                </div>
+                
+                <div class="category-card-google" onclick="filterByCategory('dessert')" data-category="dessert">
+                    <div class="category-visual">
+                        <div class="category-gradient dessert-gradient"></div>
+                        <div class="category-icon-google">
+                            <img src="https://images.unsplash.com/photo-1551024506-0bccd828d307?w=80&h=80&fit=crop&crop=center" alt="Desserts" class="category-image">
+                        </div>
+                    </div>
+                    <div class="category-content">
+                        <h3 class="category-title">Sweet Treats</h3>
+                        <p class="category-description">Cakes, pastries, and desserts</p>
+                        <div class="category-stats">45+ meals available</div>
+                    </div>
+                    <div class="category-arrow">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <line x1="7" y1="17" x2="17" y2="7"></line>
+                            <polyline points="7,7 17,7 17,17"></polyline>
+                        </svg>
+                    </div>
+                </div>
+                
+                <div class="category-card-google" onclick="filterByCategory('indian')" data-category="indian">
+                    <div class="category-visual">
+                        <div class="category-gradient indian-gradient"></div>
+                        <div class="category-icon-google">
+                            <img src="https://images.unsplash.com/photo-1565557623262-b51c2513a641?w=80&h=80&fit=crop&crop=center" alt="Indian Cuisine" class="category-image">
+                        </div>
+                    </div>
+                    <div class="category-content">
+                        <h3 class="category-title">Indian Spices</h3>
+                        <p class="category-description">Curry, biryani, and aromatic dishes</p>
+                        <div class="category-stats">75+ meals available</div>
+                    </div>
+                    <div class="category-arrow">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <line x1="7" y1="17" x2="17" y2="7"></line>
+                            <polyline points="7,7 17,7 17,17"></polyline>
+                        </svg>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Featured Meals -->
+    <section class="section-google featured-meals-google">
+        <div class="container">
+            <div class="section-header-google">
+                <div class="section-badge">
+                    <span>🔥 Trending</span>
+                </div>
+                <h2 class="section-title-google">Featured rescue meals</h2>
+                <p class="section-subtitle-google">
+                    Discover amazing meals at unbeatable prices while helping reduce food waste in your community
+                </p>
+            </div>
+            
+            <div class="meals-grid-google">
+                <div class="meal-card-google" onclick="window.location.href='meal-details.html?id=1'">
+                    <div class="meal-image-container">
+                        <img src="https://images.unsplash.com/photo-1586190848861-99aa4a171e90?w=400&h=240&fit=crop&crop=center" 
+                             alt="Jollof Rice Special" class="meal-image-google">
+                        <div class="meal-badge-google discount-badge">30% OFF</div>
+                        <div class="meal-badge-google urgency-badge">
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+                            </svg>
+                            8 left
+                        </div>
+                    </div>
+                    
+                    <div class="meal-content-google">
+                        <div class="meal-header">
+                            <h3 class="meal-title-google">Jollof Rice Special</h3>
+                            <div class="meal-rating-google">
+                                <div class="rating-stars">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                                        <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+                                    </svg>
+                                    <span class="rating-value">4.8</span>
+                                </div>
+                                <span class="rating-count">(45 reviews)</span>
+                            </div>
+                        </div>
+                        
+                        <p class="meal-description-google">
+                            Authentic Nigerian jollof rice with grilled chicken and plantain
+                        </p>
+                        
+                        <div class="meal-meta-google">
+                            <div class="meta-item">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <circle cx="12" cy="12" r="10"></circle>
+                                    <polyline points="12,6 12,12 16,14"></polyline>
+                                </svg>
+                                <span>Ready in 15 min</span>
+                            </div>
+                            <div class="meta-item">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+                                    <circle cx="12" cy="10" r="3"></circle>
+                                </svg>
+                                <span>2.3 km away</span>
+                            </div>
+                        </div>
+                        
+                        <div class="meal-pricing-google">
+                            <div class="price-section">
+                                <span class="current-price">₦1,050</span>
+                                <span class="original-price">₦1,500</span>
+                            </div>
+                            <button class="add-to-cart-google" onclick="event.stopPropagation(); addToCart(1)">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <line x1="12" y1="5" x2="12" y2="19"></line>
+                                    <line x1="5" y1="12" x2="19" y2="12"></line>
+                                </svg>
+                                <span>Add</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="meal-card-google" onclick="window.location.href='meal-details.html?id=2'">
+                    <div class="meal-image-container">
+                        <img src="https://images.unsplash.com/photo-1565299624946-b28f40a0ca4b?w=400&h=240&fit=crop&crop=center" 
+                             alt="Margherita Pizza" class="meal-image-google">
+                        <div class="meal-badge-google discount-badge">25% OFF</div>
+                        <div class="meal-badge-google urgency-badge">
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+                            </svg>
+                            5 left
+                        </div>
+                    </div>
+                    
+                    <div class="meal-content-google">
+                        <div class="meal-header">
+                            <h3 class="meal-title-google">Margherita Pizza</h3>
+                            <div class="meal-rating-google">
+                                <div class="rating-stars">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                                        <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+                                    </svg>
+                                    <span class="rating-value">4.6</span>
+                                </div>
+                                <span class="rating-count">(32 reviews)</span>
+                            </div>
+                        </div>
+                        
+                        <p class="meal-description-google">
+                            Fresh mozzarella, tomato sauce, and basil on crispy crust
+                        </p>
+                        
+                        <div class="meal-meta-google">
+                            <div class="meta-item">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <circle cx="12" cy="12" r="10"></circle>
+                                    <polyline points="12,6 12,12 16,14"></polyline>
+                                </svg>
+                                <span>Ready in 20 min</span>
+                            </div>
+                            <div class="meta-item">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+                                    <circle cx="12" cy="10" r="3"></circle>
+                                </svg>
+                                <span>1.8 km away</span>
+                            </div>
+                        </div>
+                        
+                        <div class="meal-pricing-google">
+                            <div class="price-section">
+                                <span class="current-price">₦2,250</span>
+                                <span class="original-price">₦3,000</span>
+                            </div>
+                            <button class="add-to-cart-google" onclick="event.stopPropagation(); addToCart(2)">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <line x1="12" y1="5" x2="12" y2="19"></line>
+                                    <line x1="5" y1="12" x2="19" y2="12"></line>
+                                </svg>
+                                <span>Add</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="meal-card-google" onclick="window.location.href='meal-details.html?id=3'">
+                    <div class="meal-image-container">
+                        <img src="https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=400&h=240&fit=crop&crop=center" 
+                             alt="Fresh Garden Salad" class="meal-image-google">
+                        <div class="meal-badge-google discount-badge">40% OFF</div>
+                        <div class="meal-badge-google urgency-badge">
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+                            </svg>
+                            12 left
+                        </div>
+                    </div>
+                    
+                    <div class="meal-content-google">
+                        <div class="meal-header">
+                            <h3 class="meal-title-google">Fresh Garden Salad</h3>
+                            <div class="meal-rating-google">
+                                <div class="rating-stars">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                                        <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+                                    </svg>
+                                    <span class="rating-value">4.9</span>
+                                </div>
+                                <span class="rating-count">(28 reviews)</span>
+                            </div>
+                        </div>
+                        
+                        <p class="meal-description-google">
+                            Mixed greens with seasonal vegetables and house dressing
+                        </p>
+                        
+                        <div class="meal-meta-google">
+                            <div class="meta-item">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <circle cx="12" cy="12" r="10"></circle>
+                                    <polyline points="12,6 12,12 16,14"></polyline>
+                                </svg>
+                                <span>Ready in 10 min</span>
+                            </div>
+                            <div class="meta-item">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+                                    <circle cx="12" cy="10" r="3"></circle>
+                                </svg>
+                                <span>0.9 km away</span>
+                            </div>
+                        </div>
+                        
+                        <div class="meal-pricing-google">
+                            <div class="price-section">
+                                <span class="current-price">₦900</span>
+                                <span class="original-price">₦1,500</span>
+                            </div>
+                            <button class="add-to-cart-google" onclick="event.stopPropagation(); addToCart(3)">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <line x1="12" y1="5" x2="12" y2="19"></line>
+                                    <line x1="5" y1="12" x2="19" y2="12"></line>
+                                </svg>
+                                <span>Add</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="section-cta-google">
+                <a href="meals.html" class="btn-google-primary">
+                    <span>View all meals</span>
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="5" y1="12" x2="19" y2="12"></line>
+                        <polyline points="12,5 19,12 12,19"></polyline>
+                    </svg>
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- How It Works -->
+    <section id="how-it-works" class="features">
+        <div class="container">
+            <div class="section-header">
+                <h2 class="section-title">How ChopNow Works</h2>
+                <p class="section-subtitle">Simple steps to rescue food and save money</p>
+            </div>
+            
+            <div class="features-grid">
+                <div class="feature-card">
+                    <div class="feature-icon">📍</div>
+                    <h3 class="feature-title">Find Nearby Deals</h3>
+                    <p class="feature-description">
+                        Discover discounted meals from restaurants and vendors in your area. Fresh food at unbeatable prices.
+                    </p>
+                </div>
+                
+                <div class="feature-card">
+                    <div class="feature-icon">🛒</div>
+                    <h3 class="feature-title">Order & Pay</h3>
+                    <p class="feature-description">
+                        Choose your favorite meals, add them to cart, and pay securely through our platform.
+                    </p>
+                </div>
+                
+                <div class="feature-card">
+                    <div class="feature-icon">⏰</div>
+                    <h3 class="feature-title">Quick Pickup</h3>
+                    <p class="feature-description">
+                        Pick up your order at the scheduled time. Enjoy fresh, delicious food while helping the environment.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Top Vendors -->
+    <section class="section">
+        <div class="container">
+            <div class="section-header">
+                <h2 class="section-title">Top Vendors Near You</h2>
+                <p class="section-subtitle">Discover the best local restaurants and food vendors</p>
+            </div>
+            
+            <div class="restaurants-grid">
+                <div class="restaurant-card" onclick="window.location.href='meals.html?vendor=1'">
+                    <img src="https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=400&h=220&fit=crop&crop=center" 
+                         alt="Restaurant" class="restaurant-image">
+                    <div class="restaurant-info">
+                        <h3 class="restaurant-name">Mama Grace Kitchen</h3>
+                        <p class="restaurant-cuisine">African Cuisine • Traditional Nigerian</p>
+                        <div class="restaurant-meta">
+                            <div class="restaurant-rating">
+                                <i class="fas fa-star"></i>
+                                4.8 (156)
+                            </div>
+                            <div style="color: var(--gray-600); font-size: 0.875rem;">
+                                <i class="fas fa-clock"></i>
+                                15-25 min
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="restaurant-card" onclick="window.location.href='meals.html?vendor=2'">
+                    <img src="https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=400&h=220&fit=crop&crop=center" 
+                         alt="Restaurant" class="restaurant-image">
+                    <div class="restaurant-info">
+                        <h3 class="restaurant-name">Tony's Pizzeria</h3>
+                        <p class="restaurant-cuisine">Italian • Pizza & Pasta</p>
+                        <div class="restaurant-meta">
+                            <div class="restaurant-rating">
+                                <i class="fas fa-star"></i>
+                                4.6 (89)
+                            </div>
+                            <div style="color: var(--gray-600); font-size: 0.875rem;">
+                                <i class="fas fa-clock"></i>
+                                20-30 min
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="restaurant-card" onclick="window.location.href='meals.html?vendor=3'">
+                    <img src="https://images.unsplash.com/photo-1466978913421-dad2ebd01d17?w=400&h=220&fit=crop&crop=center" 
+                         alt="Restaurant" class="restaurant-image">
+                    <div class="restaurant-info">
+                        <h3 class="restaurant-name">Green Garden Cafe</h3>
+                        <p class="restaurant-cuisine">Healthy • Salads & Smoothies</p>
+                        <div class="restaurant-meta">
+                            <div class="restaurant-rating">
+                                <i class="fas fa-star"></i>
+                                4.9 (124)
+                            </div>
+                            <div style="color: var(--gray-600); font-size: 0.875rem;">
+                                <i class="fas fa-clock"></i>
+                                10-15 min
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Stats Section -->
+    <section class="section" style="background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%); color: white;">
+        <div class="container">
+            <div class="section-header">
+                <h2 class="section-title" style="color: white;">Making a Difference Together</h2>
+                <p class="section-subtitle" style="color: rgba(255,255,255,0.9);">Join thousands of users in our mission to reduce food waste</p>
+            </div>
+            
+            <div class="stats-grid">
+                <div class="stat-card" style="background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.2); backdrop-filter: blur(10px);">
+                    <div class="stat-value" style="color: white;">50,000+</div>
+                    <div class="stat-label" style="color: rgba(255,255,255,0.9);">Meals Rescued</div>
+                </div>
+                
+                <div class="stat-card" style="background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.2); backdrop-filter: blur(10px);">
+                    <div class="stat-value" style="color: white;">1,200+</div>
+                    <div class="stat-label" style="color: rgba(255,255,255,0.9);">Partner Vendors</div>
+                </div>
+                
+                <div class="stat-card" style="background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.2); backdrop-filter: blur(10px);">
+                    <div class="stat-value" style="color: white;">25,000+</div>
+                    <div class="stat-label" style="color: rgba(255,255,255,0.9);">Happy Customers</div>
+                </div>
+                
+                <div class="stat-card" style="background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.2); backdrop-filter: blur(10px);">
+                    <div class="stat-value" style="color: white;">₦2.5M+</div>
+                    <div class="stat-label" style="color: rgba(255,255,255,0.9);">Money Saved</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- About Section -->
+    <section id="about" class="section">
+        <div class="container">
+            <div class="section-header">
+                <h2 class="section-title">About ChopNow</h2>
+                <p class="section-subtitle">Our mission to reduce food waste and improve food accessibility across Africa</p>
+            </div>
+            
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: var(--space-12); align-items: center;">
+                <div>
+                    <h3 style="font-size: 1.5rem; font-weight: 700; margin-bottom: var(--space-4); color: var(--gray-900);">
+                        Connecting Communities
+                    </h3>
+                    <p style="color: var(--gray-600); line-height: 1.7; margin-bottom: var(--space-6);">
+                        ChopNow bridges the gap between food vendors with surplus meals and consumers looking for affordable, quality food. 
+                        We're building a sustainable food ecosystem that benefits everyone.
+                    </p>
+                    <div style="display: flex; gap: var(--space-4);">
+                        <a href="register.html" class="btn btn-primary">Join Now</a>
+                        <a href="#contact" class="btn btn-outline">Learn More</a>
+                    </div>
+                </div>
+                <div style="text-align: center;">
+                    <div style="width: 200px; height: 200px; background: linear-gradient(135deg, var(--primary-color), var(--accent-color)); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto; font-size: 4rem; box-shadow: var(--shadow-xl);">
+                        🌍
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA Section -->
+    <section class="section bg-gray-50">
+        <div class="container">
+            <div class="text-center">
+                <h2 class="section-title">Ready to Start Saving?</h2>
+                <p class="section-subtitle" style="margin-bottom: var(--space-12);">
+                    Join ChopNow today and discover amazing deals on delicious meals while helping reduce food waste
+                </p>
+                
+                <div class="flex gap-4 justify-center" style="flex-wrap: wrap;">
+                    <a href="register.html" class="btn btn-primary btn-lg">
+                        <i class="fas fa-user-plus"></i>
+                        Sign Up Now
+                    </a>
+                    <a href="register.html?type=vendor" class="btn btn-secondary btn-lg">
+                        <i class="fas fa-store"></i>
+                        Become a Vendor
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer id="contact" class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <div class="logo" style="margin-bottom: var(--space-6);">
+                        <div class="logo-icon">🥗</div>
+                        <span>ChopNow</span>
+                    </div>
+                    <p style="color: var(--gray-400); line-height: 1.6; margin-bottom: var(--space-6);">
+                        Connecting communities to reduce food waste and provide affordable, delicious meals across Africa.
+                    </p>
+                    <div style="display: flex; gap: var(--space-4);">
+                        <a href="#" style="color: var(--gray-400); font-size: 1.25rem; transition: var(--transition);" onmouseover="this.style.color='var(--primary-color)'" onmouseout="this.style.color='var(--gray-400)'">
+                            <i class="fab fa-facebook"></i>
+                        </a>
+                        <a href="#" style="color: var(--gray-400); font-size: 1.25rem; transition: var(--transition);" onmouseover="this.style.color='var(--primary-color)'" onmouseout="this.style.color='var(--gray-400)'">
+                            <i class="fab fa-twitter"></i>
+                        </a>
+                        <a href="#" style="color: var(--gray-400); font-size: 1.25rem; transition: var(--transition);" onmouseover="this.style.color='var(--primary-color)'" onmouseout="this.style.color='var(--gray-400)'">
+                            <i class="fab fa-instagram"></i>
+                        </a>
+                        <a href="#" style="color: var(--gray-400); font-size: 1.25rem; transition: var(--transition);" onmouseover="this.style.color='var(--primary-color)'" onmouseout="this.style.color='var(--gray-400)'">
+                            <i class="fab fa-linkedin"></i>
+                        </a>
+                    </div>
+                </div>
+                
+                <div class="footer-section">
+                    <h3>For Customers</h3>
+                    <ul class="footer-links">
+                        <li><a href="meals.html">Browse Meals</a></li>
+                        <li><a href="register.html">Sign Up</a></li>
+                        <li><a href="#how-it-works">How it Works</a></li>
+                        <li><a href="#support">Customer Support</a></li>
+                    </ul>
+                </div>
+                
+                <div class="footer-section">
+                    <h3>For Vendors</h3>
+                    <ul class="footer-links">
+                        <li><a href="register.html?type=vendor">Join as Vendor</a></li>
+                        <li><a href="#vendor-guide">Vendor Guide</a></li>
+                        <li><a href="#pricing">Pricing</a></li>
+                        <li><a href="#vendor-support">Vendor Support</a></li>
+                    </ul>
+                </div>
+                
+                <div class="footer-section">
+                    <h3>Company</h3>
+                    <ul class="footer-links">
+                        <li><a href="#about">About Us</a></li>
+                        <li><a href="#careers">Careers</a></li>
+                        <li><a href="#press">Press</a></li>
+                        <li><a href="mailto:hello@chopnow.com">Contact</a></li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="footer-bottom">
+                <p>&copy; 2025 ChopNow. All rights reserved. Made with ❤️ for a sustainable future.</p>
+            </div>
+        </div>
     </footer>
 
     <script src="script.js"></script>
+    <script>
+        // Category filtering
+        function filterByCategory(category) {
+            window.location.href = `meals.html?cuisine=${category}`;
+        }
+
+        // Location search
+        function findNearbyMeals() {
+            const location = document.getElementById('locationSearch').value;
+            if (location.trim()) {
+                window.location.href = `meals.html?location=${encodeURIComponent(location)}`;
+            } else {
+                window.location.href = 'meals.html';
+            }
+        }
+
+        // Add to cart with improved feedback
+        function addToCart(mealId) {
+            const button = event.target.closest('button');
+            const originalHTML = button.innerHTML;
+            
+            button.innerHTML = '<i class="fas fa-check"></i> Added!';
+            button.style.background = 'var(--accent-color)';
+            button.disabled = true;
+            
+            // Update cart count
+            const cartCount = document.getElementById('cartCount');
+            if (cartCount) {
+                const currentCount = parseInt(cartCount.textContent) || 0;
+                cartCount.textContent = currentCount + 1;
+            }
+            
+            // Show notification if available
+            if (window.chopNowApp && window.chopNowApp.showNotification) {
+                window.chopNowApp.showNotification('Added to cart successfully!', 'success');
+            }
+            
+            setTimeout(() => {
+                button.innerHTML = originalHTML;
+                button.style.background = '';
+                button.disabled = false;
+            }, 2000);
+        }
+
+        // Mobile menu toggle
+        document.getElementById('mobileMenuToggle').addEventListener('click', function() {
+            const navMenu = document.getElementById('navMenu');
+            navMenu.classList.toggle('show');
+        });
+
+        // Smooth scroll for anchor links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            });
+        });
+
+        // Add scroll animations
+        const observerOptions = {
+            threshold: 0.1,
+            rootMargin: '0px 0px -50px 0px'
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('animate-fade-in');
+                }
+            });
+        }, observerOptions);
+
+        // Observe elements for animation
+        document.querySelectorAll('.category-card, .meal-card, .restaurant-card, .feature-card, .stat-card').forEach(el => {
+            observer.observe(el);
+        });
+
+        // Initialize page
+        document.addEventListener('DOMContentLoaded', function() {
+            // Check authentication status
+            if (window.chopNowApp) {
+                window.chopNowApp.updateNavigation();
+            }
+        });
+    </script>
 </body>
 </html>

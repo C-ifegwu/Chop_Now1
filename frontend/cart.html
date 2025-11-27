@@ -3,331 +3,590 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ChopNow - Your Cart</title>
+    <title>Shopping Cart - ChopNow</title>
+    <meta name="description" content="Review your selected meals and proceed to checkout on ChopNow.">
     <link rel="stylesheet" href="style.css">
-    <style>
-        /* Specific styles for cart page */
-        .cart-container {
-            margin-top: 20px;
-            background-color: white;
-            padding: 30px;
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-        }
-
-        .cart-item {
-            display: flex;
-            align-items: center;
-            border-bottom: 1px solid #eee;
-            padding: 15px 0;
-        }
-
-        .cart-item:last-child {
-            border-bottom: none;
-        }
-
-        .cart-item-image img {
-            width: 80px;
-            height: 80px;
-            object-fit: cover;
-            border-radius: 4px;
-            margin-right: 20px;
-        }
-
-        .cart-item-details {
-            flex-grow: 1;
-        }
-
-        .cart-item-details h4 {
-            margin: 0 0 5px 0;
-            color: #333;
-        }
-
-        .cart-item-details p {
-            margin: 0;
-            color: #666;
-            font-size: 0.9em;
-        }
-
-        .cart-item-quantity, .cart-item-price, .cart-item-actions {
-            text-align: right;
-            margin-left: 20px;
-            min-width: 80px;
-        }
-
-        .cart-item-quantity input[type="number"] {
-            width: 60px;
-            padding: 5px;
-            border: 1px solid #ccc;
-            border-radius: 4px;
-        }
-
-        .cart-item-actions button {
-            background-color: #dc3545;
-            color: white;
-            border: none;
-            padding: 6px 12px;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 0.85em;
-        }
-        .cart-item-actions button:hover {
-            background-color: #c82333;
-        }
-
-        .cart-summary {
-            border-top: 2px solid #eee;
-            padding-top: 20px;
-            margin-top: 20px;
-            text-align: right;
-        }
-
-        .cart-summary p {
-            font-size: 1.1em;
-            margin: 5px 0;
-        }
-
-        .cart-summary .total {
-            font-size: 1.5em;
-            font-weight: bold;
-            color: #4CAF50;
-        }
-
-        .checkout-btn {
-            background-color: #28a745;
-            color: white;
-            padding: 12px 25px;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 1.1em;
-            margin-top: 20px;
-        }
-        .checkout-btn:hover {
-            background-color: #218838;
-        }
-    </style>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="icon" type="image/x-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🥗</text></svg>">
 </head>
 <body>
-    <header>
-        <h1>ChopNow</h1>
-        <nav>
-            <ul>
-                <li><a href="index.html">Home</a></li>
-                <li><a href="meals.html">Meals</a></li>
-                <li id="auth-links">
-                    <a href="login.html">Login</a>
-                    <a href="register.html">Register</a>
-                </li>
-                <li><a href="cart.html" id="cart-link" style="display:none;">Cart (<span id="cart-count">0</span>)</a></li>
-                <li><a href="#" id="dashboard-link" style="display:none;">Dashboard</a></li>
-                <li><a href="#" id="logout-button" style="display:none;">Logout</a></li>
-            </ul>
-        </nav>
+    <!-- Header -->
+    <header class="header">
+        <div class="container">
+            <nav class="navbar">
+                <a href="index.html" class="logo">
+                    <div class="logo-icon">🥗</div>
+                    <span>ChopNow</span>
+                </a>
+                
+                <ul class="nav-menu" id="navMenu">
+                    <li><a href="index.html" class="nav-link">Home</a></li>
+                    <li><a href="meals.html" class="nav-link">Browse Meals</a></li>
+                    <li><a href="cart.html" class="nav-link active">Cart</a></li>
+                </ul>
+                
+                <div class="nav-actions">
+                    <div class="auth-buttons" id="authButtons">
+                        <a href="login.html" class="btn btn-ghost">Sign In</a>
+                        <a href="register.html" class="btn btn-primary">Get Started</a>
+                    </div>
+                    
+                    <div class="user-menu" id="userMenu" style="display: none;">
+                        <a href="consumer-dashboard.html" class="btn btn-ghost">
+                            <i class="fas fa-user"></i>
+                            Dashboard
+                        </a>
+                        <button class="btn btn-ghost" onclick="logout()">
+                            <i class="fas fa-sign-out-alt"></i>
+                            Logout
+                        </button>
+                    </div>
+                    
+                    <button class="mobile-menu-toggle" id="mobileMenuToggle">
+                        <i class="fas fa-bars"></i>
+                    </button>
+                </div>
+            </nav>
+        </div>
     </header>
 
-    <main>
-        <section class="cart-container">
-            <h2>Your Shopping Cart</h2>
-            <div id="cart-items-list">
-                <p>Your cart is empty.</p>
-                <!-- Cart items will be dynamically inserted here -->
-            </div>
+    <!-- Main Content -->
+    <main style="min-height: calc(100vh - 144px); background: var(--gray-50); padding: var(--space-10) 0;">
+        <div class="container">
+            <div style="max-width: 1000px; margin: 0 auto;">
+                <!-- Page Header -->
+                <div style="margin-bottom: var(--space-10);">
+                    <div style="display: flex; align-items: center; gap: var(--space-4); margin-bottom: var(--space-4);">
+                        <a href="meals.html" class="btn btn-ghost" style="padding: var(--space-2);">
+                            <i class="fas fa-arrow-left"></i>
+                        </a>
+                        <div>
+                            <h1 style="font-size: 2.25rem; font-weight: 800; color: var(--gray-900); margin-bottom: var(--space-2);">
+                                Your Cart
+                            </h1>
+                            <p style="color: var(--gray-600); font-size: 1rem;">
+                                Review your selected meals and proceed to checkout
+                            </p>
+                        </div>
+                    </div>
+                </div>
 
-            <div class="cart-summary">
-                <p>Subtotal: $<span id="cart-subtotal">0.00</span></p>
-                <p class="total">Total: $<span id="cart-total">0.00</span></p>
-                <button id="checkout-button" class="checkout-btn">Proceed to Checkout</button>
+                <div style="display: grid; grid-template-columns: 1fr 400px; gap: var(--space-10);">
+                    <!-- Cart Items -->
+                    <div>
+                        <div class="card">
+                            <div class="card-header">
+                                <h2 class="card-title">Cart Items</h2>
+                                <p class="card-subtitle" id="cartItemCount">Loading items...</p>
+                            </div>
+                            <div class="card-body">
+                                <div id="cartItems">
+                                    <div class="text-center" style="padding: var(--space-8) 0;">
+                                        <div class="spinner" style="margin: 0 auto var(--space-4);"></div>
+                                        <p style="color: var(--gray-600);">Loading your cart...</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Order Summary -->
+                    <div>
+                        <div class="card" style="position: sticky; top: var(--space-6);">
+                            <div class="card-header">
+                                <h2 class="card-title">Order Summary</h2>
+                                <p class="card-subtitle">Review your order details</p>
+                            </div>
+                            <div class="card-body">
+                                <div style="margin-bottom: var(--space-6);">
+                                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--space-3);">
+                                        <span style="color: var(--gray-600);">Subtotal</span>
+                                        <span style="font-weight: 600; color: var(--gray-900);" id="subtotal">₦0</span>
+                                    </div>
+                                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--space-3);">
+                                        <span style="color: var(--gray-600);">Service Fee</span>
+                                        <span style="font-weight: 600; color: var(--gray-900);" id="serviceFee">₦0</span>
+                                    </div>
+                                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--space-3);">
+                                        <span style="color: var(--gray-600);">Delivery Fee</span>
+                                        <span style="font-weight: 600; color: var(--gray-900);" id="deliveryFee">₦0</span>
+                                    </div>
+                                    <div style="border-top: 1px solid var(--gray-200); padding-top: var(--space-3); margin-top: var(--space-4);">
+                                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                                            <span style="font-size: 1.125rem; font-weight: 700; color: var(--gray-900);">Total</span>
+                                            <span style="font-size: 1.5rem; font-weight: 800; color: var(--primary-color);" id="total">₦0</span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Savings Display -->
+                                <div style="background: var(--primary-50); border: 2px solid var(--primary-200); border-radius: var(--radius-lg); padding: var(--space-4); margin-bottom: var(--space-6);">
+                                    <div style="display: flex; align-items: center; gap: var(--space-3); margin-bottom: var(--space-2);">
+                                        <div style="width: 32px; height: 32px; background: var(--primary-color); border-radius: var(--radius-full); display: flex; align-items: center; justify-content: center; color: var(--white); font-size: 0.875rem;">
+                                            <i class="fas fa-piggy-bank"></i>
+                                        </div>
+                                        <div>
+                                            <div style="font-weight: 700; color: var(--primary-dark);">You're saving</div>
+                                            <div style="font-size: 1.25rem; font-weight: 800; color: var(--primary-color);" id="totalSavings">₦0</div>
+                                        </div>
+                                    </div>
+                                    <p style="font-size: 0.875rem; color: var(--primary-dark); margin: 0;">
+                                        By rescuing food that would otherwise go to waste!
+                                    </p>
+                                </div>
+
+                                <!-- Checkout Button -->
+                                <button id="checkoutBtn" class="btn btn-primary btn-lg w-full" onclick="proceedToCheckout()" disabled>
+                                    <i class="fas fa-credit-card"></i>
+                                    Proceed to Checkout
+                                </button>
+
+                                <!-- Continue Shopping -->
+                                <div style="text-center; margin-top: var(--space-4);">
+                                    <a href="meals.html" class="btn btn-outline w-full">
+                                        <i class="fas fa-arrow-left"></i>
+                                        Continue Shopping
+                                    </a>
+                                </div>
+
+                                <!-- Security Notice -->
+                                <div style="margin-top: var(--space-6); text-align: center; color: var(--gray-500); font-size: 0.875rem; line-height: 1.6;">
+                                    <i class="fas fa-shield-alt" style="color: var(--primary-color); margin-right: var(--space-2);"></i>
+                                    Secure checkout with SSL encryption
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
-            <p id="cart-message" class="message-area"></p>
-        </section>
+        </div>
     </main>
 
-    <footer>
-        <p>&copy; 2025 ChopNow. All rights reserved.</p>
+    <!-- Footer -->
+    <footer style="background: var(--gray-900); color: var(--white); padding: var(--space-10) 0;">
+        <div class="container">
+            <div style="text-align: center;">
+                <div class="logo" style="margin-bottom: var(--space-4);">
+                    <div class="logo-icon">🥗</div>
+                    <span>ChopNow</span>
+                </div>
+                <p style="color: var(--gray-400); margin-bottom: var(--space-6);">
+                    Rescue food, save money, help the environment.
+                </p>
+                <div style="display: flex; justify-content: center; gap: var(--space-6); margin-bottom: var(--space-6);">
+                    <a href="index.html#about" style="color: var(--gray-400); text-decoration: none; font-size: 0.875rem;">About</a>
+                    <a href="index.html#contact" style="color: var(--gray-400); text-decoration: none; font-size: 0.875rem;">Contact</a>
+                    <a href="#privacy" style="color: var(--gray-400); text-decoration: none; font-size: 0.875rem;">Privacy</a>
+                    <a href="#terms" style="color: var(--gray-400); text-decoration: none; font-size: 0.875rem;">Terms</a>
+                </div>
+                <p style="color: var(--gray-500); font-size: 0.875rem;">
+                    &copy; 2025 ChopNow. All rights reserved. Made with ❤️ for a sustainable future.
+                </p>
+            </div>
+        </div>
     </footer>
 
     <script src="script.js"></script>
     <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            if (!token) { // Only check if token exists here, specific userType check below
-                alert('Please log in to view your cart.');
-                window.location.href = 'login.html';
+        let cartItems = [];
+        let subtotal = 0;
+        let serviceFee = 0;
+        let deliveryFee = 0;
+        let total = 0;
+        let totalSavings = 0;
+
+        // Load cart items
+        async function loadCartItems() {
+            try {
+                if (window.chopNowApp && window.chopNowApp.auth.isLoggedIn()) {
+                    // Load from server for logged-in users
+                    const response = await window.chopNowApp.makeRequest('/api/cart');
+                    cartItems = response.items || [];
+                } else {
+                    // Use localStorage for guests
+                    const storedItems = localStorage.getItem('cartItems');
+                    cartItems = storedItems ? JSON.parse(storedItems) : [];
+                }
+            } catch (error) {
+                console.error('Failed to load cart items:', error);
+                // Fallback to localStorage
+                const storedItems = localStorage.getItem('cartItems');
+                cartItems = storedItems ? JSON.parse(storedItems) : [];
+            }
+            
+            displayCartItems();
+            calculateTotals();
+        }
+
+        // Display cart items
+        function displayCartItems() {
+            const cartItemsDiv = document.getElementById('cartItems');
+            const cartItemCountSpan = document.getElementById('cartItemCount');
+            
+            if (cartItems.length === 0) {
+                cartItemsDiv.innerHTML = `
+                    <div class="text-center" style="padding: var(--space-12) 0;">
+                        <div style="width: 120px; height: 120px; background: var(--gray-100); border-radius: var(--radius-2xl); display: flex; align-items: center; justify-content: center; margin: 0 auto var(--space-6); font-size: 3rem; color: var(--gray-400);">
+                            <i class="fas fa-shopping-cart"></i>
+                        </div>
+                        <h3 style="font-size: 1.5rem; font-weight: 700; color: var(--gray-700); margin-bottom: var(--space-3);">Your cart is empty</h3>
+                        <p style="color: var(--gray-600); margin-bottom: var(--space-8); max-width: 400px; margin-left: auto; margin-right: auto; line-height: 1.6;">
+                            Start browsing meals to add items to your cart and help reduce food waste
+                        </p>
+                        <a href="meals.html" class="btn btn-primary btn-lg">
+                            <i class="fas fa-search"></i>
+                            Browse Meals
+                        </a>
+                    </div>
+                `;
+                cartItemCountSpan.textContent = 'No items in cart';
                 return;
             }
-
-            const cartItemsList = document.getElementById('cart-items-list');
-            const cartSubtotalSpan = document.getElementById('cart-subtotal');
-            const cartTotalSpan = document.getElementById('cart-total');
-            const checkoutButton = document.getElementById('checkout-button');
-            const cartMessage = document.getElementById('cart-message');
-
-            let cartItems = JSON.parse(localStorage.getItem('cartItems') || '[]');
-
-            function renderCart() {
-                cartItemsList.innerHTML = '';
-                let subtotal = 0;
-
-                if (cartItems.length === 0) {
-                    cartItemsList.innerHTML = '<p>Your cart is empty.</p>';
-                    cartSubtotalSpan.textContent = '0.00';
-                    cartTotalSpan.textContent = '0.00';
-                    checkoutButton.disabled = true;
-                    return;
-                }
-
-                checkoutButton.disabled = false;
-
-                // Group items by vendor
-                const groupedByVendor = cartItems.reduce((acc, item) => {
-                    const vendor = item.vendorName || 'Unknown Vendor';
-                    if (!acc[vendor]) {
-                        acc[vendor] = [];
-                    }
-                    acc[vendor].push(item);
-                    return acc;
-                }, {});
-
-                for (const vendorName in groupedByVendor) {
-                    const vendorGroupDiv = document.createElement('div');
-                    vendorGroupDiv.innerHTML = `<h3>${vendorName}</h3>`;
+            
+            cartItemCountSpan.textContent = `${cartItems.length} item${cartItems.length > 1 ? 's' : ''}`;
+            
+            cartItemsDiv.innerHTML = cartItems.map((item, index) => `
+                <div class="cart-item-card" style="display: flex; align-items: center; padding: var(--space-6); border: 1px solid var(--gray-200); border-radius: var(--radius-xl); margin-bottom: var(--space-4); background: var(--white); transition: var(--transition);">
+                    <!-- Item Image -->
+                    <div style="flex-shrink: 0; margin-right: var(--space-6);">
+                        <img src="${item.image_url || 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=120&h=120&fit=crop&crop=center'}" 
+                             alt="${item.name}" 
+                             style="width: 100px; height: 100px; object-fit: cover; border-radius: var(--radius-xl); box-shadow: var(--shadow);">
+                    </div>
                     
-                    groupedByVendor[vendorName].forEach(item => {
-                        const itemTotal = item.price * item.quantity;
-                        subtotal += itemTotal;
+                    <!-- Item Details -->
+                    <div style="flex: 1; min-width: 0;">
+                        <h3 style="font-size: 1.125rem; font-weight: 700; color: var(--gray-900); margin-bottom: var(--space-2);">
+                            ${item.name}
+                        </h3>
+                        <p style="color: var(--gray-600); font-size: 0.875rem; margin-bottom: var(--space-3); line-height: 1.5;">
+                            ${item.description || 'Fresh and delicious meal'}
+                        </p>
+                        <div style="display: flex; align-items: center; gap: var(--space-4); margin-bottom: var(--space-3);">
+                            <div style="display: flex; align-items: center; gap: var(--space-2); font-size: 0.875rem; color: var(--gray-600);">
+                                <i class="fas fa-store" style="color: var(--primary-color);"></i>
+                                <span>${item.vendor_name || 'Local Vendor'}</span>
+                            </div>
+                            <div style="display: flex; align-items: center; gap: var(--space-2); font-size: 0.875rem; color: var(--gray-600);">
+                                <i class="fas fa-clock" style="color: var(--accent-color);"></i>
+                                <span>Ready in 15 min</span>
+                            </div>
+                        </div>
+                        
+                        <!-- Price and Savings -->
+                        <div style="display: flex; align-items: center; gap: var(--space-4);">
+                            <div>
+                                <span style="font-size: 1.25rem; font-weight: 800; color: var(--primary-color);">₦${item.discounted_price}</span>
+                                <span style="font-size: 1rem; color: var(--gray-500); text-decoration: line-through; margin-left: var(--space-2);">₦${item.original_price}</span>
+                            </div>
+                            <div style="background: var(--accent-50); color: var(--accent-dark); padding: var(--space-1) var(--space-3); border-radius: var(--radius-full); font-size: 0.75rem; font-weight: 700;">
+                                ${Math.round(((item.original_price - item.discounted_price) / item.original_price) * 100)}% OFF
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Quantity Controls -->
+                    <div style="display: flex; align-items: center; gap: var(--space-4); margin-left: var(--space-6);">
+                        <div class="quantity-controls">
+                            <button class="quantity-btn" onclick="updateQuantity(${index}, ${item.quantity - 1})" ${item.quantity <= 1 ? 'disabled' : ''}>
+                                <i class="fas fa-minus"></i>
+                            </button>
+                            <span class="quantity-display">${item.quantity}</span>
+                            <button class="quantity-btn" onclick="updateQuantity(${index}, ${item.quantity + 1})">
+                                <i class="fas fa-plus"></i>
+                            </button>
+                        </div>
+                        
+                        <!-- Remove Button -->
+                        <button onclick="removeItem(${index})" class="btn btn-ghost" style="color: var(--error); padding: var(--space-2);">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+        }
 
-                        const cartItemDiv = document.createElement('div');
-                        cartItemDiv.classList.add('cart-item');
-                        cartItemDiv.dataset.mealId = item.mealId;
-                        // Placeholder image as actual image_url not stored in cartItems from meal-details
-                        const imageUrl = 'https://via.placeholder.com/80x80?text=Meal'; 
-                        cartItemDiv.innerHTML = `
-                            <div class="cart-item-image">
-                                <img src="${imageUrl}" alt="${item.name}">
-                            </div>
-                            <div class="cart-item-details">
-                                <h4>${item.name}</h4>
-                                <p>Price: $${item.price.toFixed(2)}</p>
-                            </div>
-                            <div class="cart-item-quantity">
-                                <input type="number" value="${item.quantity}" min="1" data-meal-id="${item.mealId}">
-                            </div>
-                            <div class="cart-item-price">
-                                $${itemTotal.toFixed(2)}
-                            </div>
-                            <div class="cart-item-actions">
-                                <button class="remove-item" data-meal-id="${item.mealId}">Remove</button>
-                            </div>
-                        `;
-                        vendorGroupDiv.appendChild(cartItemDiv);
-                    });
-                    cartItemsList.appendChild(vendorGroupDiv);
+        // Update item quantity
+        function updateQuantity(index, newQuantity) {
+            if (newQuantity < 1) return;
+            
+            cartItems[index].quantity = newQuantity;
+            saveCartItems();
+            displayCartItems();
+            calculateTotals();
+        }
+
+        // Remove item from cart
+        function removeItem(index) {
+            cartItems.splice(index, 1);
+            saveCartItems();
+            displayCartItems();
+            calculateTotals();
+            
+            // Update cart count in navigation
+            updateCartCount();
+        }
+
+        // Calculate totals
+        function calculateTotals() {
+            subtotal = cartItems.reduce((sum, item) => sum + (item.discounted_price * item.quantity), 0);
+            
+            // Calculate service fee (5% of subtotal)
+            serviceFee = Math.round(subtotal * 0.05);
+            
+            // Calculate delivery fee (flat rate for now)
+            deliveryFee = cartItems.length > 0 ? 200 : 0;
+            
+            total = subtotal + serviceFee + deliveryFee;
+            
+            // Calculate total savings
+            const originalTotal = cartItems.reduce((sum, item) => sum + (item.original_price * item.quantity), 0);
+            totalSavings = originalTotal - subtotal;
+            
+            // Update display
+            document.getElementById('subtotal').textContent = `₦${subtotal}`;
+            document.getElementById('serviceFee').textContent = `₦${serviceFee}`;
+            document.getElementById('deliveryFee').textContent = `₦${deliveryFee}`;
+            document.getElementById('total').textContent = `₦${total}`;
+            document.getElementById('totalSavings').textContent = `₦${totalSavings}`;
+            
+            // Enable/disable checkout button
+            const checkoutBtn = document.getElementById('checkoutBtn');
+            if (cartItems.length > 0) {
+                checkoutBtn.disabled = false;
+                checkoutBtn.style.opacity = '1';
+            } else {
+                checkoutBtn.disabled = true;
+                checkoutBtn.style.opacity = '0.5';
+            }
+        }
+
+        // Save cart items to localStorage
+        function saveCartItems() {
+            localStorage.setItem('cartItems', JSON.stringify(cartItems));
+        }
+
+        // Update cart count in navigation
+        function updateCartCount() {
+            const cartCountElements = document.querySelectorAll('#cartCount, .cart-count');
+            cartCountElements.forEach(element => {
+                if (element) {
+                    element.textContent = cartItems.length;
                 }
+            });
+        }
 
-                cartSubtotalSpan.textContent = subtotal.toFixed(2);
-                cartTotalSpan.textContent = subtotal.toFixed(2); // For now, total is same as subtotal (no tax/shipping)
+        // Proceed to checkout
+        async function proceedToCheckout() {
+            if (cartItems.length === 0) {
+                alert('Your cart is empty. Please add items before checkout.');
+                return;
+            }
+            
+            // Check if user is logged in
+            if (!window.chopNowApp || !window.chopNowApp.auth.isLoggedIn()) {
+                // Redirect to login with return URL
+                window.location.href = 'login.html?redirect=cart.html';
+                return;
+            }
+            
+            const checkoutBtn = document.getElementById('checkoutBtn');
+            const originalHTML = checkoutBtn.innerHTML;
+            
+            try {
+                checkoutBtn.innerHTML = '<div class="spinner"></div> Processing...';
+                checkoutBtn.disabled = true;
+                
+                // Create order
+                const response = await window.chopNowApp.makeRequest('/api/checkout/create-order', {
+                    method: 'POST',
+                    body: JSON.stringify({
+                        deliveryAddress: 'Default Address', // In real app, get from form
+                        paymentMethod: 'card' // In real app, get from form
+                    })
+                });
+                
+                if (response.success) {
+                    window.chopNowApp.showNotification('Order placed successfully!', 'success');
+                    
+                    // Clear cart and redirect
+                    cartItems = [];
+                    setTimeout(() => {
+                        window.location.href = 'consumer-dashboard.html#orders';
+                    }, 2000);
+                } else {
+                    throw new Error(response.message || 'Checkout failed');
+                }
+                
+            } catch (error) {
+                console.error('Checkout error:', error);
+                window.chopNowApp.showNotification('Checkout failed: ' + error.message, 'error');
+                
+                checkoutBtn.innerHTML = originalHTML;
+                checkoutBtn.disabled = false;
+            }
+        }
 
+        // Logout function
+        function logout() {
+            localStorage.removeItem('token');
+            localStorage.removeItem('userType');
+            localStorage.removeItem('userId');
+            window.location.href = 'login.html';
+        }
+
+        // Initialize page
+        document.addEventListener('DOMContentLoaded', function() {
+            // Mobile menu toggle
+            const mobileMenuToggle = document.getElementById('mobileMenuToggle');
+            const navMenu = document.getElementById('navMenu');
+            
+            if (mobileMenuToggle && navMenu) {
+                mobileMenuToggle.addEventListener('click', function() {
+                    navMenu.classList.toggle('show');
+                });
+            }
+            
+            // Update navigation based on auth status
+            if (window.chopNowApp) {
+                window.chopNowApp.updateNavigation();
+            }
+            
+            // Load cart items
+            loadCartItems();
+            updateCartCount();
+            
+            // Sample cart items for demo (remove in production)
+            if (cartItems.length === 0) {
+                cartItems = [
+                    {
+                        id: 1,
+                        name: 'Jollof Rice Special',
+                        description: 'Authentic Nigerian jollof rice with grilled chicken and plantain',
+                        original_price: 1500,
+                        discounted_price: 1050,
+                        quantity: 2,
+                        vendor_name: 'Mama Grace Kitchen',
+                        image_url: 'https://images.unsplash.com/photo-1586190848861-99aa4a171e90?w=120&h=120&fit=crop&crop=center'
+                    },
+                    {
+                        id: 2,
+                        name: 'Fresh Garden Salad',
+                        description: 'Mixed greens with seasonal vegetables and house dressing',
+                        original_price: 1500,
+                        discounted_price: 900,
+                        quantity: 1,
+                        vendor_name: 'Green Garden Cafe',
+                        image_url: 'https://images.unsplash.com/photo-1567620905732-2d1ec7ab7445?w=120&h=120&fit=crop&crop=center'
+                    }
+                ];
+                saveCartItems();
+                displayCartItems();
+                calculateTotals();
                 updateCartCount();
             }
-
-            // --- Update Quantity ---
-            cartItemsList.addEventListener('change', (event) => {
-                if (event.target.tagName === 'INPUT' && event.target.type === 'number') {
-                    const mealId = event.target.dataset.mealId;
-                    const newQuantity = parseInt(event.target.value);
-
-                    const itemIndex = cartItems.findIndex(item => item.mealId === mealId);
-                    if (itemIndex > -1 && newQuantity > 0) {
-                        cartItems[itemIndex].quantity = newQuantity;
-                        localStorage.setItem('cartItems', JSON.stringify(cartItems));
-                        renderCart();
-                    } else if (newQuantity <= 0) {
-                        // Optionally remove item if quantity drops to 0 or less
-                        cartItems = cartItems.filter(item => item.mealId !== mealId);
-                        localStorage.setItem('cartItems', JSON.stringify(cartItems));
-                        renderCart();
-                    }
-                }
-            });
-
-            // --- Remove Item ---
-            cartItemsList.addEventListener('click', (event) => {
-                if (event.target.classList.contains('remove-item')) {
-                    const mealId = event.target.dataset.mealId;
-                    cartItems = cartItems.filter(item => item.mealId !== mealId);
-                    localStorage.setItem('cartItems', JSON.stringify(cartItems));
-                    renderCart();
-                }
-            });
-
-            // --- Checkout Functionality ---
-            checkoutButton.addEventListener('click', async () => {
-                if (cartItems.length === 0) {
-                    cartMessage.textContent = 'Your cart is empty. Add items before checking out.';
-                    cartMessage.style.color = 'red';
-                    return;
-                }
-
-                // Group cart items by vendor for order creation
-                const ordersToCreate = {};
-                cartItems.forEach(item => {
-                    const vendorId = item.vendorId; // Use the actual vendorId now
-                    if (!ordersToCreate[vendorId]) {
-                        ordersToCreate[vendorId] = { vendor_id: vendorId, items: [] };
-                    }
-                    ordersToCreate[vendorId].items.push({
-                        meal_id: item.mealId,
-                        quantity: item.quantity
-                    });
-                });
-
-                cartMessage.textContent = 'Processing your order(s)...';
-                cartMessage.style.color = 'blue';
-
-                try {
-                    // Process each vendor's order separately
-                    for (const vendorId in ordersToCreate) {
-                        const orderData = ordersToCreate[vendorId];
-                        const response = await fetch('http://localhost:3000/api/orders', {
-                            method: 'POST',
-                            headers: {
-                                'Content-Type': 'application/json',
-                                'Authorization': `Bearer ${token}`
-                            },
-                            body: JSON.stringify(orderData)
-                        });
-
-                        const data = await response.json();
-
-                        if (!response.ok) {
-                            cartMessage.textContent = `Order for vendor ${vendorId} failed: ${data.message || 'Unknown error'}`;
-                            cartMessage.style.color = 'red';
-                            return; // Stop processing if one order fails
-                        }
-                    }
-                    
-                    cartMessage.textContent = 'Order(s) placed successfully!';
-                    cartMessage.style.color = 'green';
-                    localStorage.removeItem('cartItems'); // Clear cart
-                    cartItems = [];
-                    renderCart();
-
-                } catch (error) {
-                    console.error('Error during checkout:', error);
-                    cartMessage.textContent = 'An error occurred during checkout. Please try again later.';
-                    cartMessage.style.color = 'red';
-                }
-            });
-
-            // --- Update Cart Count (re-used from meals.html) ---
-            function updateCartCount() {
-                const currentCartItems = JSON.parse(localStorage.getItem('cartItems') || '[]');
-                cartCountSpan.textContent = currentCartItems.length;
-            }
-
-            // Initial render
-            renderCart();
         });
     </script>
+
+    <style>
+        /* Cart specific styles */
+        .cart-item-card:hover {
+            box-shadow: var(--shadow-md);
+            transform: translateY(-2px);
+        }
+
+        .quantity-controls {
+            display: flex;
+            align-items: center;
+            gap: var(--space-3);
+            background: var(--gray-50);
+            border-radius: var(--radius-lg);
+            padding: var(--space-2);
+        }
+
+        .quantity-btn {
+            width: 36px;
+            height: 36px;
+            border: 2px solid var(--gray-300);
+            background: var(--white);
+            border-radius: var(--radius-md);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: var(--transition);
+            font-weight: 700;
+            color: var(--gray-700);
+            font-size: 0.875rem;
+        }
+
+        .quantity-btn:hover:not(:disabled) {
+            background: var(--primary-50);
+            border-color: var(--primary-color);
+            color: var(--primary-color);
+        }
+
+        .quantity-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .quantity-display {
+            min-width: 48px;
+            text-align: center;
+            font-weight: 700;
+            font-size: 1.125rem;
+            color: var(--gray-900);
+        }
+
+        /* Responsive design */
+        @media (max-width: 1024px) {
+            main > .container > div > div {
+                grid-template-columns: 1fr !important;
+            }
+            
+            .card:last-child {
+                position: static !important;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .cart-item-card {
+                flex-direction: column !important;
+                align-items: flex-start !important;
+                gap: var(--space-4);
+            }
+            
+            .cart-item-card > div:first-child {
+                margin-right: 0 !important;
+                align-self: center;
+            }
+            
+            .cart-item-card > div:last-child {
+                margin-left: 0 !important;
+                align-self: stretch;
+                justify-content: space-between;
+            }
+            
+            main > .container > div > div:first-child {
+                margin-bottom: var(--space-8);
+            }
+        }
+
+        @media (max-width: 480px) {
+            .cart-item-card > div:first-child img {
+                width: 80px !important;
+                height: 80px !important;
+            }
+            
+            .quantity-controls {
+                flex: 1;
+                justify-content: center;
+            }
+        }
+    </style>
 </body>
 </html>

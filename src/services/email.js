@@ -4,7 +4,7 @@
 // For now, we will just log the emails to the console.
 
 function sendPasswordResetEmail(to, token) {
-    const resetLink = `http://localhost:3000/reset-password.html?token=${token}`;
+    const resetLink = `${process.env.FRONTEND_URL || 'http://localhost:3000'}/reset-password.html?token=${token}`;
     
     console.log('--- PASSWORD RESET EMAIL ---');
     console.log(`To: ${to}`);

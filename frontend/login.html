@@ -3,56 +3,316 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ChopNow - Login</title>
+    <title>Sign In - ChopNow</title>
+    <meta name="description" content="Sign in to your ChopNow account to discover amazing food deals and rescue meals.">
     <link rel="stylesheet" href="style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="icon" type="image/x-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🥗</text></svg>">
 </head>
 <body>
-    <header>
-        <h1>ChopNow</h1>
-        <nav>
-            <ul>
-                <li><a href="index.html">Home</a></li>
-                <li><a href="meals.html">Meals</a></li>
-                <li id="auth-links">
-                    <a href="login.html">Login</a>
-                    <a href="register.html">Register</a>
-                </li>
-                <li><a href="cart.html" id="cart-link" style="display:none;">Cart (<span id="cart-count">0</span>)</a></li>
-                <li><a href="#" id="dashboard-link" style="display:none;">Dashboard</a></li>
-                <li><a href="#" id="logout-button" style="display:none;">Logout</a></li>
-            </ul>
-        </nav>
+    <!-- Header -->
+    <header class="header">
+        <div class="container">
+            <nav class="navbar">
+                <a href="index.html" class="logo">
+                    <div class="logo-icon">🥗</div>
+                    <span>ChopNow</span>
+                </a>
+                
+                <ul class="nav-menu" id="navMenu">
+                    <li><a href="index.html" class="nav-link">Home</a></li>
+                    <li><a href="meals.html" class="nav-link">Browse Meals</a></li>
+                    <li><a href="index.html#how-it-works" class="nav-link">How it Works</a></li>
+                    <li><a href="index.html#about" class="nav-link">About</a></li>
+                </ul>
+                
+                <div class="nav-actions">
+                    <div class="auth-buttons">
+                        <a href="login.html" class="btn btn-primary">Sign In</a>
+                        <a href="register.html" class="btn btn-ghost">Register</a>
+                    </div>
+                    
+                    <button class="mobile-menu-toggle" id="mobileMenuToggle">
+                        <i class="fas fa-bars"></i>
+                    </button>
+                </div>
+            </nav>
+        </div>
     </header>
 
-    <main>
-        <section class="auth-form-container">
-            <h2>Login</h2>
-            <form id="login-form">
-                <div class="form-group">
-                    <label for="email">Email:</label>
-                    <input type="email" id="email" name="email" required>
+    <!-- Main Content -->
+    <main style="min-height: calc(100vh - 144px); display: flex; align-items: center; background: var(--gray-50); padding: var(--space-10) 0;">
+        <div class="container">
+            <div style="max-width: 480px; margin: 0 auto;">
+                <!-- Auth Card -->
+                <div class="card">
+                    <div class="card-header">
+                        <div style="width: 80px; height: 80px; background: linear-gradient(135deg, var(--primary-color), var(--primary-dark)); border-radius: var(--radius-2xl); display: flex; align-items: center; justify-content: center; margin: 0 auto var(--space-6); font-size: 2rem; color: var(--white); box-shadow: var(--shadow-green);">
+                            <i class="fas fa-sign-in-alt"></i>
+                        </div>
+                        <h1 class="card-title">Welcome Back</h1>
+                        <p class="card-subtitle">Sign in to your ChopNow account to continue rescuing food and saving money</p>
+                    </div>
+                    
+                    <div class="card-body">
+                        <form id="loginForm" class="space-y-6">
+                            <div class="form-group">
+                                <label for="email" class="form-label">
+                                    <i class="fas fa-envelope" style="margin-right: var(--space-2); color: var(--primary-color);"></i>
+                                    Email Address
+                                </label>
+                                <input 
+                                    type="email" 
+                                    id="email" 
+                                    name="email" 
+                                    class="form-control" 
+                                    placeholder="Enter your email address"
+                                    required
+                                    autocomplete="email"
+                                >
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="password" class="form-label">
+                                    <i class="fas fa-lock" style="margin-right: var(--space-2); color: var(--primary-color);"></i>
+                                    Password
+                                </label>
+                                <div style="position: relative;">
+                                    <input 
+                                        type="password" 
+                                        id="password" 
+                                        name="password" 
+                                        class="form-control" 
+                                        placeholder="Enter your password"
+                                        required
+                                        autocomplete="current-password"
+                                    >
+                                    <button 
+                                        type="button" 
+                                        id="togglePassword"
+                                        style="position: absolute; right: var(--space-4); top: 50%; transform: translateY(-50%); background: none; border: none; color: var(--gray-500); cursor: pointer; font-size: 1rem;"
+                                        onclick="togglePasswordVisibility()"
+                                    >
+                                        <i class="fas fa-eye" id="passwordIcon"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--space-6);">
+                                <label style="display: flex; align-items: center; gap: var(--space-2); font-size: 0.875rem; color: var(--gray-600); cursor: pointer;">
+                                    <input type="checkbox" id="rememberMe" style="accent-color: var(--primary-color);">
+                                    Remember me
+                                </label>
+                                <a href="forgot-password.html" style="font-size: 0.875rem; color: var(--primary-color); text-decoration: none; font-weight: 600;">
+                                    Forgot password?
+                                </a>
+                            </div>
+                            
+                            <button type="submit" class="btn btn-primary btn-lg w-full" id="loginButton">
+                                <i class="fas fa-sign-in-alt"></i>
+                                Sign In
+                            </button>
+                        </form>
+                        
+                        <!-- Message Area -->
+                        <div id="messageArea" style="margin-top: var(--space-6); display: none;"></div>
+                        
+                        <!-- Divider -->
+                        <div style="margin: var(--space-8) 0; text-align: center; position: relative;">
+                            <div style="height: 1px; background: var(--gray-200);"></div>
+                            <span style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: var(--white); padding: 0 var(--space-4); color: var(--gray-500); font-size: 0.875rem;">
+                                Don't have an account?
+                            </span>
+                        </div>
+                        
+                        <!-- Register Link -->
+                        <div class="text-center">
+                            <a href="register.html" class="btn btn-outline btn-lg w-full">
+                                <i class="fas fa-user-plus"></i>
+                                Create New Account
+                            </a>
+                        </div>
+                        
+                        <!-- Quick Actions -->
+                        <div style="margin-top: var(--space-8); padding-top: var(--space-6); border-top: 1px solid var(--gray-200);">
+                            <p style="text-align: center; color: var(--gray-600); font-size: 0.875rem; margin-bottom: var(--space-4);">
+                                Quick Actions
+                            </p>
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-3);">
+                                <a href="meals.html" class="btn btn-ghost" style="font-size: 0.875rem;">
+                                    <i class="fas fa-search"></i>
+                                    Browse Meals
+                                </a>
+                                <a href="register.html?type=vendor" class="btn btn-ghost" style="font-size: 0.875rem;">
+                                    <i class="fas fa-store"></i>
+                                    Join as Vendor
+                                </a>
+                            </div>
+                        </div>
+                    </div>
                 </div>
-                <div class="form-group">
-                    <label for="password">Password:</label>
-                    <input type="password" id="password" name="password" required>
+                
+                <!-- Security Notice -->
+                <div style="margin-top: var(--space-6); text-align: center; color: var(--gray-500); font-size: 0.875rem; line-height: 1.6;">
+                    <i class="fas fa-shield-alt" style="color: var(--primary-color); margin-right: var(--space-2);"></i>
+                    Your data is protected with industry-standard security measures
                 </div>
-                <button type="submit">Login</button>
-                <p class="message">Don't have an account? <a href="register.html">Register here</a></p>
-                <p class="message"><a href="forgot-password.html">Forgot Password?</a></p>
-            </form>
-            <p id="login-message" class="message-area"></p>
-        </section>
+            </div>
+        </div>
     </main>
 
-    <footer>
-        <p>&copy; 2025 ChopNow. All rights reserved.</p>
+    <!-- Footer -->
+    <footer style="background: var(--gray-900); color: var(--white); padding: var(--space-10) 0;">
+        <div class="container">
+            <div style="text-align: center;">
+                <div class="logo" style="margin-bottom: var(--space-4);">
+                    <div class="logo-icon">🥗</div>
+                    <span>ChopNow</span>
+                </div>
+                <p style="color: var(--gray-400); margin-bottom: var(--space-6);">
+                    Connecting communities to reduce food waste and provide affordable, delicious meals.
+                </p>
+                <div style="display: flex; justify-content: center; gap: var(--space-6); margin-bottom: var(--space-6);">
+                    <a href="index.html#about" style="color: var(--gray-400); text-decoration: none; font-size: 0.875rem;">About</a>
+                    <a href="index.html#contact" style="color: var(--gray-400); text-decoration: none; font-size: 0.875rem;">Contact</a>
+                    <a href="#privacy" style="color: var(--gray-400); text-decoration: none; font-size: 0.875rem;">Privacy</a>
+                    <a href="#terms" style="color: var(--gray-400); text-decoration: none; font-size: 0.875rem;">Terms</a>
+                </div>
+                <p style="color: var(--gray-500); font-size: 0.875rem;">
+                    &copy; 2025 ChopNow. All rights reserved. Made with ❤️ for a sustainable future.
+                </p>
+            </div>
+        </div>
     </footer>
 
     <script src="script.js"></script>
     <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            const loginForm = document.getElementById('login-form');
-            const loginMessage = document.getElementById('login-message');
+        // Password visibility toggle
+        function togglePasswordVisibility() {
+            const passwordInput = document.getElementById('password');
+            const passwordIcon = document.getElementById('passwordIcon');
+            
+            if (passwordInput.type === 'password') {
+                passwordInput.type = 'text';
+                passwordIcon.className = 'fas fa-eye-slash';
+            } else {
+                passwordInput.type = 'password';
+                passwordIcon.className = 'fas fa-eye';
+            }
+        }
+
+        // Form handling
+        document.addEventListener('DOMContentLoaded', function() {
+            const loginForm = document.getElementById('loginForm');
+            const loginButton = document.getElementById('loginButton');
+            const messageArea = document.getElementById('messageArea');
+
+            // Mobile menu toggle
+            const mobileMenuToggle = document.getElementById('mobileMenuToggle');
+            const navMenu = document.getElementById('navMenu');
+            
+            if (mobileMenuToggle && navMenu) {
+                mobileMenuToggle.addEventListener('click', function() {
+                    navMenu.classList.toggle('show');
+                });
+            }
+
+            // Show message function
+            function showMessage(message, type = 'info') {
+                messageArea.style.display = 'block';
+                messageArea.className = type === 'error' ? 'error-state' : 'success-state';
+                messageArea.innerHTML = `
+                    <div style="display: flex; align-items: center; gap: var(--space-3);">
+                        <i class="fas fa-${type === 'error' ? 'exclamation-circle' : 'check-circle'}"></i>
+                        <span>${message}</span>
+                    </div>
+                `;
+                
+                // Auto-hide success messages
+                if (type === 'success') {
+                    setTimeout(() => {
+                        messageArea.style.display = 'none';
+                    }, 5000);
+                }
+            }
+
+            // Form submission
+            loginForm.addEventListener('submit', async function(e) {
+                e.preventDefault();
+                
+                const formData = new FormData(loginForm);
+                const loginData = {
+                    email: formData.get('email'),
+                    password: formData.get('password')
+                };
+
+                // Update button state
+                const originalHTML = loginButton.innerHTML;
+                loginButton.innerHTML = '<div class="spinner"></div> Signing In...';
+                loginButton.disabled = true;
+
+                try {
+                    const response = await fetch('/api/auth/login', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(loginData)
+                    });
+
+                    const result = await response.json();
+
+                    if (response.ok) {
+                        // Store authentication data
+                        localStorage.setItem('token', result.token);
+                        localStorage.setItem('userType', result.user.user_type);
+                        localStorage.setItem('userId', result.user.id);
+
+                        showMessage('Login successful! Redirecting...', 'success');
+
+                        // Redirect based on user type
+                        setTimeout(() => {
+                            if (result.user.user_type === 'vendor') {
+                                window.location.href = 'vendor-dashboard.html';
+                            } else {
+                                window.location.href = 'consumer-dashboard.html';
+                            }
+                        }, 1500);
+
+                    } else {
+                        showMessage(result.message || 'Login failed. Please check your credentials.', 'error');
+                    }
+
+                } catch (error) {
+                    console.error('Login error:', error);
+                    showMessage('Network error. Please check your connection and try again.', 'error');
+                } finally {
+                    // Reset button state
+                    loginButton.innerHTML = originalHTML;
+                    loginButton.disabled = false;
+                }
+            });
+
+            // Check if already logged in
+            const token = localStorage.getItem('token');
+            const userType = localStorage.getItem('userType');
+            
+            if (token && userType) {
+                showMessage('You are already logged in. Redirecting...', 'success');
+                setTimeout(() => {
+                    if (userType === 'vendor') {
+                        window.location.href = 'vendor-dashboard.html';
+                    } else {
+                        window.location.href = 'consumer-dashboard.html';
+                    }
+                }, 2000);
+            }
+
+            // Auto-focus email field
+            document.getElementById('email').focus();
         });
     </script>
 </body>

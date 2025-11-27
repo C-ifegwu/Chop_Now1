@@ -1,32 +1,28 @@
 const WebSocket = require('ws');
 
 let wss;
-const clients = new Map(); // Map to store connections by userId
 
 function initWebSocket(server) {
     wss = new WebSocket.Server({ server });
 
     wss.on('connection', (ws, req) => {
-        // For now, we'll rely on the client sending their userId after connection.
-        // A more robust solution would use authentication tokens.
+        // userId and userType are now set during verifyClient in server.js
+        // No need for client to send a 'register' message
+        
         ws.on('message', (message) => {
             try {
                 const data = JSON.parse(message);
-                if (data.type === 'register' && data.userId) {
-                    ws.userId = data.userId;
-                    clients.set(data.userId, ws);
-                    console.log(`[WS] Client registered for userId: ${data.userId}`);
-                }
+                // Handle different message types if needed, excluding 'register'
+                // The main broadcasting logic is in server.js global functions now.
+                // This service could add specific logic for message processing if required.
+                console.log(`[WS] Message from userId ${ws.userId}:`, data);
             } catch (e) {
                 console.error('[WS] Error processing message:', e);
             }
         });
 
         ws.on('close', () => {
-            if (ws.userId) {
-                clients.delete(ws.userId);
-                console.log(`[WS] Client disconnected for userId: ${ws.userId}`);
-            }
+            console.log(`[WS] Client disconnected for userId: ${ws.userId}`);
         });
 
         ws.on('error', (error) => {
@@ -38,14 +34,14 @@ function initWebSocket(server) {
 }
 
 function sendNotificationToVendor(vendorId, notification) {
-    const vendorSocket = clients.get(vendorId);
-    if (vendorSocket && vendorSocket.readyState === WebSocket.OPEN) {
-        vendorSocket.send(JSON.stringify(notification));
-        console.log(`[WS] Sent notification to vendor: ${vendorId}`);
+    if (global.broadcastToUser) {
+        global.broadcastToUser(vendorId, notification);
+        console.log(`[WS] Sent notification to vendor: ${vendorId} via global broadcast`);
         return true;
+    } else {
+        console.error('[WS] global.broadcastToUser is not available. Cannot send notification.');
+        return false;
     }
-    console.log(`[WS] Vendor not connected or socket not open: ${vendorId}`);
-    return false;
 }
 
 module.exports = {
