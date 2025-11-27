@@ -4,12 +4,31 @@ const path = require('path');
 const http = require('http');
 const helmet = require('helmet');
 const session = require('express-session'); // Import express-session
+const crypto = require('crypto');
 require('dotenv').config();
 
 // Import middleware and utilities
 const { securityHeaders, generalRateLimit, apiRateLimit, secureSession, csrfProtection } = require('./middleware/security'); // Import secureSession and csrfProtection
 const { httpLogger, logger } = require('./utils/logger');
 const db = require('./config/database');
+
+// Get JWT secret with fallback for development
+const getJWTSecret = () => {
+    if (process.env.JWT_SECRET) {
+        return process.env.JWT_SECRET;
+    }
+    
+    // In production, require JWT_SECRET
+    if (process.env.NODE_ENV === 'production') {
+        throw new Error('FATAL ERROR: JWT_SECRET is required in production. Please set it in your environment variables.');
+    }
+    
+    // For development, generate a temporary secret (not secure for production!)
+    const defaultSecret = crypto.randomBytes(32).toString('hex');
+    console.warn('⚠️  WARNING: JWT_SECRET not set. Using temporary secret for development only.');
+    console.warn('⚠️  Set JWT_SECRET in environment variables for production deployment.');
+    return defaultSecret;
+};
 
 const authRoutes = require('./routes/auth');
 const mealRoutes = require('./routes/meals');
@@ -169,7 +188,7 @@ const wss = new WebSocket.Server({
             return done(false, 401, 'Unauthorized: No token provided');
         }
 
-        jwt.verify(token, process.env.JWT_SECRET, (err, user) => {
+        jwt.verify(token, getJWTSecret(), (err, user) => {
             if (err) {
                 logger.warn('WebSocket connection attempt with invalid token.', { error: err.message });
                 return done(false, 403, 'Forbidden: Invalid or expired token');

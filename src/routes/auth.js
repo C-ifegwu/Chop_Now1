@@ -8,6 +8,24 @@ const { authenticateToken } = require('../middleware/auth');
 const { validateUserRegistration, validateUserLogin, validatePasswordReset, validatePasswordUpdate } = require('../middleware/validation');
 const emailService = require('../services/email');
 
+// Get JWT secret with fallback for development
+const getJWTSecret = () => {
+    if (process.env.JWT_SECRET) {
+        return process.env.JWT_SECRET;
+    }
+    
+    // In production, require JWT_SECRET
+    if (process.env.NODE_ENV === 'production') {
+        throw new Error('FATAL ERROR: JWT_SECRET is required in production. Please set it in your environment variables.');
+    }
+    
+    // For development, generate a temporary secret (not secure for production!)
+    const defaultSecret = crypto.randomBytes(32).toString('hex');
+    console.warn('⚠️  WARNING: JWT_SECRET not set. Using temporary secret for development only.');
+    console.warn('⚠️  Set JWT_SECRET in environment variables for production deployment.');
+    return defaultSecret;
+};
+
 // Register new user (Consumer or Vendor)
 router.post('/register', validateUserRegistration, async (req, res) => {
     try {
@@ -34,7 +52,7 @@ router.post('/register', validateUserRegistration, async (req, res) => {
         // Generate JWT token
         const token = jwt.sign(
             { userId: userId, email, userType },
-            process.env.JWT_SECRET,
+            getJWTSecret(),
             { expiresIn: '7d' }
         );
 
@@ -57,9 +75,8 @@ router.post('/register', validateUserRegistration, async (req, res) => {
     }
 });
 
-if (!process.env.JWT_SECRET) {
-    throw new Error('FATAL ERROR: JWT_SECRET is not defined in environment variables.');
-}
+// JWT_SECRET validation is handled by getJWTSecret() function above
+// This ensures the secret is available when needed
 
 // Login
 router.post('/login', validateUserLogin, async (req, res) => {
@@ -85,7 +102,7 @@ router.post('/login', validateUserLogin, async (req, res) => {
         // Generate JWT token
         const token = jwt.sign(
             { userId: user.id, email: user.email, userType: user.user_type },
-            process.env.JWT_SECRET,
+            getJWTSecret(),
             { expiresIn: '7d' }
         );
 

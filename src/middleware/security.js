@@ -153,9 +153,27 @@ const decrypt = (encryptedData) => {
 };
 
 // Session security
+// Generate a default secret for development if not provided
+const getSessionSecret = () => {
+    if (process.env.SESSION_SECRET) {
+        return process.env.SESSION_SECRET;
+    }
+    
+    // In production, require SESSION_SECRET
+    if (process.env.NODE_ENV === 'production') {
+        throw new Error('FATAL ERROR: SESSION_SECRET is required in production. Please set it in your environment variables.');
+    }
+    
+    // For development, generate a temporary secret (not secure for production!)
+    const defaultSecret = crypto.randomBytes(32).toString('hex');
+    console.warn('⚠️  WARNING: SESSION_SECRET not set. Using temporary secret for development only.');
+    console.warn('⚠️  Set SESSION_SECRET in environment variables for production deployment.');
+    return defaultSecret;
+};
+
 const secureSession = {
     name: 'chopnow.sid',
-    secret: process.env.SESSION_SECRET,
+    secret: getSessionSecret(),
     resave: false,
     saveUninitialized: false,
     cookie: {
@@ -165,10 +183,6 @@ const secureSession = {
         sameSite: 'strict' // CSRF protection
     }
 };
-
-if (!secureSession.secret) {
-    throw new Error('FATAL ERROR: SESSION_SECRET is not defined in environment variables.');
-}
 
 // Audit logging
 const auditLog = (action, userId, details = {}) => {
