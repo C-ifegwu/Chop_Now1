@@ -26,10 +26,19 @@ const phoneValidation = body('phone')
 const validateRequest = (req, res, next) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
+        const errorMessages = errors.array().map(err => ({
+            field: err.path || err.param,
+            message: err.msg,
+            value: err.value
+        }));
+        
+        console.error('Validation errors:', errorMessages);
+        console.error('Request body:', req.body);
+        
         return res.status(400).json({
             success: false,
             message: 'Validation failed',
-            errors: errors.array()
+            errors: errorMessages
         });
     }
     next();
@@ -86,26 +95,64 @@ const validatePasswordUpdate = [
 const validateMeal = [
     body('name')
         .trim()
+        .notEmpty()
+        .withMessage('Meal name is required')
         .isLength({ min: 2, max: 100 })
         .withMessage('Meal name must be between 2 and 100 characters'),
     
     body('description')
-        .optional()
+        .optional({ nullable: true, checkFalsy: true })
+        .trim()
         .isLength({ max: 500 })
         .withMessage('Description must not exceed 500 characters'),
     
     body('originalPrice')
-        .isFloat({ min: 0.01, max: 1000 })
-        .withMessage('Original price must be between $0.01 and $1000'),
+        .notEmpty()
+        .withMessage('Original price is required')
+        .custom((value) => {
+            const num = parseFloat(value);
+            if (isNaN(num) || num <= 0) {
+                throw new Error('Original price must be a valid positive number');
+            }
+            return true;
+        })
+        .custom((value) => {
+            const num = parseFloat(value);
+            if (num < 0.01 || num > 1000000) {
+                throw new Error('Original price must be between $0.01 and $1,000,000');
+            }
+            return true;
+        }),
     
     body('discountedPrice')
-        .isFloat({ min: 0.01, max: 1000 })
-        .withMessage('Discounted price must be between $0.01 and $1000')
+        .notEmpty()
+        .withMessage('Discounted price is required')
+        .custom((value) => {
+            const num = parseFloat(value);
+            if (isNaN(num) || num <= 0) {
+                throw new Error('Discounted price must be a valid positive number');
+            }
+            return true;
+        })
+        .custom((value) => {
+            const num = parseFloat(value);
+            if (num < 0.01 || num > 1000000) {
+                throw new Error('Discounted price must be between $0.01 and $1,000,000');
+            }
+            return true;
+        })
         .custom((value, { req }) => {
-            if (value >= req.body.originalPrice) {
+            const originalPrice = parseFloat(req.body.originalPrice);
+            const discountedPrice = parseFloat(value);
+            
+            if (isNaN(originalPrice) || isNaN(discountedPrice)) {
+                return true; // Let other validators handle NaN
+            }
+            
+            if (discountedPrice >= originalPrice) {
                 throw new Error('Discounted price must be less than original price');
             }
-            const discountPercentage = ((req.body.originalPrice - value) / req.body.originalPrice) * 100;
+            const discountPercentage = ((originalPrice - discountedPrice) / originalPrice) * 100;
             if (discountPercentage < 20) {
                 throw new Error('Discount must be at least 20%');
             }
@@ -113,28 +160,72 @@ const validateMeal = [
         }),
     
     body('quantityAvailable')
-        .isInt({ min: 1, max: 100 })
-        .withMessage('Quantity available must be between 1 and 100'),
+        .notEmpty()
+        .withMessage('Quantity available is required')
+        .custom((value) => {
+            const num = parseInt(value, 10);
+            if (isNaN(num) || num <= 0) {
+                throw new Error('Quantity available must be a valid positive integer');
+            }
+            return true;
+        })
+        .custom((value) => {
+            const num = parseInt(value, 10);
+            if (num < 1 || num > 1000) {
+                throw new Error('Quantity available must be between 1 and 1000');
+            }
+            return true;
+        }),
     
     body('cuisineType')
-        .optional()
+        .optional({ nullable: true, checkFalsy: true })
         .isIn(['african', 'american', 'asian', 'european', 'indian', 'mediterranean', 'mexican', 'mixed'])
         .withMessage('Invalid cuisine type'),
     
     body('mealType')
-        .optional()
+        .optional({ nullable: true, checkFalsy: true })
         .isIn(['breakfast', 'lunch', 'dinner', 'snack', 'dessert'])
         .withMessage('Invalid meal type'),
     
     body('dietaryRestrictions')
-        .optional()
-        .isJSON()
-        .withMessage('Dietary restrictions must be valid JSON array'),
+        .optional({ nullable: true, checkFalsy: true })
+        .custom((value) => {
+            if (!value || value === '') return true;
+            // Allow both JSON string and array
+            if (typeof value === 'string') {
+                try {
+                    JSON.parse(value);
+                    return true;
+                } catch {
+                    return false;
+                }
+            }
+            return Array.isArray(value);
+        })
+        .withMessage('Dietary restrictions must be a valid JSON array or array'),
     
     body('allergens')
-        .optional()
-        .isJSON()
-        .withMessage('Allergens must be valid JSON array'),
+        .optional({ nullable: true, checkFalsy: true })
+        .custom((value) => {
+            if (!value || value === '') return true;
+            // Allow both JSON string and array
+            if (typeof value === 'string') {
+                try {
+                    JSON.parse(value);
+                    return true;
+                } catch {
+                    return false;
+                }
+            }
+            return Array.isArray(value);
+        })
+        .withMessage('Allergens must be a valid JSON array or array'),
+    
+    body('pickupOptions')
+        .optional({ nullable: true, checkFalsy: true }),
+    
+    body('pickupTimes')
+        .optional({ nullable: true, checkFalsy: true }),
     
     validateRequest
 ];

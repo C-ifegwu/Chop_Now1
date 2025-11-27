@@ -109,8 +109,45 @@ router.post('/', authenticateToken, authorizeVendor, (req, res, next) => {
     });
 }, validateMeal, async (req, res) => {
     try {
-        const { name, description, originalPrice, discountedPrice, quantityAvailable, 
-                cuisineType, pickupOptions, pickupTimes, allergens } = req.body;
+        // Parse and convert values from form data (multer sends everything as strings)
+        const name = req.body.name?.trim();
+        const description = req.body.description?.trim() || null;
+        const originalPrice = parseFloat(req.body.originalPrice);
+        const discountedPrice = parseFloat(req.body.discountedPrice);
+        const quantityAvailable = parseInt(req.body.quantityAvailable, 10);
+        const cuisineType = req.body.cuisineType || null;
+        const pickupOptions = req.body.pickupOptions || null;
+        const pickupTimes = req.body.pickupTimes || null;
+        
+        // Parse allergens if it's a JSON string
+        let allergens = req.body.allergens || null;
+        if (allergens && typeof allergens === 'string') {
+            try {
+                allergens = JSON.parse(allergens);
+            } catch (e) {
+                // If it's not valid JSON, treat as null
+                allergens = null;
+            }
+        }
+
+        // Validate parsed values
+        if (isNaN(originalPrice) || originalPrice <= 0) {
+            return res.status(400).json({ 
+                message: 'Invalid original price' 
+            });
+        }
+        
+        if (isNaN(discountedPrice) || discountedPrice <= 0) {
+            return res.status(400).json({ 
+                message: 'Invalid discounted price' 
+            });
+        }
+        
+        if (isNaN(quantityAvailable) || quantityAvailable <= 0) {
+            return res.status(400).json({ 
+                message: 'Invalid quantity available' 
+            });
+        }
 
         // Business rule: discount must be at least 20%
         const discount = ((originalPrice - discountedPrice) / originalPrice) * 100;
@@ -123,13 +160,16 @@ router.post('/', authenticateToken, authorizeVendor, (req, res, next) => {
         const vendorId = req.user.userId;
         const imageUrl = req.file ? `/uploads/${req.file.filename}` : null;
 
+        // Convert allergens to JSON string for database storage
+        const allergensJson = allergens ? JSON.stringify(allergens) : null;
+
         const result = await db.run(
             `INSERT INTO meals (vendor_id, name, description, original_price, discounted_price,
                                quantity_available, cuisine_type, pickup_options, pickup_times,
                                allergens, image_url, is_available)
              VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 1)`,
             [vendorId, name, description, originalPrice, discountedPrice, quantityAvailable,
-             cuisineType, pickupOptions, pickupTimes, allergens, imageUrl]
+             cuisineType, pickupOptions, pickupTimes, allergensJson, imageUrl]
         );
 
         res.status(201).json({
