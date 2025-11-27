@@ -15,8 +15,14 @@ const notificationRoutes = require('./routes/notifications');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// Middleware
-app.use(cors());
+// CORS configuration for production
+const corsOptions = {
+    origin: process.env.FRONTEND_URL || 'http://localhost:3000', // Allow specific origin or default to localhost
+    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
+    credentials: true,
+    optionsSuccessStatus: 204
+};
+app.use(cors(corsOptions));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
@@ -26,7 +32,7 @@ app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
 // Serve frontend static files
 app.use(express.static(path.join(__dirname, '../frontend')));
 
-// Routes
+// API Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/meals', mealRoutes);
 app.use('/api/orders', orderRoutes);
@@ -38,9 +44,9 @@ app.get('/api/health', (req, res) => {
     res.json({ status: 'OK', message: 'ChopNow API is running' });
 });
 
-// 404 handler for undefined routes
-app.use((req, res, next) => {
-    res.status(404).json({ message: 'Not Found' });
+// Catch-all to serve index.html for any non-API routes
+app.get('*', (req, res) => {
+    res.sendFile(path.join(__dirname, '../frontend', 'index.html'));
 });
 
 // Error handling middleware

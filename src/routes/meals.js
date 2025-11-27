@@ -16,32 +16,33 @@ router.get('/', async (req, res) => {
                      JOIN users u ON m.vendor_id = u.id
                      WHERE m.is_available = 1 AND m.quantity_available > 0`;
         
+        let paramIndex = 1;
         const params = [];
 
         if (cuisine) {
-            query += ' AND m.cuisine_type = ?';
+            query += ` AND m.cuisine_type = $${paramIndex++}`;
             params.push(cuisine);
         }
 
         if (minPrice) {
-            query += ' AND m.discounted_price >= ?';
+            query += ` AND m.discounted_price >= $${paramIndex++}`;
             params.push(minPrice);
         }
 
         if (maxPrice) {
-            query += ' AND m.discounted_price <= ?';
+            query += ` AND m.discounted_price <= $${paramIndex++}`;
             params.push(maxPrice);
         }
 
         if (search) {
-            query += ' AND (m.name LIKE ? OR m.description LIKE ?)';
+            query += ` AND (m.name ILIKE $${paramIndex++} OR m.description ILIKE $${paramIndex++})`; // ILIKE for case-insensitive
             params.push(`%${search}%`, `%${search}%`);
         }
 
         query += ' ORDER BY m.created_at DESC';
 
-        const meals = await db.all(query, params);
-        res.json(meals);
+        const mealsResult = await db.query(query, params);
+        res.json(mealsResult.rows);
     } catch (error) {
         console.error('Get meals error:', error);
         res.status(500).json({ message: 'Failed to fetch meals', error: error.message });
@@ -51,15 +52,17 @@ router.get('/', async (req, res) => {
 // Get single meal by ID
 router.get('/:id', async (req, res) => {
     try {
-        const meal = await db.get(
+        const mealResult = await db.query(
             `SELECT m.*, u.business_name as vendor_name, u.address as vendor_address, u.latitude, u.longitude,
                     AVG(r.rating) as average_rating, COUNT(r.id) as review_count
              FROM meals m
              JOIN users u ON m.vendor_id = u.id
              LEFT JOIN reviews r ON m.id = r.meal_id
-             WHERE m.id = ?`,
+             WHERE m.id = $1
+             GROUP BY m.id, u.business_name, u.address, u.latitude, u.longitude`, // Added GROUP BY for aggregate functions
             [req.params.id]
         );
+        const meal = mealResult.rows[0];
 
         if (!meal) {
             return res.status(404).json({ message: 'Meal not found' });
@@ -89,18 +92,18 @@ router.post('/', authenticateToken, authorizeVendor, upload.single('image'), val
         const vendorId = req.user.userId;
         const imageUrl = req.file ? `/uploads/${req.file.filename}` : null;
 
-        const result = await db.run(
+        const result = await db.query(
             `INSERT INTO meals (vendor_id, name, description, original_price, discounted_price,
                                quantity_available, cuisine_type, pickup_options, pickup_times,
-                               allergens, image_url, is_available, created_at)
-             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 1, datetime('now'))`,
+                               allergens, image_url, is_available)
+             VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, TRUE) RETURNING id`,
             [vendorId, name, description, originalPrice, discountedPrice, quantityAvailable,
              cuisineType, pickupOptions, pickupTimes, allergens, imageUrl]
         );
 
         res.status(201).json({
             message: 'Meal listing created successfully',
-            mealId: result.lastID,
+            mealId: result.rows[0].id,
             imageUrl: imageUrl
         });
     } catch (error) {
@@ -116,19 +119,19 @@ router.put('/:id', authenticateToken, authorizeVendor, validate(mealSchema), asy
         const vendorId = req.user.userId;
 
         // Verify meal belongs to vendor
-        const meal = await db.get('SELECT * FROM meals WHERE id = ? AND vendor_id = ?', [mealId, vendorId]);
-        if (!meal) {
+        const mealResult = await db.query('SELECT * FROM meals WHERE id = $1 AND vendor_id = $2', [mealId, vendorId]);
+        if (mealResult.rows.length === 0) {
             return res.status(404).json({ message: 'Meal not found or unauthorized' });
         }
 
         const { name, description, originalPrice, discountedPrice, quantityAvailable,
                 cuisineType, pickupOptions, pickupTimes, allergens, isAvailable } = req.body;
 
-        await db.run(
-            `UPDATE meals SET name = ?, description = ?, original_price = ?, discounted_price = ?,
-                             quantity_available = ?, cuisine_type = ?, pickup_options = ?,
-                             pickup_times = ?, allergens = ?, is_available = ?
-             WHERE id = ? AND vendor_id = ?`,
+        await db.query(
+            `UPDATE meals SET name = $1, description = $2, original_price = $3, discounted_price = $4,
+                             quantity_available = $5, cuisine_type = $6, pickup_options = $7,
+                             pickup_times = $8, allergens = $9, is_available = $10, updated_at = NOW()
+             WHERE id = $11 AND vendor_id = $12`,
             [name, description, originalPrice, discountedPrice, quantityAvailable,
              cuisineType, pickupOptions, pickupTimes, allergens, isAvailable, mealId, vendorId]
         );
@@ -146,9 +149,9 @@ router.delete('/:id', authenticateToken, authorizeVendor, async (req, res) => {
         const mealId = req.params.id;
         const vendorId = req.user.userId;
 
-        const result = await db.run('DELETE FROM meals WHERE id = ? AND vendor_id = ?', [mealId, vendorId]);
+        const result = await db.query('DELETE FROM meals WHERE id = $1 AND vendor_id = $2', [mealId, vendorId]);
         
-        if (result.changes === 0) {
+        if (result.rowCount === 0) {
             return res.status(404).json({ message: 'Meal not found or unauthorized' });
         }
 
@@ -163,17 +166,18 @@ router.delete('/:id', authenticateToken, authorizeVendor, async (req, res) => {
 router.get('/vendor/my-meals', authenticateToken, authorizeVendor, async (req, res) => {
     try {
         const vendorId = req.user.userId;
-        const meals = await db.all(
+        const mealsResult = await db.query(
             `SELECT m.*, COUNT(o.id) as total_orders
              FROM meals m
-             LEFT JOIN orders o ON m.id = o.meal_id
-             WHERE m.vendor_id = ?
+             LEFT JOIN order_items oi ON m.id = oi.meal_id
+             LEFT JOIN orders o ON oi.order_id = o.id
+             WHERE m.vendor_id = $1
              GROUP BY m.id
              ORDER BY m.created_at DESC`,
             [vendorId]
         );
 
-        res.json(meals);
+        res.json(mealsResult.rows);
     } catch (error) {
         console.error('Get vendor meals error:', error);
         res.status(500).json({ message: 'Failed to fetch vendor meals', error: error.message });

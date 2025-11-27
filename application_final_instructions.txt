@@ -1,0 +1,24 @@
+The temporary guidance files have been removed.
+
+The application is now set up with the backend serving the frontend and the frontend communicating with the backend via its API.
+
+**Here's how everything is connected:**
+
+*   **API Endpoints:** The frontend JavaScript code makes `fetch` requests to `http://localhost:3000/api/...` (e.g., `/api/auth/register`, `/api/meals`).
+*   **Static File Serving:** The backend Express server is configured to serve all static files from the `frontend/` directory. This means when you navigate to `http://localhost:3000/index.html` (or `http://localhost:3001/index.html` if the port was changed), Express serves those HTML, CSS, and JavaScript files directly.
+*   **Catch-all Route:** There is a catch-all route `app.get('*', ...)` in `src/server.js` that serves `index.html` for any non-API routes, which helps with client-side routing and direct access to sub-pages.
+*   **Authentication:** JSON Web Tokens (JWT) are used for user authentication. The frontend stores these tokens in `localStorage` and sends them with authenticated API requests.
+
+**To access and interact with the fully connected application:**
+
+1.  **Ensure the backend is running:** If you are seeing this message, it is likely that the previous `npm start` command is still running in another terminal window. If not, from the project root directory, run:
+    ```bash
+    npm start
+    ```
+    Wait until you see messages like `ChopNow server is running on port XXXX` and `Connected to SQLite database`.
+
+2.  **Open in your web browser:** Once the backend is confirmed to be running on port `3000` (or `3001` if you changed it in `.env`), open your web browser and navigate to:
+    *   `http://localhost:3000/index.html` (or `http://localhost:3001/index.html` if your port was changed)
+    *   You can also directly access specific pages like `http://localhost:3000/login.html` or `http://localhost:3000/meals.html`.
+
+The development, connection, and cleanup for the application are now complete.

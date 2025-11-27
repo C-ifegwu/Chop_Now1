@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ChopNow - Browse Meals</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        /* Specific styles for meals page */
+        .meals-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .meal-card {
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            text-decoration: none;
+            color: inherit;
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.2s ease-in-out;
+        }
+
+        .meal-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .meal-card img {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+            border-bottom: 1px solid #eee;
+        }
+
+        .meal-card-content {
+            padding: 15px;
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .meal-card h3 {
+            margin-top: 0;
+            margin-bottom: 10px;
+            color: #333;
+            font-size: 1.3rem;
+        }
+
+        .meal-card p {
+            font-size: 0.9em;
+            color: #666;
+            margin-bottom: 5px;
+        }
+
+        .meal-card-price {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            margin-top: 10px;
+        }
+
+        .meal-card .original-price {
+            text-decoration: line-through;
+            color: #999;
+            font-size: 0.9em;
+        }
+
+        .meal-card .discounted-price {
+            color: #4CAF50;
+            font-size: 1.4em;
+            font-weight: bold;
+        }
+
+        .meal-card button {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.9em;
+            margin-top: 10px;
+            transition: background-color 0.2s;
+        }
+
+        .meal-card button:hover {
+            background-color: #0056b3;
+        }
+
+        .filters-section {
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            align-items: flex-end;
+        }
+
+        .filters-section .form-group {
+            margin-bottom: 0;
+        }
+
+        .filters-section .form-group label {
+            font-weight: normal;
+            margin-bottom: 5px;
+        }
+
+        .filters-section .form-group input,
+        .filters-section .form-group select {
+            padding: 8px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            width: auto; /* Adjust width as needed for inline forms */
+            min-width: 120px;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>ChopNow</h1>
+        <nav>
+            <ul>
+                <li><a href="index.html">Home</a></li>
+                <li><a href="meals.html">Meals</a></li>
+                <li id="auth-links">
+                    <a href="login.html">Login</a>
+                    <a href="register.html">Register</a>
+                </li>
+                <li><a href="cart.html" id="cart-link" style="display:none;">Cart (<span id="cart-count">0</span>)</a></li>
+                <li><a href="#" id="dashboard-link" style="display:none;">Dashboard</a></li>
+                <li><a href="#" id="logout-button" style="display:none;">Logout</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <main>
+        <section class="filters-section">
+            <h3>Filter Meals</h3>
+            <form id="filter-form">
+                <div class="form-group">
+                    <label for="cuisine">Cuisine:</label>
+                    <input type="text" id="cuisine" name="cuisine" placeholder="e.g., Italian">
+                </div>
+                <div class="form-group">
+                    <label for="minPrice">Min Price:</label>
+                    <input type="number" id="minPrice" name="minPrice" step="0.01">
+                </div>
+                <div class="form-group">
+                    <label for="maxPrice">Max Price:</label>
+                    <input type="number" id="maxPrice" name="maxPrice" step="0.01">
+                </div>
+                <div class="form-group">
+                    <label for="search">Search:</label>
+                    <input type="text" id="search" name="search" placeholder="e.g., pasta, chicken">
+                </div>
+                <button type="submit" class="btn-primary">Apply Filters</button>
+                <button type="button" id="clear-filters" class="btn-secondary">Clear Filters</button>
+            </form>
+            <p id="filter-message" class="message-area"></p>
+        </section>
+
+        <section>
+            <h2>Available Meals</h2>
+            <div id="meals-list-container" class="meals-grid">
+                <p>Loading meals...</p>
+                <!-- Meal cards will be dynamically inserted here -->
+            </div>
+            <p id="meals-message" class="message-area"></p>
+        </section>
+    </main>
+
+    <footer>
+        <p>&copy; 2025 ChopNow. All rights reserved.</p>
+    </footer>
+
+    <script src="script.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const token = localStorage.getItem('token');
+            const userType = localStorage.getItem('userType');
+            const mealsListContainer = document.getElementById('meals-list-container');
+            const mealsMessage = document.getElementById('meals-message');
+            const filterForm = document.getElementById('filter-form');
+            const clearFiltersButton = document.getElementById('clear-filters');
+            const cartCountSpan = document.getElementById('cart-count');
+            const authLinks = document.getElementById('auth-links');
+            const dashboardLink = document.getElementById('dashboard-link');
+
+            // --- Authentication and Navigation ---
+            if (token) {
+                authLinks.style.display = 'none'; // Hide login/register
+                logoutButton.style.display = 'inline'; // Show logout
+
+                if (userType === 'vendor') {
+                    dashboardLink.href = 'vendor-dashboard.html';
+                } else { // consumer
+                    dashboardLink.href = 'consumer-dashboard.html';
+                    cartLink.style.display = 'inline'; // Show cart for consumers
+                }
+                dashboardLink.style.display = 'inline'; // Show dashboard
+            } else {
+                authLinks.style.display = 'block'; // Show login/register
+                logoutButton.style.display = 'none'; // Hide logout
+                dashboardLink.style.display = 'none'; // Hide dashboard
+                cartLink.style.display = 'none'; // Hide cart for guests
+            }
+
+            // --- Logout Functionality ---
+            logoutButton.addEventListener('click', (event) => {
+                event.preventDefault();
+                localStorage.removeItem('token');
+                localStorage.removeItem('userType');
+                localStorage.removeItem('userId');
+                window.location.href = 'login.html';
+            });
+
+            // --- Fetch and Display Meals ---
+            async function fetchMeals(filters = {}) {
+                mealsListContainer.innerHTML = '<p>Loading meals...</p>';
+                mealsMessage.textContent = '';
+
+                const queryParams = new URLSearchParams(filters).toString();
+                try {
+                    const response = await fetch(`http://localhost:3000/api/meals?${queryParams}`);
+                    const data = await response.json();
+
+                    if (response.ok) {
+                        mealsListContainer.innerHTML = ''; // Clear existing
+                        if (data.length > 0) {
+                            data.forEach(meal => {
+                                const mealCard = document.createElement('a');
+                                mealCard.href = `meal-details.html?id=${meal.id}`;
+                                mealCard.classList.add('meal-card');
+                                mealCard.innerHTML = `
+                                    <img src="${meal.image_url || 'https://via.placeholder.com/200x200?text=No+Image'}" alt="${meal.name}">
+                                    <div class="meal-card-content">
+                                        <div>
+                                            <h3>${meal.name}</h3>
+                                            <p>${meal.description.substring(0, 70)}...</p>
+                                            <p>Cuisine: ${meal.cuisine_type || 'N/A'}</p>
+                                            <p>Vendor: ${meal.vendor_name}</p>
+                                        </div>
+                                        <div class="meal-card-price">
+                                            <span class="original-price">$${meal.original_price.toFixed(2)}</span>
+                                            <span class="discounted-price">$${meal.discounted_price.toFixed(2)}</span>
+                                        </div>
+                                        <button>View Details</button>
+                                    </div>
+                                `;
+                                mealsListContainer.appendChild(mealCard);
+                            });
+                        } else {
+                            mealsListContainer.innerHTML = '<p>No meals found matching your criteria.</p>';
+                        }
+                    } else {
+                        mealsMessage.textContent = data.message || 'Failed to fetch meals.';
+                        mealsMessage.style.color = 'red';
+                    }
+                } catch (error) {
+                    console.error('Error fetching meals:', error);
+                    mealsMessage.textContent = 'An error occurred while fetching meals.';
+                    mealsMessage.style.color = 'red';
+                }
+            }
+
+            // --- Filter Form Submission ---
+            filterForm.addEventListener('submit', (event) => {
+                event.preventDefault();
+                const filters = {
+                    cuisine: document.getElementById('cuisine').value,
+                    minPrice: document.getElementById('minPrice').value,
+                    maxPrice: document.getElementById('maxPrice').value,
+                    search: document.getElementById('search').value
+                };
+                // Remove empty filters
+                Object.keys(filters).forEach(key => filters[key] === '' && delete filters[key]);
+                fetchMeals(filters);
+            });
+
+            // --- Clear Filters ---
+            clearFiltersButton.addEventListener('click', () => {
+                filterForm.reset();
+                fetchMeals(); // Fetch all meals again
+            });
+
+            // --- Update Cart Count (Placeholder) ---
+            function updateCartCount() {
+                // This would typically involve reading from localStorage or a global state
+                // For now, it's a placeholder. A real cart would have items stored.
+                const cartItems = JSON.parse(localStorage.getItem('cartItems') || '[]');
+                cartCountSpan.textContent = cartItems.length;
+            }
+
+            // Initial load
+            fetchMeals();
+            updateCartCount();
+        });
+    </script>
+</body>
+</html>

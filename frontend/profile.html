@@ -1,0 +1,475 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ChopNow - User Profile</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        /* Specific styles for profile page */
+        .profile-container {
+            margin-top: 20px;
+            background-color: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .profile-container h2 {
+            color: #4CAF50;
+            margin-top: 0;
+            border-bottom: 2px solid #eee;
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+
+        .form-group input[type="text"],
+        .form-group input[type="email"],
+        .form-group input[type="tel"] {
+            width: calc(100% - 20px);
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+
+        .btn-primary {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 1em;
+        }
+        .btn-primary:hover {
+            background-color: #45a049;
+        }
+
+        .reviews-section h3 {
+            color: #4CAF50;
+            margin-top: 30px;
+            border-bottom: 2px solid #eee;
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+        }
+
+        .order-card {
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            padding: 15px;
+            background-color: #f9f9f9;
+        }
+
+        .order-card h4 {
+            margin-top: 0;
+            color: #333;
+            font-size: 1.2em;
+        }
+
+        .order-items-list {
+            list-style: disc;
+            margin-left: 20px;
+            padding-left: 0;
+            font-size: 0.9em;
+            color: #666;
+        }
+        .review-button {
+            background-color: #ffc107;
+            color: white;
+            padding: 8px 15px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.9em;
+            margin-top: 10px;
+        }
+        .review-button:hover {
+            background-color: #e0a800;
+        }
+
+        /* Modal for review submission */
+        .modal {
+            display: none; /* Hidden by default */
+            position: fixed; /* Stay in place */
+            z-index: 1; /* Sit on top */
+            left: 0;
+            top: 0;
+            width: 100%; /* Full width */
+            height: 100%; /* Full height */
+            overflow: auto; /* Enable scroll if needed */
+            background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
+        }
+
+        .modal-content {
+            background-color: #fefefe;
+            margin: 15% auto; /* 15% from the top and centered */
+            padding: 20px;
+            border: 1px solid #888;
+            width: 80%; /* Could be more or less, depending on screen size */
+            max-width: 500px;
+            border-radius: 8px;
+            position: relative;
+        }
+
+        .close-button {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+        }
+
+        .close-button:hover,
+        .close-button:focus {
+            color: black;
+            text-decoration: none;
+            cursor: pointer;
+        }
+        .stars label {
+            font-size: 2em;
+            color: #ccc;
+            cursor: pointer;
+        }
+        .stars input[type="radio"] {
+            display: none;
+        }
+        .stars input[type="radio"]:checked ~ label {
+            color: #ff9800;
+        }
+        .stars label:hover,
+        .stars label:hover ~ label {
+            color: #ff9800;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>ChopNow</h1>
+        <nav>
+            <ul>
+                <li><a href="index.html">Home</a></li>
+                <li><a href="meals.html">Meals</a></li>
+                <li id="auth-links">
+                    <a href="login.html">Login</a>
+                    <a href="register.html">Register</a>
+                </li>
+                <li><a href="cart.html" id="cart-link" style="display:none;">Cart (<span id="cart-count">0</span>)</a></li>
+                <li><a href="#" id="dashboard-link" style="display:none;">Dashboard</a></li>
+                <li><a href="#" id="logout-button" style="display:none;">Logout</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <main>
+        <section class="profile-container">
+            <h2>Your Profile</h2>
+            <form id="profile-form">
+                <div class="form-group">
+                    <label for="email">Email:</label>
+                    <input type="email" id="email" name="email" disabled>
+                </div>
+                <div class="form-group" id="name-group">
+                    <label for="name">Name:</label>
+                    <input type="text" id="name" name="name">
+                </div>
+                <div class="form-group" id="business-name-group">
+                    <label for="business-name">Business Name:</label>
+                    <input type="text" id="business-name" name="businessName">
+                </div>
+                <div class="form-group">
+                    <label for="phone">Phone:</label>
+                    <input type="tel" id="phone" name="phone">
+                </div>
+                <div class="form-group">
+                    <label for="address">Address:</label>
+                    <input type="text" id="address" name="address">
+                </div>
+                <button type="submit" class="btn-primary">Update Profile</button>
+            </form>
+            <p id="profile-message" class="message-area"></p>
+        </section>
+
+        <section class="profile-container reviews-section" id="consumer-reviews-section" style="display:none;">
+            <h3>Completed Orders & Reviews</h3>
+            <div id="completed-orders-list">
+                <p>No completed orders found.</p>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <p>&copy; 2025 ChopNow. All rights reserved.</p>
+    </footer>
+
+    <!-- Review Modal -->
+    <div id="review-modal" class="modal">
+        <div class="modal-content">
+            <span class="close-button">&times;</span>
+            <h4>Submit Review for <span id="review-meal-name"></span></h4>
+            <form id="review-form">
+                <input type="hidden" id="review-meal-id">
+                <div class="form-group">
+                    <label>Rating:</label>
+                    <div class="stars">
+                        <input type="radio" id="star5" name="rating" value="5" /><label for="star5" title="5 stars">&#9733;</label>
+                        <input type="radio" id="star4" name="rating" value="4" /><label for="star4" title="4 stars">&#9733;</label>
+                        <input type="radio" id="star3" name="rating" value="3" /><label for="star3" title="3 stars">&#9733;</label>
+                        <input type="radio" id="star2" name="rating" value="2" /><label for="star2" title="2 stars">&#9733;</label>
+                        <input type="radio" id="star1" name="rating" value="1" /><label for="star1" title="1 star">&#9733;</label>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="review-comment">Comment:</label>
+                    <textarea id="review-comment" name="comment" rows="4"></textarea>
+                </div>
+                <button type="submit" class="btn-primary">Submit Review</button>
+            </form>
+            <p id="review-message" class="message-area"></p>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const token = localStorage.getItem('token');
+            const userType = localStorage.getItem('userType');
+            const userId = localStorage.getItem('userId');
+
+            if (!token) {
+                alert('Please log in to view your profile.');
+                window.location.href = 'login.html';
+                return;
+            }
+
+            const emailInput = document.getElementById('email');
+            const nameGroup = document.getElementById('name-group');
+            const nameInput = document.getElementById('name');
+            const businessNameGroup = document.getElementById('business-name-group');
+            const businessNameInput = document.getElementById('business-name');
+            const phoneInput = document.getElementById('phone');
+            const addressInput = document.getElementById('address');
+            const profileForm = document.getElementById('profile-form');
+            const profileMessage = document.getElementById('profile-message');
+            const consumerReviewsSection = document.getElementById('consumer-reviews-section');
+            const completedOrdersList = document.getElementById('completed-orders-list');
+
+            // Review Modal Elements
+            const reviewModal = document.getElementById('review-modal');
+            const closeButton = document.querySelector('.close-button');
+            const reviewMealName = document.getElementById('review-meal-name');
+            const reviewMealIdInput = document.getElementById('review-meal-id');
+            const reviewForm = document.getElementById('review-form');
+            const reviewComment = document.getElementById('review-comment');
+            const reviewMessage = document.getElementById('review-message');
+
+
+            // --- Fetch User Profile ---
+            async function fetchProfile() {
+                try {
+                    const response = await fetch('http://localhost:3000/api/auth/profile', {
+                        method: 'GET',
+                        headers: {
+                            'Authorization': `Bearer ${token}`
+                        }
+                    });
+                    const user = await response.json();
+
+                    if (response.ok) {
+                        emailInput.value = user.email;
+                        phoneInput.value = user.phone || '';
+                        addressInput.value = user.address || '';
+
+                        if (user.user_type === 'consumer') {
+                            nameGroup.style.display = 'block';
+                            nameInput.value = user.name || '';
+                            businessNameGroup.style.display = 'none';
+                            consumerReviewsSection.style.display = 'block';
+                            fetchCompletedOrdersForReview();
+                        } else { // vendor
+                            nameGroup.style.display = 'none';
+                            businessNameGroup.style.display = 'block';
+                            businessNameInput.value = user.business_name || '';
+                            consumerReviewsSection.style.display = 'none';
+                        }
+                    } else {
+                        profileMessage.textContent = user.message || 'Failed to fetch profile.';
+                        profileMessage.style.color = 'red';
+                    }
+                } catch (error) {
+                    console.error('Error fetching profile:', error);
+                    profileMessage.textContent = 'An error occurred while fetching profile.';
+                    profileMessage.style.color = 'red';
+                }
+            }
+
+            // --- Update Profile ---
+            profileForm.addEventListener('submit', async (event) => {
+                event.preventDefault();
+
+                let updateData = {
+                    phone: phoneInput.value,
+                    address: addressInput.value
+                };
+
+                if (userType === 'consumer') {
+                    updateData.name = nameInput.value;
+                } else {
+                    updateData.businessName = businessNameInput.value;
+                }
+
+                try {
+                    const response = await fetch('http://localhost:3000/api/auth/profile', {
+                        method: 'PUT',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${token}`
+                        },
+                        body: JSON.stringify(updateData)
+                    });
+
+                    const data = await response.json();
+
+                    if (response.ok) {
+                        profileMessage.textContent = data.message;
+                        profileMessage.style.color = 'green';
+                    } else {
+                        profileMessage.textContent = data.message || 'Failed to update profile.';
+                        profileMessage.style.color = 'red';
+                    }
+                } catch (error) {
+                    console.error('Error updating profile:', error);
+                    profileMessage.textContent = 'An error occurred while updating profile.';
+                    profileMessage.style.color = 'red';
+                }
+            });
+
+            // --- Fetch Completed Orders for Review (Consumer Only) ---
+            async function fetchCompletedOrdersForReview() {
+                completedOrdersList.innerHTML = '<p>Loading completed orders...</p>';
+                try {
+                    const response = await fetch('http://localhost:3000/api/orders/consumer', {
+                        method: 'GET',
+                        headers: {
+                            'Authorization': `Bearer ${token}`
+                        }
+                    });
+                    const orders = await response.json();
+
+                    if (response.ok && orders.length > 0) {
+                        const completedOrders = orders.filter(order => order.status === 'completed');
+                        if (completedOrders.length > 0) {
+                            completedOrdersList.innerHTML = '';
+                            completedOrders.forEach(order => {
+                                order.items.forEach(item => { // Create a review card for each meal in a completed order
+                                    const orderCard = document.createElement('div');
+                                    orderCard.classList.add('order-card');
+                                    orderCard.innerHTML = `
+                                        <h4>${item.meal_name} from ${order.vendor_name}</h4>
+                                        <p>Order Date: ${new Date(order.created_at).toLocaleDateString()}</p>
+                                        <button class="review-button" data-meal-id="${item.meal_id}" data-meal-name="${item.meal_name}">Leave a Review</button>
+                                    `;
+                                    completedOrdersList.appendChild(orderCard);
+                                });
+                            });
+                        } else {
+                            completedOrdersList.innerHTML = '<p>No completed orders to review.</p>';
+                        }
+                    } else if (response.ok && orders.length === 0) {
+                        completedOrdersList.innerHTML = '<p>No completed orders found.</p>';
+                    }
+                     else {
+                        completedOrdersList.innerHTML = `<p style="color:red;">Failed to load completed orders: ${orders.message || 'Error'}</p>`;
+                    }
+                } catch (error) {
+                    console.error('Error fetching completed orders:', error);
+                    completedOrdersList.innerHTML = `<p style="color:red;">An error occurred while loading completed orders.</p>`;
+                }
+            }
+
+            // --- Review Modal Handling ---
+            completedOrdersList.addEventListener('click', (event) => {
+                if (event.target.classList.contains('review-button')) {
+                    const mealId = event.target.dataset.mealId;
+                    const mealName = event.target.dataset.mealName;
+                    reviewMealIdInput.value = mealId;
+                    reviewMealName.textContent = mealName;
+                    reviewComment.value = '';
+                    reviewMessage.textContent = '';
+                    // Reset star ratings
+                    document.querySelectorAll('input[name="rating"]').forEach(radio => radio.checked = false);
+                    reviewModal.style.display = 'block';
+                }
+            });
+
+            closeButton.addEventListener('click', () => {
+                reviewModal.style.display = 'none';
+            });
+
+            window.addEventListener('click', (event) => {
+                if (event.target === reviewModal) {
+                    reviewModal.style.display = 'none';
+                }
+            });
+
+            // --- Submit Review ---
+            reviewForm.addEventListener('submit', async (event) => {
+                event.preventDefault();
+
+                const mealId = reviewMealIdInput.value;
+                const rating = document.querySelector('input[name="rating"]:checked');
+                const comment = reviewComment.value;
+
+                if (!rating) {
+                    reviewMessage.textContent = 'Please select a star rating.';
+                    reviewMessage.style.color = 'red';
+                    return;
+                }
+
+                try {
+                    const response = await fetch('http://localhost:3000/api/reviews', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${token}`
+                        },
+                        body: JSON.stringify({ mealId: parseInt(mealId), rating: parseInt(rating.value), comment })
+                    });
+                    const data = await response.json();
+
+                    if (response.ok) {
+                        reviewMessage.textContent = data.message;
+                        reviewMessage.style.color = 'green';
+                        reviewForm.reset();
+                        setTimeout(() => {
+                            reviewModal.style.display = 'none';
+                            fetchCompletedOrdersForReview(); // Refresh completed orders list
+                        }, 1500);
+                    } else {
+                        reviewMessage.textContent = data.message || 'Failed to submit review.';
+                        reviewMessage.style.color = 'red';
+                    }
+                } catch (error) {
+                    console.error('Error submitting review:', error);
+                    reviewMessage.textContent = 'An error occurred while submitting your review.';
+                    reviewMessage.style.color = 'red';
+                }
+            });
+
+
+            // Initial fetch
+            fetchProfile();
+        });
+    </script>
+</body>
+</html>

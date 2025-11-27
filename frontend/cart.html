@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ChopNow - Your Cart</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        /* Specific styles for cart page */
+        .cart-container {
+            margin-top: 20px;
+            background-color: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .cart-item {
+            display: flex;
+            align-items: center;
+            border-bottom: 1px solid #eee;
+            padding: 15px 0;
+        }
+
+        .cart-item:last-child {
+            border-bottom: none;
+        }
+
+        .cart-item-image img {
+            width: 80px;
+            height: 80px;
+            object-fit: cover;
+            border-radius: 4px;
+            margin-right: 20px;
+        }
+
+        .cart-item-details {
+            flex-grow: 1;
+        }
+
+        .cart-item-details h4 {
+            margin: 0 0 5px 0;
+            color: #333;
+        }
+
+        .cart-item-details p {
+            margin: 0;
+            color: #666;
+            font-size: 0.9em;
+        }
+
+        .cart-item-quantity, .cart-item-price, .cart-item-actions {
+            text-align: right;
+            margin-left: 20px;
+            min-width: 80px;
+        }
+
+        .cart-item-quantity input[type="number"] {
+            width: 60px;
+            padding: 5px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+
+        .cart-item-actions button {
+            background-color: #dc3545;
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.85em;
+        }
+        .cart-item-actions button:hover {
+            background-color: #c82333;
+        }
+
+        .cart-summary {
+            border-top: 2px solid #eee;
+            padding-top: 20px;
+            margin-top: 20px;
+            text-align: right;
+        }
+
+        .cart-summary p {
+            font-size: 1.1em;
+            margin: 5px 0;
+        }
+
+        .cart-summary .total {
+            font-size: 1.5em;
+            font-weight: bold;
+            color: #4CAF50;
+        }
+
+        .checkout-btn {
+            background-color: #28a745;
+            color: white;
+            padding: 12px 25px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 1.1em;
+            margin-top: 20px;
+        }
+        .checkout-btn:hover {
+            background-color: #218838;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>ChopNow</h1>
+        <nav>
+            <ul>
+                <li><a href="index.html">Home</a></li>
+                <li><a href="meals.html">Meals</a></li>
+                <li id="auth-links">
+                    <a href="login.html">Login</a>
+                    <a href="register.html">Register</a>
+                </li>
+                <li><a href="cart.html" id="cart-link" style="display:none;">Cart (<span id="cart-count">0</span>)</a></li>
+                <li><a href="#" id="dashboard-link" style="display:none;">Dashboard</a></li>
+                <li><a href="#" id="logout-button" style="display:none;">Logout</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <main>
+        <section class="cart-container">
+            <h2>Your Shopping Cart</h2>
+            <div id="cart-items-list">
+                <p>Your cart is empty.</p>
+                <!-- Cart items will be dynamically inserted here -->
+            </div>
+
+            <div class="cart-summary">
+                <p>Subtotal: $<span id="cart-subtotal">0.00</span></p>
+                <p class="total">Total: $<span id="cart-total">0.00</span></p>
+                <button id="checkout-button" class="checkout-btn">Proceed to Checkout</button>
+            </div>
+            <p id="cart-message" class="message-area"></p>
+        </section>
+    </main>
+
+    <footer>
+        <p>&copy; 2025 ChopNow. All rights reserved.</p>
+    </footer>
+
+    <script src="script.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            if (!token) { // Only check if token exists here, specific userType check below
+                alert('Please log in to view your cart.');
+                window.location.href = 'login.html';
+                return;
+            }
+
+            const cartItemsList = document.getElementById('cart-items-list');
+            const cartSubtotalSpan = document.getElementById('cart-subtotal');
+            const cartTotalSpan = document.getElementById('cart-total');
+            const checkoutButton = document.getElementById('checkout-button');
+            const cartMessage = document.getElementById('cart-message');
+
+            let cartItems = JSON.parse(localStorage.getItem('cartItems') || '[]');
+
+            function renderCart() {
+                cartItemsList.innerHTML = '';
+                let subtotal = 0;
+
+                if (cartItems.length === 0) {
+                    cartItemsList.innerHTML = '<p>Your cart is empty.</p>';
+                    cartSubtotalSpan.textContent = '0.00';
+                    cartTotalSpan.textContent = '0.00';
+                    checkoutButton.disabled = true;
+                    return;
+                }
+
+                checkoutButton.disabled = false;
+
+                // Group items by vendor
+                const groupedByVendor = cartItems.reduce((acc, item) => {
+                    const vendor = item.vendorName || 'Unknown Vendor';
+                    if (!acc[vendor]) {
+                        acc[vendor] = [];
+                    }
+                    acc[vendor].push(item);
+                    return acc;
+                }, {});
+
+                for (const vendorName in groupedByVendor) {
+                    const vendorGroupDiv = document.createElement('div');
+                    vendorGroupDiv.innerHTML = `<h3>${vendorName}</h3>`;
+                    
+                    groupedByVendor[vendorName].forEach(item => {
+                        const itemTotal = item.price * item.quantity;
+                        subtotal += itemTotal;
+
+                        const cartItemDiv = document.createElement('div');
+                        cartItemDiv.classList.add('cart-item');
+                        cartItemDiv.dataset.mealId = item.mealId;
+                        // Placeholder image as actual image_url not stored in cartItems from meal-details
+                        const imageUrl = 'https://via.placeholder.com/80x80?text=Meal'; 
+                        cartItemDiv.innerHTML = `
+                            <div class="cart-item-image">
+                                <img src="${imageUrl}" alt="${item.name}">
+                            </div>
+                            <div class="cart-item-details">
+                                <h4>${item.name}</h4>
+                                <p>Price: $${item.price.toFixed(2)}</p>
+                            </div>
+                            <div class="cart-item-quantity">
+                                <input type="number" value="${item.quantity}" min="1" data-meal-id="${item.mealId}">
+                            </div>
+                            <div class="cart-item-price">
+                                $${itemTotal.toFixed(2)}
+                            </div>
+                            <div class="cart-item-actions">
+                                <button class="remove-item" data-meal-id="${item.mealId}">Remove</button>
+                            </div>
+                        `;
+                        vendorGroupDiv.appendChild(cartItemDiv);
+                    });
+                    cartItemsList.appendChild(vendorGroupDiv);
+                }
+
+                cartSubtotalSpan.textContent = subtotal.toFixed(2);
+                cartTotalSpan.textContent = subtotal.toFixed(2); // For now, total is same as subtotal (no tax/shipping)
+
+                updateCartCount();
+            }
+
+            // --- Update Quantity ---
+            cartItemsList.addEventListener('change', (event) => {
+                if (event.target.tagName === 'INPUT' && event.target.type === 'number') {
+                    const mealId = event.target.dataset.mealId;
+                    const newQuantity = parseInt(event.target.value);
+
+                    const itemIndex = cartItems.findIndex(item => item.mealId === mealId);
+                    if (itemIndex > -1 && newQuantity > 0) {
+                        cartItems[itemIndex].quantity = newQuantity;
+                        localStorage.setItem('cartItems', JSON.stringify(cartItems));
+                        renderCart();
+                    } else if (newQuantity <= 0) {
+                        // Optionally remove item if quantity drops to 0 or less
+                        cartItems = cartItems.filter(item => item.mealId !== mealId);
+                        localStorage.setItem('cartItems', JSON.stringify(cartItems));
+                        renderCart();
+                    }
+                }
+            });
+
+            // --- Remove Item ---
+            cartItemsList.addEventListener('click', (event) => {
+                if (event.target.classList.contains('remove-item')) {
+                    const mealId = event.target.dataset.mealId;
+                    cartItems = cartItems.filter(item => item.mealId !== mealId);
+                    localStorage.setItem('cartItems', JSON.stringify(cartItems));
+                    renderCart();
+                }
+            });
+
+            // --- Checkout Functionality ---
+            checkoutButton.addEventListener('click', async () => {
+                if (cartItems.length === 0) {
+                    cartMessage.textContent = 'Your cart is empty. Add items before checking out.';
+                    cartMessage.style.color = 'red';
+                    return;
+                }
+
+                // Group cart items by vendor for order creation
+                const ordersToCreate = {};
+                cartItems.forEach(item => {
+                    const vendorId = item.vendorId; // Use the actual vendorId now
+                    if (!ordersToCreate[vendorId]) {
+                        ordersToCreate[vendorId] = { vendor_id: vendorId, items: [] };
+                    }
+                    ordersToCreate[vendorId].items.push({
+                        meal_id: item.mealId,
+                        quantity: item.quantity
+                    });
+                });
+
+                cartMessage.textContent = 'Processing your order(s)...';
+                cartMessage.style.color = 'blue';
+
+                try {
+                    // Process each vendor's order separately
+                    for (const vendorId in ordersToCreate) {
+                        const orderData = ordersToCreate[vendorId];
+                        const response = await fetch('http://localhost:3000/api/orders', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'Authorization': `Bearer ${token}`
+                            },
+                            body: JSON.stringify(orderData)
+                        });
+
+                        const data = await response.json();
+
+                        if (!response.ok) {
+                            cartMessage.textContent = `Order for vendor ${vendorId} failed: ${data.message || 'Unknown error'}`;
+                            cartMessage.style.color = 'red';
+                            return; // Stop processing if one order fails
+                        }
+                    }
+                    
+                    cartMessage.textContent = 'Order(s) placed successfully!';
+                    cartMessage.style.color = 'green';
+                    localStorage.removeItem('cartItems'); // Clear cart
+                    cartItems = [];
+                    renderCart();
+
+                } catch (error) {
+                    console.error('Error during checkout:', error);
+                    cartMessage.textContent = 'An error occurred during checkout. Please try again later.';
+                    cartMessage.style.color = 'red';
+                }
+            });
+
+            // --- Update Cart Count (re-used from meals.html) ---
+            function updateCartCount() {
+                const currentCartItems = JSON.parse(localStorage.getItem('cartItems') || '[]');
+                cartCountSpan.textContent = currentCartItems.length;
+            }
+
+            // Initial render
+            renderCart();
+        });
+    </script>
+</body>
+</html>

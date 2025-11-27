@@ -4,10 +4,11 @@
   "description": "Backend API for ChopNow food rescue platform",
   "main": "src/server.js",
   "scripts": {
-    "start": "mkdir -p uploads && node src/server.js",
+    "start": "node src/server.js",
     "build": "echo 'No build step required' && exit 0",
     "dev": "nodemon src/server.js",
-    "test": "jest"
+    "test": "jest",
+    "db:init": "node database/seed.js"
   },
   "keywords": [
     "food-rescue",
@@ -28,7 +29,7 @@
     "joi": "^18.0.2",
     "jsonwebtoken": "^9.0.2",
     "multer": "^1.4.5-lts.1",
-    "sqlite3": "^5.1.6",
+    "sqlite3": "^5.1.7",
     "ws": "^8.18.3"
   },
   "devDependencies": {

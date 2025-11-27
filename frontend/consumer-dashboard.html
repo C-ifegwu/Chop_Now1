@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ChopNow - Consumer Dashboard</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        /* Specific styles for consumer dashboard */
+        .dashboard-container {
+            margin-top: 20px;
+            background-color: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .dashboard-container h2 {
+            color: #4CAF50;
+            margin-top: 0;
+            border-bottom: 2px solid #eee;
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+        }
+
+        .order-history-list {
+            list-style: none;
+            padding: 0;
+        }
+
+        .order-card {
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            padding: 15px;
+            background-color: #f9f9f9;
+        }
+
+        .order-card h3 {
+            margin-top: 0;
+            color: #333;
+            font-size: 1.4em;
+        }
+
+        .order-card p {
+            margin: 5px 0;
+            font-size: 0.95em;
+            color: #555;
+        }
+
+        .order-card .status {
+            font-weight: bold;
+            color: #007bff;
+        }
+        .order-card .status.completed { color: #28a745; }
+        .order-card .status.cancelled { color: #dc3545; }
+
+        .order-items-list {
+            list-style: disc;
+            margin-left: 20px;
+            padding-left: 0;
+            font-size: 0.9em;
+            color: #666;
+        }
+
+        .order-item {
+            margin-bottom: 3px;
+        }
+
+        .review-button {
+            background-color: #ffc107;
+            color: white;
+            padding: 8px 15px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.9em;
+            margin-top: 10px;
+        }
+        .review-button:hover {
+            background-color: #e0a800;
+        }
+        .cancel-button {
+            background-color: #dc3545;
+            color: white;
+            padding: 8px 15px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.9em;
+            margin-top: 10px;
+            margin-left: 10px;
+        }
+        .cancel-button:hover {
+            background-color: #c82333;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>ChopNow - Consumer Dashboard</h1>
+        <nav>
+            <ul>
+                <li><a href="index.html">Home</a></li>
+                <li><a href="meals.html">Meals</a></li>
+                <li id="auth-links">
+                    <a href="login.html">Login</a>
+                    <a href="register.html">Register</a>
+                </li>
+                <li><a href="cart.html" id="cart-link" style="display:none;">Cart (<span id="cart-count">0</span>)</a></li>
+                <li><a href="#" id="dashboard-link" style="display:none;">Dashboard</a></li>
+                <li><a href="#" id="logout-button" style="display:none;">Logout</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <main>
+        <section class="dashboard-container">
+            <h2>Your Orders</h2>
+            <div id="order-history">
+                <p>Loading order history...</p>
+                <!-- Order cards will be dynamically inserted here -->
+            </div>
+            <p id="order-history-message" class="message-area"></p>
+        </section>
+    </main>
+
+    <footer>
+        <p>&copy; 2025 ChopNow. All rights reserved.</p>
+    </footer>
+
+    <script src="script.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const orderHistoryDiv = document.getElementById('order-history');
+            const orderHistoryMessage = document.getElementById('order-history-message');
+
+            // --- Fetch and Display Order History ---
+            async function fetchOrderHistory() {
+                orderHistoryDiv.innerHTML = '<p>Loading order history...</p>';
+                orderHistoryMessage.textContent = '';
+
+                try {
+                    const response = await fetch('http://localhost:3000/api/orders/consumer', {
+                        method: 'GET',
+                        headers: {
+                            'Authorization': `Bearer ${token}`
+                        }
+                    });
+                    const data = await response.json();
+
+                    if (response.ok) {
+                        orderHistoryDiv.innerHTML = '';
+                        if (data.length > 0) {
+                            data.forEach(order => {
+                                const orderCard = document.createElement('div');
+                                orderCard.classList.add('order-card');
+                                orderCard.innerHTML = `
+                                    <h3>Order #${order.id} with ${order.vendor_name}</h3>
+                                    <p>Total: $${order.total_amount.toFixed(2)}</p>
+                                    <p>Status: <span class="status ${order.status}">${order.status.toUpperCase()}</span></p>
+                                    <p>Ordered On: ${new Date(order.created_at).toLocaleString()}</p>
+                                    <h4>Items:</h4>
+                                    <ul class="order-items-list">
+                                        ${order.items.map(item => `
+                                            <li class="order-item">
+                                                ${item.quantity}x ${item.meal_name} ($${item.price.toFixed(2)} each)
+                                            </li>
+                                        `).join('')}
+                                    </ul>
+                                    ${order.status === 'completed' ? `<button class="review-button" data-order-id="${order.id}">Leave Review</button>` : ''}
+                                    ${order.status === 'pending' ? `<button class="cancel-button" data-order-id="${order.id}">Cancel Order</button>` : ''}
+                                `;
+                                orderHistoryDiv.appendChild(orderCard);
+                            });
+                        } else {
+                            orderHistoryDiv.innerHTML = '<p>You have no past orders.</p>';
+                        }
+                    } else {
+                        orderHistoryMessage.textContent = data.message || 'Failed to fetch order history.';
+                        orderHistoryMessage.style.color = 'red';
+                    }
+                } catch (error) {
+                    console.error('Error fetching order history:', error);
+                    orderHistoryMessage.textContent = 'An error occurred while fetching order history.';
+                    orderHistoryMessage.style.color = 'red';
+                }
+            }
+
+            // --- Review Button Handler ---
+            orderHistoryDiv.addEventListener('click', (event) => {
+                if (event.target.classList.contains('review-button')) {
+                    const orderId = event.target.dataset.orderId;
+                    alert(`Leave review for order ${orderId} (Functionality to be implemented)`);
+                    // In a real app, this would open a review modal or navigate to a review page
+                } else if (event.target.classList.contains('cancel-button')) {
+                    const orderId = event.target.dataset.orderId;
+                    if (confirm(`Are you sure you want to cancel order #${orderId}?`)) {
+                        cancelOrder(orderId);
+                    }
+                }
+            });
+
+            async function cancelOrder(orderId) {
+                try {
+                    const response = await fetch(`http://localhost:3000/api/orders/${orderId}`, {
+                        method: 'DELETE',
+                        headers: {
+                            'Authorization': `Bearer ${token}`
+                        }
+                    });
+                    const data = await response.json();
+                    if (response.ok) {
+                        orderHistoryMessage.textContent = data.message;
+                        orderHistoryMessage.style.color = 'green';
+                        fetchOrderHistory(); // Refresh list
+                    } else {
+                        orderHistoryMessage.textContent = data.message || 'Failed to cancel order.';
+                        orderHistoryMessage.style.color = 'red';
+                    }
+                } catch (error) {
+                    console.error('Error cancelling order:', error);
+                    orderHistoryMessage.textContent = 'An error occurred while cancelling order.';
+                    orderHistoryMessage.style.color = 'red';
+                }
+            }
+
+
+            // --- Update Cart Count ---
+            function updateCartCount() {
+                const cartItems = JSON.parse(localStorage.getItem('cartItems') || '[]');
+                cartCountSpan.textContent = cartItems.length;
+            }
+
+            // Initial load
+            fetchOrderHistory();
+            updateCartCount();
+        });
+    </script>
+</body>
+</html>

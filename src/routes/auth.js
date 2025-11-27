@@ -15,8 +15,8 @@ router.post('/register', validate(registerSchema), async (req, res) => {
         const { email, password, userType, phone, name, businessName, address } = req.body;
 
         // Check if user already exists
-        const existingUser = await db.get('SELECT * FROM users WHERE email = ?', [email]);
-        if (existingUser) {
+        const existingUser = await db.query('SELECT * FROM users WHERE email = $1', [email]);
+        if (existingUser.rows.length > 0) {
             return res.status(400).json({ message: 'User already exists' });
         }
 
@@ -24,15 +24,17 @@ router.post('/register', validate(registerSchema), async (req, res) => {
         const hashedPassword = await bcrypt.hash(password, 10);
 
         // Insert user
-        const result = await db.run(
-            `INSERT INTO users (email, password, user_type, phone, name, business_name, address, created_at)
-             VALUES (?, ?, ?, ?, ?, ?, ?, datetime('now'))`,
+        const result = await db.query(
+            `INSERT INTO users (email, password, user_type, phone, name, business_name, address)
+             VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING id`,
             [email, hashedPassword, userType, phone || null, name || null, businessName || null, address || null]
         );
 
+        const userId = result.rows[0].id;
+
         // Generate JWT token
         const token = jwt.sign(
-            { userId: result.lastID, email, userType },
+            { userId: userId, email, userType },
             process.env.JWT_SECRET,
             { expiresIn: '7d' }
         );
@@ -41,7 +43,7 @@ router.post('/register', validate(registerSchema), async (req, res) => {
             message: 'User registered successfully',
             token,
             userType,
-            userId: result.lastID
+            userId: userId
         });
     } catch (error) {
         console.error('Registration error:', error);
@@ -59,7 +61,8 @@ router.post('/login', async (req, res) => {
         }
 
         // Find user
-        const user = await db.get('SELECT * FROM users WHERE email = ?', [email]);
+        const userResult = await db.query('SELECT * FROM users WHERE email = $1', [email]);
+        const user = userResult.rows[0];
         if (!user) {
             return res.status(401).json({ message: 'Invalid credentials' });
         }
@@ -93,7 +96,8 @@ router.post('/login', async (req, res) => {
 router.post('/forgot-password', async (req, res) => {
     try {
         const { email } = req.body;
-        const user = await db.get('SELECT * FROM users WHERE email = ?', [email]);
+        const userResult = await db.query('SELECT * FROM users WHERE email = $1', [email]);
+        const user = userResult.rows[0];
         if (!user) {
             return res.status(404).json({ message: 'No user with that email found.' });
         }
@@ -102,8 +106,8 @@ router.post('/forgot-password', async (req, res) => {
         const token = crypto.randomBytes(32).toString('hex');
         const expires = Date.now() + 3600000; // 1 hour
 
-        await db.run(
-            'UPDATE users SET reset_password_token = ?, reset_password_expires = ? WHERE id = ?',
+        await db.query(
+            'UPDATE users SET reset_password_token = $1, reset_password_expires = $2 WHERE id = $3',
             [token, expires, user.id]
         );
 
@@ -123,10 +127,11 @@ router.post('/reset-password', async (req, res) => {
     try {
         const { token, password } = req.body;
 
-        const user = await db.get(
-            'SELECT * FROM users WHERE reset_password_token = ? AND reset_password_expires > ?',
+        const userResult = await db.query(
+            'SELECT * FROM users WHERE reset_password_token = $1 AND reset_password_expires > $2',
             [token, Date.now()]
         );
+        const user = userResult.rows[0];
 
         if (!user) {
             return res.status(400).json({ message: 'Password reset token is invalid or has expired.' });
@@ -136,8 +141,8 @@ router.post('/reset-password', async (req, res) => {
         const hashedPassword = await bcrypt.hash(password, 10);
 
         // Update password and clear token
-        await db.run(
-            'UPDATE users SET password = ?, reset_password_token = NULL, reset_password_expires = NULL WHERE id = ?',
+        await db.query(
+            'UPDATE users SET password = $1, reset_password_token = NULL, reset_password_expires = NULL WHERE id = $2',
             [hashedPassword, user.id]
         );
 
@@ -153,7 +158,8 @@ router.post('/reset-password', async (req, res) => {
 router.get('/profile', authenticateToken, async (req, res) => {
     try {
         const userId = req.user.userId;
-        const user = await db.get('SELECT id, email, user_type, phone, name, business_name, address FROM users WHERE id = ?', [userId]);
+        const userResult = await db.query('SELECT id, email, user_type, phone, name, business_name, address FROM users WHERE id = $1', [userId]);
+        const user = userResult.rows[0];
         
         if (!user) {
             return res.status(404).json({ message: 'User not found' });
@@ -172,8 +178,8 @@ router.put('/profile', authenticateToken, async (req, res) => {
         const userId = req.user.userId;
         const { phone, name, businessName, address } = req.body;
 
-        await db.run(
-            `UPDATE users SET phone = ?, name = ?, business_name = ?, address = ? WHERE id = ?`,
+        await db.query(
+            `UPDATE users SET phone = $1, name = $2, business_name = $3, address = $4 WHERE id = $5`,
             [phone, name, businessName, address, userId]
         );
 

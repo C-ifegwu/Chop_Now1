@@ -18,8 +18,9 @@ router.post('/', authenticateToken, authorizeConsumer, async (req, res) => {
         let totalAmount = 0;
         const mealsToUpdate = [];
         for (const item of items) {
-            const meal = await db.get('SELECT * FROM meals WHERE id = ? AND vendor_id = ? AND is_available = 1 AND quantity_available >= ?', 
+            const mealResult = await db.query('SELECT * FROM meals WHERE id = $1 AND vendor_id = $2 AND is_available = TRUE AND quantity_available >= $3', 
                 [item.meal_id, vendor_id, item.quantity]);
+            const meal = mealResult.rows[0];
             
             if (!meal) {
                 return res.status(400).json({ message: `Meal with ID ${item.meal_id} is not available or quantity is insufficient.` });
@@ -29,19 +30,19 @@ router.post('/', authenticateToken, authorizeConsumer, async (req, res) => {
         }
 
         // Create the order
-        const orderResult = await db.run(
-            `INSERT INTO orders (consumer_id, vendor_id, total_amount, status, created_at)
-             VALUES (?, ?, ?, 'pending', datetime('now'))`,
+        const orderResult = await db.query(
+            `INSERT INTO orders (consumer_id, vendor_id, total_amount, status)
+             VALUES ($1, $2, $3, 'pending') RETURNING id`,
             [consumerId, vendor_id, totalAmount]
         );
-        const orderId = orderResult.lastID;
+        const orderId = orderResult.rows[0].id;
 
         // Create order items and update meal quantities
         for (const item of mealsToUpdate) {
-            await db.run('INSERT INTO order_items (order_id, meal_id, quantity, price) VALUES (?, ?, ?, ?)',
+            await db.query('INSERT INTO order_items (order_id, meal_id, quantity, price) VALUES ($1, $2, $3, $4)',
                 [orderId, item.meal_id, item.quantity, item.price]);
             
-            await db.run('UPDATE meals SET quantity_available = quantity_available - ? WHERE id = ?',
+            await db.query('UPDATE meals SET quantity_available = quantity_available - $1 WHERE id = $2',
                 [item.quantity, item.meal_id]);
         }
 
@@ -66,23 +67,25 @@ router.post('/', authenticateToken, authorizeConsumer, async (req, res) => {
 // Get orders for consumer
 router.get('/consumer', authenticateToken, authorizeConsumer, async (req, res) => {
     try {
-        const orders = await db.all(
+        const ordersResult = await db.query(
             `SELECT o.*, u.business_name as vendor_name
              FROM orders o
              JOIN users u ON o.vendor_id = u.id
-             WHERE o.consumer_id = ?
+             WHERE o.consumer_id = $1
              ORDER BY o.created_at DESC`,
             [req.user.userId]
         );
+        const orders = ordersResult.rows;
 
         for (const order of orders) {
-            order.items = await db.all(
+            const itemsResult = await db.query(
                 `SELECT oi.*, m.name as meal_name, m.image_url
                  FROM order_items oi
                  JOIN meals m ON oi.meal_id = m.id
-                 WHERE oi.order_id = ?`,
+                 WHERE oi.order_id = $1`,
                 [order.id]
             );
+            order.items = itemsResult.rows;
         }
 
         res.json(orders);
@@ -95,23 +98,25 @@ router.get('/consumer', authenticateToken, authorizeConsumer, async (req, res) =
 // Get orders for vendor
 router.get('/vendor', authenticateToken, authorizeVendor, async (req, res) => {
     try {
-        const orders = await db.all(
+        const ordersResult = await db.query(
             `SELECT o.*, u.name as consumer_name, u.phone as consumer_phone
              FROM orders o
              JOIN users u ON o.consumer_id = u.id
-             WHERE o.vendor_id = ?
+             WHERE o.vendor_id = $1
              ORDER BY o.created_at DESC`,
             [req.user.userId]
         );
+        const orders = ordersResult.rows;
 
         for (const order of orders) {
-            order.items = await db.all(
+            const itemsResult = await db.query(
                 `SELECT oi.*, m.name as meal_name, m.image_url
                  FROM order_items oi
                  JOIN meals m ON oi.meal_id = m.id
-                 WHERE oi.order_id = ?`,
+                 WHERE oi.order_id = $1`,
                 [order.id]
             );
+            order.items = itemsResult.rows;
         }
 
         res.json(orders);
@@ -128,25 +133,30 @@ router.put('/:id/status', authenticateToken, authorizeVendor, async (req, res) =
         const orderId = req.params.id;
 
         // Verify order belongs to vendor
-        const order = await db.get(
-            `SELECT * FROM orders WHERE id = ? AND vendor_id = ?`,
+        const orderResult = await db.query(
+            `SELECT * FROM orders WHERE id = $1 AND vendor_id = $2`,
             [orderId, req.user.userId]
         );
+        const order = orderResult.rows[0];
 
         if (!order) {
             return res.status(404).json({ message: 'Order not found or unauthorized' });
         }
 
-        await db.run('UPDATE orders SET status = ? WHERE id = ?', [status, orderId]);
+        await db.query('UPDATE orders SET status = $1, updated_at = NOW() WHERE id = $2', [status, orderId]);
 
         // Get meal and consumer info for notification
-        const orderDetails = await db.get(
+        // Note: original query joined on o.meal_id but orders table doesn't have meal_id directly.
+        // Assuming order_items will be used to get meal details if needed for notification.
+        const orderDetailsResult = await db.query(
             `SELECT o.consumer_id, m.name as meal_name
              FROM orders o
-             JOIN meals m ON o.meal_id = m.id
-             WHERE o.id = ?`,
+             JOIN order_items oi ON o.id = oi.order_id
+             JOIN meals m ON oi.meal_id = m.id
+             WHERE o.id = $1 LIMIT 1`, // LIMIT 1 as we just need one meal's name for notification example
             [orderId]
         );
+        const orderDetails = orderDetailsResult.rows[0];
 
         // Notify consumer of status change
         // await notifyConsumerOrderStatus(orderDetails.consumer_id, orderId, status, orderDetails.meal_name);
@@ -163,7 +173,8 @@ router.delete('/:id', authenticateToken, authorizeConsumer, async (req, res) => 
     try {
         const orderId = req.params.id;
 
-        const order = await db.get('SELECT * FROM orders WHERE id = ? AND consumer_id = ?', [orderId, req.user.userId]);
+        const orderResult = await db.query('SELECT * FROM orders WHERE id = $1 AND consumer_id = $2', [orderId, req.user.userId]);
+        const order = orderResult.rows[0];
         if (!order) {
             return res.status(404).json({ message: 'Order not found' });
         }
@@ -172,18 +183,19 @@ router.delete('/:id', authenticateToken, authorizeConsumer, async (req, res) => 
             return res.status(400).json({ message: 'Order can only be cancelled if status is pending' });
         }
 
-        const orderItems = await db.all('SELECT * FROM order_items WHERE order_id = ?', [orderId]);
+        const orderItemsResult = await db.query('SELECT * FROM order_items WHERE order_id = $1', [orderId]);
+        const orderItems = orderItemsResult.rows;
 
         // Restore meal quantity
         for (const item of orderItems) {
-            await db.run(
-                'UPDATE meals SET quantity_available = quantity_available + ? WHERE id = ?',
+            await db.query(
+                'UPDATE meals SET quantity_available = quantity_available + $1 WHERE id = $2',
                 [item.quantity, item.meal_id]
             );
         }
 
-        await db.run('DELETE FROM order_items WHERE order_id = ?', [orderId]);
-        await db.run('DELETE FROM orders WHERE id = ?', [orderId]);
+        await db.query('DELETE FROM order_items WHERE order_id = $1', [orderId]);
+        await db.query('DELETE FROM orders WHERE id = $1', [orderId]);
 
         res.json({ message: 'Order cancelled successfully' });
     } catch (error) {

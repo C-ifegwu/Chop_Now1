@@ -15,37 +15,37 @@ router.post('/', authenticateToken, authorizeConsumer, async (req, res) => {
         }
 
         // Verify order was completed for this meal
-        const order = await db.get(
+        const orderResult = await db.query(
             `SELECT o.id
              FROM orders o
              JOIN order_items oi ON o.id = oi.order_id
-             WHERE o.consumer_id = ? AND oi.meal_id = ? AND o.status = 'completed'`,
+             WHERE o.consumer_id = $1 AND oi.meal_id = $2 AND o.status = 'completed'`,
             [consumerId, mealId]
         );
 
-        if (!order) {
+        if (orderResult.rows.length === 0) {
             return res.status(400).json({ message: 'Can only review meals from completed orders' });
         }
 
         // Check if review already exists
-        const existingReview = await db.get(
-            'SELECT * FROM reviews WHERE consumer_id = ? AND meal_id = ?',
+        const existingReviewResult = await db.query(
+            'SELECT * FROM reviews WHERE consumer_id = $1 AND meal_id = $2',
             [consumerId, mealId]
         );
 
-        if (existingReview) {
+        if (existingReviewResult.rows.length > 0) {
             return res.status(400).json({ message: 'Review already exists for this meal' });
         }
 
-        const result = await db.run(
-            `INSERT INTO reviews (consumer_id, meal_id, rating, comment, created_at)
-             VALUES (?, ?, ?, ?, datetime('now'))`,
+        const result = await db.query(
+            `INSERT INTO reviews (consumer_id, meal_id, rating, comment)
+             VALUES ($1, $2, $3, $4) RETURNING id`,
             [consumerId, mealId, rating, comment]
         );
 
         res.status(201).json({
             message: 'Review created successfully',
-            reviewId: result.lastID
+            reviewId: result.rows[0].id
         });
     } catch (error) {
         console.error('Create review error:', error);
@@ -56,16 +56,16 @@ router.post('/', authenticateToken, authorizeConsumer, async (req, res) => {
 // Get reviews for a meal
 router.get('/meal/:mealId', async (req, res) => {
     try {
-        const reviews = await db.all(
+        const reviewsResult = await db.query(
             `SELECT r.*, u.name as consumer_name
              FROM reviews r
              JOIN users u ON r.consumer_id = u.id
-             WHERE r.meal_id = ?
+             WHERE r.meal_id = $1
              ORDER BY r.created_at DESC`,
             [req.params.mealId]
         );
 
-        res.json(reviews);
+        res.json(reviewsResult.rows);
     } catch (error) {
         console.error('Get reviews error:', error);
         res.status(500).json({ message: 'Failed to fetch reviews', error: error.message });
@@ -75,17 +75,17 @@ router.get('/meal/:mealId', async (req, res) => {
 // Get reviews for a vendor
 router.get('/vendor/:vendorId', async (req, res) => {
     try {
-        const reviews = await db.all(
+        const reviewsResult = await db.query(
             `SELECT r.*, m.name as meal_name, u.name as consumer_name
              FROM reviews r
              JOIN meals m ON r.meal_id = m.id
              JOIN users u ON r.consumer_id = u.id
-             WHERE m.vendor_id = ?
+             WHERE m.vendor_id = $1
              ORDER BY r.created_at DESC`,
             [req.params.vendorId]
         );
 
-        res.json(reviews);
+        res.json(reviewsResult.rows);
     } catch (error) {
         console.error('Get vendor reviews error:', error);
         res.status(500).json({ message: 'Failed to fetch reviews', error: error.message });
@@ -103,18 +103,19 @@ router.post('/:reviewId/response', authenticateToken, async (req, res) => {
         const reviewId = req.params.reviewId;
 
         // Verify review is for vendor's meal
-        const review = await db.get(
+        const reviewResult = await db.query(
             `SELECT r.* FROM reviews r
              JOIN meals m ON r.meal_id = m.id
-             WHERE r.id = ? AND m.vendor_id = ?`,
+             WHERE r.id = $1 AND m.vendor_id = $2`,
             [reviewId, req.user.userId]
         );
+        const review = reviewResult.rows[0];
 
         if (!review) {
             return res.status(404).json({ message: 'Review not found or unauthorized' });
         }
 
-        await db.run('UPDATE reviews SET vendor_response = ?, response_date = datetime("now") WHERE id = ?', 
+        await db.query('UPDATE reviews SET vendor_response = $1, response_date = NOW() WHERE id = $2', 
                     [response, reviewId]);
 
         res.json({ message: 'Response added successfully' });

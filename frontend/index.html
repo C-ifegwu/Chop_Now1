@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ChopNow</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <header>
+        <h1>ChopNow</h1>
+        <nav>
+            <ul>
+                <li><a href="index.html">Home</a></li>
+                <li><a href="meals.html">Meals</a></li>
+                <li id="auth-links">
+                    <a href="login.html">Login</a>
+                    <a href="register.html">Register</a>
+                </li>
+                <li><a href="cart.html" id="cart-link" style="display:none;">Cart (<span id="cart-count">0</span>)</a></li>
+                <li><a href="#" id="dashboard-link" style="display:none;">Dashboard</a></li>
+                <li><a href="#" id="logout-button" style="display:none;">Logout</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <main>
+        <section id="hero">
+            <h2>Rescue delicious food, prevent waste.</h2>
+            <p>Find great deals on surplus food from local vendors.</p>
+            <a href="meals.html" class="button">Browse Meals</a>
+        </section>
+
+        <section id="features">
+            <div class="feature-item">
+                <h3>For Consumers</h3>
+                <p>Discover affordable meals near you and help reduce food waste.</p>
+            </div>
+            <div class="feature-item">
+                <h3>For Vendors</h3>
+                <p>Sell your surplus food, reduce waste, and reach new customers.</p>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <p>&copy; 2025 ChopNow. All rights reserved.</p>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+</html>

@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ChopNow - Meal Details</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        /* Specific styles for meal details page */
+        .meal-detail-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 30px;
+            margin-top: 20px;
+            background-color: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .meal-detail-image {
+            flex: 1 1 400px; /* Grow, shrink, base width */
+            max-width: 100%;
+        }
+
+        .meal-detail-image img {
+            width: 100%;
+            height: auto;
+            border-radius: 8px;
+        }
+
+        .meal-detail-info {
+            flex: 2 1 400px; /* Grow, shrink, base width */
+        }
+
+        .meal-detail-info h2 {
+            color: #4CAF50;
+            margin-top: 0;
+            font-size: 2.2rem;
+        }
+
+        .meal-detail-info .price-section {
+            display: flex;
+            align-items: baseline;
+            gap: 15px;
+            margin: 15px 0;
+        }
+
+        .meal-detail-info .original-price {
+            text-decoration: line-through;
+            color: #999;
+            font-size: 1.2em;
+        }
+
+        .meal-detail-info .discounted-price {
+            color: #E91E63; /* A contrasting color for emphasis */
+            font-size: 2em;
+            font-weight: bold;
+        }
+
+        .meal-detail-info p {
+            line-height: 1.6;
+            margin-bottom: 10px;
+        }
+
+        .meal-detail-info .vendor-info {
+            font-style: italic;
+            color: #555;
+            margin-top: 20px;
+        }
+
+        .meal-actions-section {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px solid #eee;
+        }
+
+        .meal-actions-section label {
+            font-weight: bold;
+        }
+
+        .meal-actions-section input[type="number"] {
+            width: 60px;
+            padding: 8px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+
+        .add-to-cart-btn {
+            background-color: #007bff;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 1em;
+            transition: background-color 0.2s;
+        }
+
+        .add-to-cart-btn:hover {
+            background-color: #0056b3;
+        }
+
+        .reviews-section {
+            margin-top: 40px;
+            background-color: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .review-item {
+            border-bottom: 1px solid #eee;
+            padding-bottom: 15px;
+            margin-bottom: 15px;
+        }
+
+        .review-item:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+        }
+
+        .review-item strong {
+            color: #333;
+        }
+
+        .review-item .rating {
+            color: #ff9800; /* Amber for stars */
+            font-weight: bold;
+        }
+        .review-item .date {
+            font-size: 0.9em;
+            color: #777;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>ChopNow</h1>
+        <nav>
+            <ul>
+                <li><a href="index.html">Home</a></li>
+                <li><a href="meals.html">Meals</a></li>
+                <li id="auth-links">
+                    <a href="login.html">Login</a>
+                    <a href="register.html">Register</a>
+                </li>
+                <li><a href="cart.html" id="cart-link" style="display:none;">Cart (<span id="cart-count">0</span>)</a></li>
+                <li><a href="#" id="dashboard-link" style="display:none;">Dashboard</a></li>
+                <li><a href="#" id="logout-button" style="display:none;">Logout</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <main>
+        <section class="meal-detail-container">
+            <div class="meal-detail-image">
+                <img id="meal-image" src="https://via.placeholder.com/400x300?text=Meal+Image" alt="Meal Image">
+            </div>
+            <div class="meal-detail-info">
+                <h2 id="meal-name">Loading Meal Name...</h2>
+                <div class="price-section">
+                    <span class="original-price" id="original-price"></span>
+                    <span class="discounted-price" id="discounted-price"></span>
+                </div>
+                <p id="meal-description">Loading meal description...</p>
+                <p><strong>Cuisine:</strong> <span id="cuisine-type"></span></p>
+                <p><strong>Vendor:</strong> <span id="vendor-name"></span></p>
+                <p><strong>Pickup Options:</strong> <span id="pickup-options"></span></p>
+                <p><strong>Pickup Times:</strong> <span id="pickup-times"></span></p>
+                <p><strong>Allergens:</strong> <span id="allergens"></span></p>
+                <p><strong>Quantity Available:</strong> <span id="quantity-available"></span></p>
+
+                <p id="meal-detail-message" class="message-area"></p>
+
+                <div class="meal-actions-section">
+                    <label for="add-quantity">Quantity:</label>
+                    <input type="number" id="add-quantity" value="1" min="1">
+                    <button class="add-to-cart-btn" id="add-to-cart">Add to Cart</button>
+                </div>
+            </div>
+        </section>
+
+        <section class="reviews-section">
+            <h3>Customer Reviews (<span id="review-count">0</span>)</h3>
+            <div id="reviews-list">
+                <p>No reviews yet.</p>
+                <!-- Reviews will be dynamically inserted here -->
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <p>&copy; 2025 ChopNow. All rights reserved.</p>
+    </footer>
+
+    <script src="script.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const mealId = urlParams.get('id');
+
+            const mealImage = document.getElementById('meal-image');
+            const mealName = document.getElementById('meal-name');
+            const originalPrice = document.getElementById('original-price');
+            const discountedPrice = document.getElementById('discounted-price');
+            const mealDescription = document.getElementById('meal-description');
+            const cuisineType = document.getElementById('cuisine-type');
+            const vendorName = document.getElementById('vendor-name');
+            const pickupOptions = document.getElementById('pickup-options');
+            const pickupTimes = document.getElementById('pickup-times');
+            const allergens = document.getElementById('allergens');
+            const quantityAvailable = document.getElementById('quantity-available');
+            const mealDetailMessage = document.getElementById('meal-detail-message');
+            const addQuantityInput = document.getElementById('add-quantity');
+            const addToCartButton = document.getElementById('add-to-cart');
+            const reviewsList = document.getElementById('reviews-list');
+            const reviewCountSpan = document.getElementById('review-count');
+
+            if (!mealId) {
+                mealDetailMessage.textContent = 'Meal ID missing from URL.';
+                mealDetailMessage.style.color = 'red';
+                return;
+            }
+
+            // --- Fetch Meal Details ---
+            async function fetchMealDetails() {
+                try {
+                    const response = await fetch(`http://localhost:3000/api/meals/${mealId}`);
+                    const meal = await response.json();
+
+                    if (response.ok) {
+                        mealImage.src = meal.image_url || 'https://via.placeholder.com/400x300?text=Meal+Image';
+                        mealName.textContent = meal.name;
+                        originalPrice.textContent = `$${meal.original_price.toFixed(2)}`;
+                        discountedPrice.textContent = `$${meal.discounted_price.toFixed(2)}`;
+                        mealDescription.textContent = meal.description;
+                        cuisineType.textContent = meal.cuisine_type || 'N/A';
+                        vendorName.textContent = meal.vendor_name;
+                        pickupOptions.textContent = meal.pickup_options || 'N/A';
+                        pickupTimes.textContent = meal.pickup_times || 'N/A';
+                        allergens.textContent = meal.allergens || 'None specified';
+                        quantityAvailable.textContent = meal.quantity_available;
+                        addQuantityInput.max = meal.quantity_available; // Set max for input
+
+                        // Update reviews section
+                        reviewCountSpan.textContent = meal.review_count;
+                        if (meal.average_rating) {
+                            reviewsList.insertAdjacentHTML('afterbegin', `<p><strong>Average Rating:</strong> <span class="rating">${meal.average_rating.toFixed(1)}</span> / 5</p>`);
+                        }
+                        
+                        // Fetch separate reviews for detailed display
+                        fetchMealReviews();
+
+                    } else {
+                        mealDetailMessage.textContent = meal.message || 'Failed to fetch meal details.';
+                        mealDetailMessage.style.color = 'red';
+                    }
+                } catch (error) {
+                    console.error('Error fetching meal details:', error);
+                    mealDetailMessage.textContent = 'An error occurred while fetching meal details.';
+                    mealDetailMessage.style.color = 'red';
+                }
+            }
+
+            // --- Fetch Meal Reviews ---
+            async function fetchMealReviews() {
+                try {
+                    const response = await fetch(`http://localhost:3000/api/reviews/meal/${mealId}`);
+                    const reviews = await response.json();
+
+                    if (response.ok && reviews.length > 0) {
+                        reviewsList.innerHTML = ''; // Clear "No reviews yet."
+                        reviews.forEach(review => {
+                            const reviewDiv = document.createElement('div');
+                            reviewDiv.classList.add('review-item');
+                            reviewDiv.innerHTML = `
+                                <p><strong>${review.consumer_name}</strong> - <span class="rating">${review.rating}</span>/5
+                                <span class="date">${new Date(review.created_at).toLocaleDateString()}</span></p>
+                                <p>${review.comment}</p>
+                                ${review.vendor_response ? `<p><em>Vendor Response:</em> ${review.vendor_response}</p>` : ''}
+                            `;
+                            reviewsList.appendChild(reviewDiv);
+                        });
+                    } else if (response.ok && reviews.length === 0) {
+                        reviewsList.innerHTML = '<p>No reviews yet.</p>';
+                    } else {
+                        reviewsList.innerHTML = `<p style="color:red;">Failed to load reviews: ${reviews.message || 'Error'}</p>`;
+                    }
+                } catch (error) {
+                    console.error('Error fetching meal reviews:', error);
+                    reviewsList.innerHTML = `<p style="color:red;">An error occurred while loading reviews.</p>`;
+                }
+            }
+
+            // --- Add to Cart Functionality ---
+            addToCartButton.addEventListener('click', () => {
+                const quantity = parseInt(addQuantityInput.value);
+                const available = parseInt(quantityAvailable.textContent);
+
+                if (quantity > 0 && quantity <= available) {
+                    let cartItems = JSON.parse(localStorage.getItem('cartItems') || '[]');
+                    const mealNameText = mealName.textContent;
+                    const discountedPriceValue = parseFloat(discountedPrice.textContent.replace('$', ''));
+
+                    // Check if item already in cart
+                    const existingItemIndex = cartItems.findIndex(item => item.mealId === mealId);
+
+                    if (existingItemIndex > -1) {
+                        cartItems[existingItemIndex].quantity += quantity;
+                    } else {
+                        cartItems.push({
+                            mealId: mealId,
+                            name: mealNameText,
+                            quantity: quantity,
+                            price: discountedPriceValue,
+                            vendorName: vendorName.textContent,
+                            vendorId: meal.vendor_id // Add vendor_id here
+                        });
+                    }
+
+                    localStorage.setItem('cartItems', JSON.stringify(cartItems));
+                    updateCartCount();
+                    mealDetailMessage.textContent = `${quantity} of "${mealNameText}" added to cart!`;
+                    mealDetailMessage.style.color = 'green';
+                } else {
+                    mealDetailMessage.textContent = 'Please enter a valid quantity.';
+                    mealDetailMessage.style.color = 'red';
+                }
+            });
+
+            // --- Update Cart Count (re-used from meals.html) ---
+            function updateCartCount() {
+                const cartItems = JSON.parse(localStorage.getItem('cartItems') || '[]');
+                cartCountSpan.textContent = cartItems.length;
+            }
+
+            // Initial load
+            fetchMealDetails();
+            updateCartCount();
+        });
+    </script>
+</body>
+</html>
