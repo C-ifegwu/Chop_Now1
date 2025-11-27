@@ -35,3 +35,20 @@ build/
 *.tmp
 *.temp
 
+# Logs
+logs/
+*.log
+
+# Test and debug files
+check_*.js
+test-*.js
+*_test.js
+*_debug.js
+
+# Completion summaries and temporary docs
+*_COMPLETION*.md
+*_STATUS*.md
+*_SUMMARY*.md
+*_instructions.txt
+task_*.txt
+
