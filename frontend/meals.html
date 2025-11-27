@@ -340,9 +340,23 @@
                 });
             }
 
-            // Update navigation
+            // Update navigation and cart count
             if (window.chopNowApp) {
                 window.chopNowApp.updateNavigation();
+                
+                // Update cart count if user is logged in
+                if (window.chopNowApp.auth.isLoggedIn()) {
+                    window.chopNowApp.cart.updateCount();
+                } else {
+                    // For guests, count localStorage items
+                    const cartItems = JSON.parse(localStorage.getItem('cartItems') || '[]');
+                    const cartCountElements = document.querySelectorAll('#cartCount, .cart-count');
+                    cartCountElements.forEach(element => {
+                        if (element) {
+                            element.textContent = cartItems.length;
+                        }
+                    });
+                }
             }
         });
 
@@ -690,6 +704,7 @@
             localStorage.removeItem('token');
             localStorage.removeItem('userType');
             localStorage.removeItem('userId');
+            localStorage.removeItem('cartItems');
             window.location.href = 'login.html';
         }
     </script>

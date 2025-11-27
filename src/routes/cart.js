@@ -1,10 +1,10 @@
 const express = require('express');
 const router = express.Router();
 const db = require('../config/database');
-const { authenticateToken } = require('../middleware/auth');
+const { authenticateToken, authorizeConsumer } = require('../middleware/auth');
 
-// Get user's cart
-router.get('/', authenticateToken, async (req, res) => {
+// Get user's cart (consumers only)
+router.get('/', authenticateToken, authorizeConsumer, async (req, res) => {
     try {
         const userId = req.user.userId;
         
@@ -38,8 +38,8 @@ router.get('/', authenticateToken, async (req, res) => {
     }
 });
 
-// Add item to cart
-router.post('/add', authenticateToken, async (req, res) => {
+// Add item to cart (consumers only)
+router.post('/add', authenticateToken, authorizeConsumer, async (req, res) => {
     try {
         const userId = req.user.userId;
         const { mealId, quantity = 1 } = req.body;
@@ -108,8 +108,8 @@ router.post('/add', authenticateToken, async (req, res) => {
     }
 });
 
-// Update cart item quantity
-router.put('/update/:itemId', authenticateToken, async (req, res) => {
+// Update cart item quantity (consumers only)
+router.put('/update/:itemId', authenticateToken, authorizeConsumer, async (req, res) => {
     try {
         const userId = req.user.userId;
         const { itemId } = req.params;
@@ -160,8 +160,8 @@ router.put('/update/:itemId', authenticateToken, async (req, res) => {
     }
 });
 
-// Remove item from cart
-router.delete('/remove/:itemId', authenticateToken, async (req, res) => {
+// Remove item from cart (consumers only)
+router.delete('/remove/:itemId', authenticateToken, authorizeConsumer, async (req, res) => {
     try {
         const userId = req.user.userId;
         const { itemId } = req.params;
@@ -194,8 +194,8 @@ router.delete('/remove/:itemId', authenticateToken, async (req, res) => {
     }
 });
 
-// Clear entire cart
-router.delete('/clear', authenticateToken, async (req, res) => {
+// Clear entire cart (consumers only)
+router.delete('/clear', authenticateToken, authorizeConsumer, async (req, res) => {
     try {
         const userId = req.user.userId;
         
