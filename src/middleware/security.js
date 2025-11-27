@@ -74,6 +74,23 @@ const generateCSRFToken = () => {
 };
 
 const csrfProtection = (req, res, next) => {
+    // Skip CSRF for API endpoints using JWT authentication
+    // JWT tokens in Authorization headers are not vulnerable to CSRF attacks
+    const isAPIEndpoint = req.path.startsWith('/api/');
+    const hasJWTToken = req.headers['authorization']?.startsWith('Bearer ');
+    
+    // Skip CSRF for authenticated API requests (JWT-based)
+    if (isAPIEndpoint && hasJWTToken) {
+        return next();
+    }
+    
+    // Skip CSRF for public API endpoints (registration, login, etc.)
+    // These endpoints don't use sessions and are stateless
+    if (isAPIEndpoint) {
+        return next();
+    }
+    
+    // For non-API endpoints (like form submissions), check CSRF token
     if (['POST', 'PUT', 'DELETE', 'PATCH'].includes(req.method)) {
         const token = req.headers['x-csrf-token'] || req.body._csrf;
         const sessionToken = req.session?.csrfToken;
