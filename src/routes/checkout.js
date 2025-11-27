@@ -7,30 +7,58 @@ const { authenticateToken, authorizeConsumer } = require('../middleware/auth');
 router.post('/create-order', authenticateToken, authorizeConsumer, async (req, res) => {
     let transaction;
     try {
+        // Start transaction
         transaction = await db.beginTransaction();
         const userId = req.user.userId;
         const { deliveryAddress, paymentMethod } = req.body;
         
         // Get cart items
-        const cartItems = await db.all(`
-            SELECT 
-                ci.*,
-                m.name,
-                m.discounted_price,
-                m.vendor_id,
-                u.business_name as vendor_name
-            FROM cart_items ci
-            JOIN meals m ON ci.meal_id = m.id
-            JOIN users u ON m.vendor_id = u.id
-            WHERE ci.user_id = ?
-        `, [userId]);
+        let cartItems;
+        try {
+            cartItems = await db.all(`
+                SELECT 
+                    ci.id as cart_item_id,
+                    ci.user_id,
+                    ci.meal_id,
+                    ci.quantity,
+                    m.name,
+                    m.discounted_price,
+                    m.original_price,
+                    m.vendor_id,
+                    m.quantity_available,
+                    u.business_name as vendor_name
+                FROM cart_items ci
+                JOIN meals m ON ci.meal_id = m.id
+                JOIN users u ON m.vendor_id = u.id
+                WHERE ci.user_id = ?
+            `, [userId]);
+        } catch (queryError) {
+            await transaction.rollback();
+            console.error('Error fetching cart items:', queryError);
+            return res.status(500).json({
+                success: false,
+                message: 'Failed to fetch cart items',
+                error: process.env.NODE_ENV === 'production' ? undefined : queryError.message
+            });
+        }
         
-        if (cartItems.length === 0) {
+        if (!cartItems || cartItems.length === 0) {
             await transaction.rollback();
             return res.status(400).json({
                 success: false,
-                message: 'Cart is empty'
+                message: 'Cart is empty. Please add items to your cart before checkout.'
             });
+        }
+        
+        // Validate meal availability
+        for (const item of cartItems) {
+            if (!item.quantity_available || item.quantity_available < item.quantity) {
+                await transaction.rollback();
+                return res.status(400).json({
+                    success: false,
+                    message: `Insufficient quantity available for ${item.name || 'meal'}. Only ${item.quantity_available || 0} available.`
+                });
+            }
         }
         
         // Group items by vendor
@@ -52,11 +80,17 @@ router.post('/create-order', authenticateToken, authorizeConsumer, async (req, r
         
         // Create separate orders for each vendor
         for (const vendorOrder of Object.values(ordersByVendor)) {
+            // Calculate service fee
+            const serviceFeePercentage = parseFloat(process.env.SERVICE_FEE_PERCENTAGE || '0.05');
+            const serviceFee = Math.round(vendorOrder.totalAmount * serviceFeePercentage);
+            const deliveryFee = parseFloat(process.env.DELIVERY_FEE || '200');
+            const totalAmount = vendorOrder.totalAmount + serviceFee + deliveryFee;
+            
             // Create order
             const orderResult = await db.run(
                 `INSERT INTO orders (consumer_id, vendor_id, total_amount, status, payment_method, payment_status, delivery_address, created_at)
                  VALUES (?, ?, ?, 'pending', ?, 'pending', ?, ?)`,
-                [userId, vendorOrder.vendorId, vendorOrder.totalAmount, paymentMethod, deliveryAddress, new Date().toISOString()]
+                [userId, vendorOrder.vendorId, totalAmount, paymentMethod || 'card', deliveryAddress || 'Not specified', new Date().toISOString()]
             );
             
             const orderId = orderResult.lastID;
@@ -78,16 +112,15 @@ router.post('/create-order', authenticateToken, authorizeConsumer, async (req, r
             createdOrders.push({
                 orderId,
                 vendorName: vendorOrder.vendorName,
-                totalAmount: vendorOrder.totalAmount,
+                totalAmount: totalAmount,
                 itemCount: vendorOrder.items.length
             });
         }
         
-        // Clear cart (now inside the transaction for atomicity)
+        // Clear cart
         await db.run('DELETE FROM cart_items WHERE user_id = ?', [userId]);
 
-        // In a real app, you would integrate with payment gateway here
-        // For now, we'll simulate successful payment
+        // Simulate successful payment (in production, integrate with payment gateway)
         for (const order of createdOrders) {
             await db.run(
                 'UPDATE orders SET payment_status = ?, status = ? WHERE id = ?',
@@ -95,7 +128,9 @@ router.post('/create-order', authenticateToken, authorizeConsumer, async (req, r
             );
         }
         
+        // Commit transaction
         await transaction.commit();
+        
         res.json({
             success: true,
             message: 'Orders created successfully',
@@ -103,13 +138,20 @@ router.post('/create-order', authenticateToken, authorizeConsumer, async (req, r
         });
         
     } catch (error) {
+        // Rollback transaction on error
         if (transaction) {
-            await transaction.rollback();
+            try {
+                await transaction.rollback();
+            } catch (rollbackError) {
+                console.error('Error rolling back transaction:', rollbackError);
+            }
         }
         console.error('Checkout error:', error);
+        console.error('Error stack:', error.stack);
         res.status(500).json({
             success: false,
-            message: 'Failed to process checkout'
+            message: 'Failed to process checkout',
+            error: process.env.NODE_ENV === 'production' ? undefined : error.message
         });
     }
 });
