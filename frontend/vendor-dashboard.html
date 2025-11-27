@@ -730,9 +730,20 @@
                 } else {
                     const error = await response.json();
                     messageArea.className = 'error-state';
+                    
+                    // Show detailed validation errors if available
+                    let errorMessage = error.message || 'Failed to add meal. Please try again.';
+                    if (error.errors && Array.isArray(error.errors) && error.errors.length > 0) {
+                        const errorDetails = error.errors.map(err => {
+                            const field = err.field || err.path || '';
+                            return `${field ? field + ': ' : ''}${err.message || err.msg}`;
+                        }).join('<br>');
+                        errorMessage = errorDetails;
+                    }
+                    
                     messageArea.innerHTML = `
                         <i class="fas fa-exclamation-circle"></i>
-                        <span>${error.message || 'Failed to add meal. Please try again.'}</span>
+                        <span>${errorMessage}</span>
                     `;
                 }
                 

@@ -110,14 +110,15 @@ router.post('/', authenticateToken, authorizeVendor, (req, res, next) => {
 }, validateMeal, async (req, res) => {
     try {
         // Parse and convert values from form data (multer sends everything as strings)
+        // Support both camelCase and snake_case field names
         const name = req.body.name?.trim();
         const description = req.body.description?.trim() || null;
-        const originalPrice = parseFloat(req.body.originalPrice);
-        const discountedPrice = parseFloat(req.body.discountedPrice);
-        const quantityAvailable = parseInt(req.body.quantityAvailable, 10);
-        const cuisineType = req.body.cuisineType || null;
-        const pickupOptions = req.body.pickupOptions || null;
-        const pickupTimes = req.body.pickupTimes || null;
+        const originalPrice = parseFloat(req.body.originalPrice || req.body.original_price);
+        const discountedPrice = parseFloat(req.body.discountedPrice || req.body.discounted_price);
+        const quantityAvailable = parseInt(req.body.quantityAvailable || req.body.quantity_available, 10);
+        const cuisineType = req.body.cuisineType || req.body.cuisine_type || null;
+        const pickupOptions = req.body.pickupOptions || req.body.pickup_options || null;
+        const pickupTimes = req.body.pickupTimes || req.body.pickup_times || req.body.pickup_time || null;
         
         // Parse allergens if it's a JSON string
         let allergens = req.body.allergens || null;

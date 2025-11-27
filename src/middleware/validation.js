@@ -91,8 +91,36 @@ const validatePasswordUpdate = [
     validateRequest
 ];
 
-// Meal validation
+// Custom middleware to normalize field names (snake_case to camelCase)
+const normalizeMealFields = (req, res, next) => {
+    // Normalize snake_case to camelCase for validation
+    if (req.body.original_price && !req.body.originalPrice) {
+        req.body.originalPrice = req.body.original_price;
+    }
+    if (req.body.discounted_price && !req.body.discountedPrice) {
+        req.body.discountedPrice = req.body.discounted_price;
+    }
+    if (req.body.quantity_available && !req.body.quantityAvailable) {
+        req.body.quantityAvailable = req.body.quantity_available;
+    }
+    if (req.body.cuisine_type && !req.body.cuisineType) {
+        req.body.cuisineType = req.body.cuisine_type;
+    }
+    if (req.body.pickup_options && !req.body.pickupOptions) {
+        req.body.pickupOptions = req.body.pickup_options;
+    }
+    if (req.body.pickup_times && !req.body.pickupTimes) {
+        req.body.pickupTimes = req.body.pickup_times;
+    }
+    if (req.body.pickup_time && !req.body.pickupTimes) {
+        req.body.pickupTimes = req.body.pickup_time;
+    }
+    next();
+};
+
+// Meal validation - simplified to work with both formats
 const validateMeal = [
+    normalizeMealFields,
     body('name')
         .trim()
         .notEmpty()
@@ -114,10 +142,6 @@ const validateMeal = [
             if (isNaN(num) || num <= 0) {
                 throw new Error('Original price must be a valid positive number');
             }
-            return true;
-        })
-        .custom((value) => {
-            const num = parseFloat(value);
             if (num < 0.01 || num > 1000000) {
                 throw new Error('Original price must be between $0.01 and $1,000,000');
             }
@@ -132,10 +156,6 @@ const validateMeal = [
             if (isNaN(num) || num <= 0) {
                 throw new Error('Discounted price must be a valid positive number');
             }
-            return true;
-        })
-        .custom((value) => {
-            const num = parseFloat(value);
             if (num < 0.01 || num > 1000000) {
                 throw new Error('Discounted price must be between $0.01 and $1,000,000');
             }
@@ -167,10 +187,6 @@ const validateMeal = [
             if (isNaN(num) || num <= 0) {
                 throw new Error('Quantity available must be a valid positive integer');
             }
-            return true;
-        })
-        .custom((value) => {
-            const num = parseInt(value, 10);
             if (num < 1 || num > 1000) {
                 throw new Error('Quantity available must be between 1 and 1000');
             }
@@ -179,8 +195,14 @@ const validateMeal = [
     
     body('cuisineType')
         .optional({ nullable: true, checkFalsy: true })
-        .isIn(['african', 'american', 'asian', 'european', 'indian', 'mediterranean', 'mexican', 'mixed'])
-        .withMessage('Invalid cuisine type'),
+        .custom((value) => {
+            if (!value) return true; // Optional field
+            const validTypes = ['african', 'american', 'asian', 'european', 'indian', 'mediterranean', 'mexican', 'mixed'];
+            if (!validTypes.includes(value)) {
+                throw new Error('Invalid cuisine type');
+            }
+            return true;
+        }),
     
     body('mealType')
         .optional({ nullable: true, checkFalsy: true })
