@@ -159,15 +159,20 @@ const getSessionSecret = () => {
         return process.env.SESSION_SECRET;
     }
     
-    // In production, require SESSION_SECRET
+    // Generate a temporary secret (not secure for production!)
+    const defaultSecret = crypto.randomBytes(32).toString('hex');
+    
     if (process.env.NODE_ENV === 'production') {
-        throw new Error('FATAL ERROR: SESSION_SECRET is required in production. Please set it in your environment variables.');
+        console.error('🚨 CRITICAL SECURITY WARNING: SESSION_SECRET is not set in production!');
+        console.error('🚨 Using a temporary secret that will change on each restart.');
+        console.error('🚨 This is INSECURE - sessions will be invalidated on restart.');
+        console.error('🚨 Please set SESSION_SECRET in Railway environment variables immediately!');
+        console.error('🚨 Generate a secure secret: node -e "console.log(require(\'crypto\').randomBytes(32).toString(\'hex\'))"');
+    } else {
+        console.warn('⚠️  WARNING: SESSION_SECRET not set. Using temporary secret for development only.');
+        console.warn('⚠️  Set SESSION_SECRET in environment variables for production deployment.');
     }
     
-    // For development, generate a temporary secret (not secure for production!)
-    const defaultSecret = crypto.randomBytes(32).toString('hex');
-    console.warn('⚠️  WARNING: SESSION_SECRET not set. Using temporary secret for development only.');
-    console.warn('⚠️  Set SESSION_SECRET in environment variables for production deployment.');
     return defaultSecret;
 };
 
