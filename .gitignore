@@ -17,6 +17,10 @@ yarn-error.log
 /database/*.db
 /database/*.db-journal
 
+# Uploads
+/uploads
+/uploads/*
+
 # OS-specific
 .DS_Store
 Thumbs.db

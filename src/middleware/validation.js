@@ -112,9 +112,9 @@ const validateMeal = [
             return true;
         }),
     
-    body('quantity')
+    body('quantityAvailable')
         .isInt({ min: 1, max: 100 })
-        .withMessage('Quantity must be between 1 and 100'),
+        .withMessage('Quantity available must be between 1 and 100'),
     
     body('cuisineType')
         .optional()

@@ -96,7 +96,18 @@ router.get('/:id', async (req, res) => {
 });
 
 // Create new meal listing (Vendor only)
-router.post('/', authenticateToken, authorizeVendor, upload.single('image'), validateMeal, async (req, res) => {
+router.post('/', authenticateToken, authorizeVendor, (req, res, next) => {
+    upload.single('image')(req, res, (err) => {
+        if (err) {
+            console.error('Upload error:', err);
+            return res.status(400).json({ 
+                message: 'File upload failed', 
+                error: err.message 
+            });
+        }
+        next();
+    });
+}, validateMeal, async (req, res) => {
     try {
         const { name, description, originalPrice, discountedPrice, quantityAvailable, 
                 cuisineType, pickupOptions, pickupTimes, allergens } = req.body;
@@ -128,7 +139,11 @@ router.post('/', authenticateToken, authorizeVendor, upload.single('image'), val
         });
     } catch (error) {
         console.error('Create meal error:', error);
-        res.status(500).json({ message: 'Failed to create meal listing', error: error.message });
+        console.error('Error stack:', error.stack);
+        res.status(500).json({ 
+            message: 'Failed to create meal listing', 
+            error: process.env.NODE_ENV === 'production' ? 'Internal server error' : error.message 
+        });
     }
 });
 
