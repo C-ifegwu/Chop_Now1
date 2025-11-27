@@ -86,10 +86,15 @@ router.post('/register', validateUserRegistration, async (req, res) => {
 // Login
 router.post('/login', validateUserLogin, async (req, res) => {
     try {
-        const { email, password } = req.body;
+        const { email, password, userType } = req.body;
 
         if (!email || !password) {
             return res.status(400).json({ message: 'Email and password are required' });
+        }
+
+        // Validate user type
+        if (!userType || !['consumer', 'vendor'].includes(userType)) {
+            return res.status(400).json({ message: 'User type must be either "consumer" or "vendor"' });
         }
 
         // Find user
@@ -102,6 +107,13 @@ router.post('/login', validateUserLogin, async (req, res) => {
         const isValidPassword = await bcrypt.compare(password, user.password);
         if (!isValidPassword) {
             return res.status(401).json({ message: 'Invalid credentials' });
+        }
+
+        // Validate user type matches
+        if (user.user_type !== userType) {
+            return res.status(403).json({ 
+                message: `This account is registered as a ${user.user_type}. Please select "${user.user_type === 'vendor' ? 'Vendor' : 'Customer'}" to log in.` 
+            });
         }
 
         // Generate JWT token

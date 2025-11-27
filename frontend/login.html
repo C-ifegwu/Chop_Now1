@@ -59,6 +59,41 @@
                     
                     <div class="card-body">
                         <form id="loginForm" class="space-y-6">
+                            <!-- User Type Selector -->
+                            <div class="form-group">
+                                <label class="form-label">
+                                    <i class="fas fa-user-tag" style="margin-right: var(--space-2); color: var(--primary-color);"></i>
+                                    Login As
+                                </label>
+                                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-3);">
+                                    <button 
+                                        type="button" 
+                                        id="userTypeCustomer" 
+                                        class="user-type-btn active"
+                                        onclick="selectUserType('consumer')"
+                                        style="padding: var(--space-4); border: 2px solid var(--primary-color); border-radius: var(--radius-lg); background: var(--primary-color); color: var(--white); font-weight: 600; cursor: pointer; transition: all 0.3s ease; display: flex; align-items: center; justify-content: center; gap: var(--space-2); font-size: 0.9375rem;"
+                                        onmouseover="if(!this.classList.contains('active')) { this.style.borderColor = 'var(--primary-color)'; this.style.background = 'var(--primary-50)'; }"
+                                        onmouseout="if(!this.classList.contains('active')) { this.style.borderColor = 'var(--gray-300)'; this.style.background = 'var(--white)'; }"
+                                    >
+                                        <i class="fas fa-user"></i>
+                                        Customer
+                                    </button>
+                                    <button 
+                                        type="button" 
+                                        id="userTypeVendor" 
+                                        class="user-type-btn"
+                                        onclick="selectUserType('vendor')"
+                                        style="padding: var(--space-4); border: 2px solid var(--gray-300); border-radius: var(--radius-lg); background: var(--white); color: var(--gray-700); font-weight: 600; cursor: pointer; transition: all 0.3s ease; display: flex; align-items: center; justify-content: center; gap: var(--space-2); font-size: 0.9375rem;"
+                                        onmouseover="if(!this.classList.contains('active')) { this.style.borderColor = 'var(--primary-color)'; this.style.background = 'var(--primary-50)'; }"
+                                        onmouseout="if(!this.classList.contains('active')) { this.style.borderColor = 'var(--gray-300)'; this.style.background = 'var(--white)'; }"
+                                    >
+                                        <i class="fas fa-store"></i>
+                                        Vendor
+                                    </button>
+                                </div>
+                                <input type="hidden" id="userType" name="userType" value="consumer" required>
+                            </div>
+                            
                             <div class="form-group">
                                 <label for="email" class="form-label">
                                     <i class="fas fa-envelope" style="margin-right: var(--space-2); color: var(--primary-color);"></i>
@@ -190,6 +225,41 @@
 
     <script src="script.js"></script>
     <script>
+        // User type selection
+        function selectUserType(type) {
+            const customerBtn = document.getElementById('userTypeCustomer');
+            const vendorBtn = document.getElementById('userTypeVendor');
+            const userTypeInput = document.getElementById('userType');
+            
+            userTypeInput.value = type;
+            
+            if (type === 'consumer') {
+                customerBtn.classList.add('active');
+                customerBtn.style.borderColor = 'var(--primary-color)';
+                customerBtn.style.background = 'var(--primary-color)';
+                customerBtn.style.color = 'var(--white)';
+                customerBtn.style.transform = 'scale(1.02)';
+                
+                vendorBtn.classList.remove('active');
+                vendorBtn.style.borderColor = 'var(--gray-300)';
+                vendorBtn.style.background = 'var(--white)';
+                vendorBtn.style.color = 'var(--gray-700)';
+                vendorBtn.style.transform = 'scale(1)';
+            } else {
+                vendorBtn.classList.add('active');
+                vendorBtn.style.borderColor = 'var(--primary-color)';
+                vendorBtn.style.background = 'var(--primary-color)';
+                vendorBtn.style.color = 'var(--white)';
+                vendorBtn.style.transform = 'scale(1.02)';
+                
+                customerBtn.classList.remove('active');
+                customerBtn.style.borderColor = 'var(--gray-300)';
+                customerBtn.style.background = 'var(--white)';
+                customerBtn.style.color = 'var(--gray-700)';
+                customerBtn.style.transform = 'scale(1)';
+            }
+        }
+        
         // Password visibility toggle
         function togglePasswordVisibility() {
             const passwordInput = document.getElementById('password');
@@ -246,7 +316,8 @@
                 const formData = new FormData(loginForm);
                 const loginData = {
                     email: formData.get('email'),
-                    password: formData.get('password')
+                    password: formData.get('password'),
+                    userType: formData.get('userType') || 'consumer'
                 };
 
                 // Update button state
@@ -283,7 +354,19 @@
                         }, 1500);
 
                     } else {
-                        showMessage(result.message || 'Login failed. Please check your credentials.', 'error');
+                        // Show error message - backend will provide specific message for wrong user type
+                        const errorMessage = result.message || 'Login failed. Please check your credentials.';
+                        showMessage(errorMessage, 'error');
+                        
+                        // If it's a user type mismatch, highlight the user type selector
+                        if (response.status === 403 && errorMessage.includes('registered as')) {
+                            // Extract the correct user type from the error message
+                            if (errorMessage.includes('vendor')) {
+                                selectUserType('vendor');
+                            } else if (errorMessage.includes('consumer') || errorMessage.includes('customer')) {
+                                selectUserType('consumer');
+                            }
+                        }
                     }
 
                 } catch (error) {
