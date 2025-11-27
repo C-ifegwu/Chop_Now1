@@ -1,15 +1,11 @@
 const express = require('express');
 const router = express.Router();
 const db = require('../config/database');
-const { authenticateToken } = require('../middleware/auth');
+const { authenticateToken, authorizeConsumer } = require('../middleware/auth');
 
 // Create review (Consumer only, after order completion)
-router.post('/', authenticateToken, async (req, res) => {
+router.post('/', authenticateToken, authorizeConsumer, async (req, res) => {
     try {
-        if (req.user.userType !== 'consumer') {
-            return res.status(403).json({ message: 'Only consumers can create reviews' });
-        }
-
         const { mealId, rating, comment } = req.body;
         const consumerId = req.user.userId;
 
@@ -18,14 +14,17 @@ router.post('/', authenticateToken, async (req, res) => {
             return res.status(400).json({ message: 'Rating must be between 1 and 5' });
         }
 
-        // Verify order was completed
+        // Verify order was completed for this meal
         const order = await db.get(
-            'SELECT * FROM orders WHERE consumer_id = ? AND meal_id = ? AND status = ?',
-            [consumerId, mealId, 'completed']
+            `SELECT o.id
+             FROM orders o
+             JOIN order_items oi ON o.id = oi.order_id
+             WHERE o.consumer_id = ? AND oi.meal_id = ? AND o.status = 'completed'`,
+            [consumerId, mealId]
         );
 
         if (!order) {
-            return res.status(400).json({ message: 'Can only review completed orders' });
+            return res.status(400).json({ message: 'Can only review meals from completed orders' });
         }
 
         // Check if review already exists

@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button"
 export function Footer() {
   return (
     <footer className="border-t bg-background/95">
-      <div className="container py-12">
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div className="grid grid-cols-1 gap-8 md:grid-cols-4">
           <div className="space-y-4">
             <Link href="/" className="flex items-center space-x-2">
@@ -35,11 +35,9 @@ export function Footer() {
           <div>
             <h3 className="text-lg font-semibold mb-4">Quick Links</h3>
             <ul className="space-y-2">
-              <li><Link href="/about" className="text-muted-foreground hover:text-foreground transition-colors">About Us</Link></li>
-              <li><Link href="/menu" className="text-muted-foreground hover:text-foreground transition-colors">Our Menu</Link></li>
-              <li><Link href="/how-it-works" className="text-muted-foreground hover:text-foreground transition-colors">How It Works</Link></li>
-              <li><Link href="/testimonials" className="text-muted-foreground hover:text-foreground transition-colors">Testimonials</Link></li>
-              <li><Link href="/contact" className="text-muted-foreground hover:text-foreground transition-colors">Contact Us</Link></li>
+              <li><Link href="/" className="text-muted-foreground hover:text-foreground transition-colors">Home</Link></li>
+              <li><Link href="/meals" className="text-muted-foreground hover:text-foreground transition-colors">Our Menu</Link></li>
+              <li><Link href="/auth/signup?type=vendor" className="text-muted-foreground hover:text-foreground transition-colors">Become a Vendor</Link></li>
             </ul>
           </div>
 
@@ -74,7 +72,7 @@ export function Footer() {
                 placeholder="Your email"
                 className="flex-1 rounded-md border border-input bg-transparent px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
               />
-              <Button variant="premium" size="sm" className="shrink-0">
+              <Button size="sm">
                 Subscribe
               </Button>
             </div>

@@ -16,6 +16,7 @@ router.post('/', authenticateToken, authorizeConsumer, async (req, res) => {
 
         // Calculate total amount and verify meals
         let totalAmount = 0;
+        const mealsToUpdate = [];
         for (const item of items) {
             const meal = await db.get('SELECT * FROM meals WHERE id = ? AND vendor_id = ? AND is_available = 1 AND quantity_available >= ?', 
                 [item.meal_id, vendor_id, item.quantity]);
@@ -24,6 +25,7 @@ router.post('/', authenticateToken, authorizeConsumer, async (req, res) => {
                 return res.status(400).json({ message: `Meal with ID ${item.meal_id} is not available or quantity is insufficient.` });
             }
             totalAmount += meal.discounted_price * item.quantity;
+            mealsToUpdate.push({ ...item, price: meal.discounted_price });
         }
 
         // Create the order
@@ -35,9 +37,9 @@ router.post('/', authenticateToken, authorizeConsumer, async (req, res) => {
         const orderId = orderResult.lastID;
 
         // Create order items and update meal quantities
-        for (const item of items) {
-            await db.run('INSERT INTO order_items (order_id, meal_id, quantity) VALUES (?, ?, ?)',
-                [orderId, item.meal_id, item.quantity]);
+        for (const item of mealsToUpdate) {
+            await db.run('INSERT INTO order_items (order_id, meal_id, quantity, price) VALUES (?, ?, ?, ?)',
+                [orderId, item.meal_id, item.quantity, item.price]);
             
             await db.run('UPDATE meals SET quantity_available = quantity_available - ? WHERE id = ?',
                 [item.quantity, item.meal_id]);
@@ -62,21 +64,26 @@ router.post('/', authenticateToken, authorizeConsumer, async (req, res) => {
 });
 
 // Get orders for consumer
-router.get('/consumer', authenticateToken, async (req, res) => {
+router.get('/consumer', authenticateToken, authorizeConsumer, async (req, res) => {
     try {
-        if (req.user.userType !== 'consumer') {
-            return res.status(403).json({ message: 'Unauthorized' });
-        }
-
         const orders = await db.all(
-            `SELECT o.*, m.name as meal_name, m.image_url, u.business_name as vendor_name
+            `SELECT o.*, u.business_name as vendor_name
              FROM orders o
-             JOIN meals m ON o.meal_id = m.id
-             JOIN users u ON m.vendor_id = u.id
+             JOIN users u ON o.vendor_id = u.id
              WHERE o.consumer_id = ?
              ORDER BY o.created_at DESC`,
             [req.user.userId]
         );
+
+        for (const order of orders) {
+            order.items = await db.all(
+                `SELECT oi.*, m.name as meal_name, m.image_url
+                 FROM order_items oi
+                 JOIN meals m ON oi.meal_id = m.id
+                 WHERE oi.order_id = ?`,
+                [order.id]
+            );
+        }
 
         res.json(orders);
     } catch (error) {
@@ -86,44 +93,43 @@ router.get('/consumer', authenticateToken, async (req, res) => {
 });
 
 // Get orders for vendor
-router.get('/vendor', authenticateToken, async (req, res) => {
+router.get('/vendor', authenticateToken, authorizeVendor, async (req, res) => {
     try {
-        if (req.user.userType !== 'vendor') {
-            return res.status(403).json({ message: 'Unauthorized' });
-        }
-
         const orders = await db.all(
-            `SELECT o.*, m.name as meal_name, u.name as consumer_name, u.phone as consumer_phone
+            `SELECT o.*, u.name as consumer_name, u.phone as consumer_phone
              FROM orders o
-             JOIN meals m ON o.meal_id = m.id
              JOIN users u ON o.consumer_id = u.id
-             WHERE m.vendor_id = ?
+             WHERE o.vendor_id = ?
              ORDER BY o.created_at DESC`,
             [req.user.userId]
         );
 
+        for (const order of orders) {
+            order.items = await db.all(
+                `SELECT oi.*, m.name as meal_name, m.image_url
+                 FROM order_items oi
+                 JOIN meals m ON oi.meal_id = m.id
+                 WHERE oi.order_id = ?`,
+                [order.id]
+            );
+        }
+
         res.json(orders);
     } catch (error) {
         console.error('Get vendor orders error:', error);
-        res.status(500).json({ message: 'Failed to fetch orders', error: error.message });
+        res.status(500).json({ message: 'Failed to fetch orders', error: aerror.message });
     }
 });
 
 // Update order status (Vendor only)
-router.put('/:id/status', authenticateToken, async (req, res) => {
+router.put('/:id/status', authenticateToken, authorizeVendor, async (req, res) => {
     try {
-        if (req.user.userType !== 'vendor') {
-            return res.status(403).json({ message: 'Only vendors can update order status' });
-        }
-
         const { status } = req.body;
         const orderId = req.params.id;
 
         // Verify order belongs to vendor
         const order = await db.get(
-            `SELECT o.* FROM orders o
-             JOIN meals m ON o.meal_id = m.id
-             WHERE o.id = ? AND m.vendor_id = ?`,
+            `SELECT * FROM orders WHERE id = ? AND vendor_id = ?`,
             [orderId, req.user.userId]
         );
 
@@ -143,7 +149,7 @@ router.put('/:id/status', authenticateToken, async (req, res) => {
         );
 
         // Notify consumer of status change
-        await notifyConsumerOrderStatus(orderDetails.consumer_id, orderId, status, orderDetails.meal_name);
+        // await notifyConsumerOrderStatus(orderDetails.consumer_id, orderId, status, orderDetails.meal_name);
 
         res.json({ message: 'Order status updated successfully' });
     } catch (error) {
@@ -153,12 +159,8 @@ router.put('/:id/status', authenticateToken, async (req, res) => {
 });
 
 // Cancel order (Consumer only, before vendor accepts)
-router.delete('/:id', authenticateToken, async (req, res) => {
+router.delete('/:id', authenticateToken, authorizeConsumer, async (req, res) => {
     try {
-        if (req.user.userType !== 'consumer') {
-            return res.status(403).json({ message: 'Unauthorized' });
-        }
-
         const orderId = req.params.id;
 
         const order = await db.get('SELECT * FROM orders WHERE id = ? AND consumer_id = ?', [orderId, req.user.userId]);
@@ -170,12 +172,17 @@ router.delete('/:id', authenticateToken, async (req, res) => {
             return res.status(400).json({ message: 'Order can only be cancelled if status is pending' });
         }
 
-        // Restore meal quantity
-        await db.run(
-            'UPDATE meals SET quantity_available = quantity_available + ? WHERE id = ?',
-            [order.quantity, order.meal_id]
-        );
+        const orderItems = await db.all('SELECT * FROM order_items WHERE order_id = ?', [orderId]);
 
+        // Restore meal quantity
+        for (const item of orderItems) {
+            await db.run(
+                'UPDATE meals SET quantity_available = quantity_available + ? WHERE id = ?',
+                [item.quantity, item.meal_id]
+            );
+        }
+
+        await db.run('DELETE FROM order_items WHERE order_id = ?', [orderId]);
         await db.run('DELETE FROM orders WHERE id = ?', [orderId]);
 
         res.json({ message: 'Order cancelled successfully' });

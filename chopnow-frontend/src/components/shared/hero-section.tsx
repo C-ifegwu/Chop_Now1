@@ -3,11 +3,12 @@
 import { motion } from "framer-motion"
 import { Button } from "@/components/ui/button"
 import { ArrowRight } from "lucide-react"
+import Link from "next/link"
 
 export function HeroSection() {
   return (
     <section className="relative overflow-hidden bg-gradient-to-b from-background to-muted/30">
-      <div className="container relative z-10 flex min-h-[80vh] flex-col items-center justify-center py-20 text-center md:py-32">
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8 relative z-10 flex min-h-[80vh] flex-col items-center justify-center py-20 text-center md:py-32">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -45,12 +46,14 @@ export function HeroSection() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.3, duration: 0.6 }}
           >
-            <Button size="lg" className="group px-8 text-lg h-14">
-              Order Now
-              <ArrowRight className="ml-2 h-5 w-5 transition-transform group-hover:translate-x-1" />
-            </Button>
+            <Link href="/meals">
+              <Button size="lg" className="group px-8 text-lg h-14">
+                Order Now
+                <ArrowRight className="ml-2 h-5 w-5 transition-transform group-hover:translate-x-1" />
+              </Button>
+            </Link>
             <Button variant="outline" size="lg" className="px-8 text-lg h-14">
-              View Menu
+              Learn More
             </Button>
           </motion.div>
         </motion.div>

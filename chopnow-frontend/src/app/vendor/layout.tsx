@@ -1,11 +1,10 @@
-import { getServerSession } from "next-auth"
+import { auth } from "@/auth"
 import { redirect } from "next/navigation"
-import { authOptions } from "@/lib/auth"
 import { VendorSidebar } from "@/components/vendor/sidebar"
 import { VendorNavbar } from "@/components/vendor/navbar"
 
 export default async function VendorLayout({ children }: { children: React.ReactNode }) {
-  const session = await getServerSession(authOptions)
+  const session = await auth()
   
   if (!session?.user) {
     redirect("/auth/signin")

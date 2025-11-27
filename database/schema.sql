@@ -42,14 +42,23 @@ CREATE TABLE IF NOT EXISTS meals (
 CREATE TABLE IF NOT EXISTS orders (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     consumer_id INTEGER NOT NULL,
-    meal_id INTEGER NOT NULL,
-    quantity INTEGER NOT NULL,
+    vendor_id INTEGER NOT NULL,
     total_amount REAL NOT NULL,
-    payment_method TEXT,
     status TEXT DEFAULT 'pending' CHECK(status IN ('pending', 'accepted', 'preparing', 'ready', 'completed', 'cancelled')),
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (consumer_id) REFERENCES users(id),
+    FOREIGN KEY (vendor_id) REFERENCES users(id)
+);
+
+-- Order Items Table
+CREATE TABLE IF NOT EXISTS order_items (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    order_id INTEGER NOT NULL,
+    meal_id INTEGER NOT NULL,
+    quantity INTEGER NOT NULL,
+    price REAL NOT NULL,
+    FOREIGN KEY (order_id) REFERENCES orders(id),
     FOREIGN KEY (meal_id) REFERENCES meals(id)
 );
 

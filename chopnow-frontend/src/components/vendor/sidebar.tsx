@@ -4,25 +4,23 @@ import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
+import { useSession, signOut } from "next-auth/react"
 import {
   Home,
   Utensils,
   ShoppingCart,
-  BarChart2,
-  Settings,
   LogOut,
   PlusCircle,
 } from "lucide-react"
 
 export function VendorSidebar() {
   const pathname = usePathname()
+  const { data: session } = useSession()
 
   const navItems = [
     { name: "Dashboard", href: "/vendor/dashboard", icon: Home },
-    { name: "Menu", href: "/vendor/menu", icon: Utensils },
+    { name: "Meals", href: "/vendor/meals", icon: Utensils },
     { name: "Orders", href: "/vendor/orders", icon: ShoppingCart },
-    { name: "Analytics", href: "/vendor/analytics", icon: BarChart2 },
-    { name: "Settings", href: "/vendor/settings", icon: Settings },
   ]
 
   return (
@@ -35,7 +33,7 @@ export function VendorSidebar() {
           <div className="mt-5 flex-1 flex flex-col">
             <nav className="flex-1 px-2 space-y-1">
               {navItems.map((item) => {
-                const isActive = pathname === item.href
+                const isActive = pathname.startsWith(item.href)
                 const Icon = item.icon
                 return (
                   <Link
@@ -64,7 +62,7 @@ export function VendorSidebar() {
             </nav>
             <div className="px-2 mt-4">
               <Button asChild className="w-full">
-                <Link href="/vendor/menu/new" className="flex items-center justify-center">
+                <Link href="/vendor/meals/new" className="flex items-center justify-center">
                   <PlusCircle className="mr-2 h-5 w-5" />
                   Add New Meal
                 </Link>
@@ -78,15 +76,18 @@ export function VendorSidebar() {
               <div>
                 <div className="flex items-center">
                   <span className="inline-flex items-center justify-center h-10 w-10 rounded-full bg-gray-500">
-                    <span className="text-sm font-medium leading-none text-white">U</span>
+                    <span className="text-sm font-medium leading-none text-white">
+                      {session?.user?.name?.charAt(0).toUpperCase()}
+                    </span>
                   </span>
                   <div className="ml-3">
                     <p className="text-sm font-medium text-gray-700 dark:text-gray-200">
-                      User Name
+                      {session?.user?.name}
                     </p>
-                    <p className="text-xs font-medium text-gray-500 dark:text-gray-400 group-hover:text-gray-700 dark:group-hover:text-gray-300">
-                      View profile
-                    </p>
+                    <Button variant="ghost" size="sm" onClick={() => signOut({ callbackUrl: '/' })}>
+                      <LogOut className="mr-2 h-4 w-4" />
+                      Sign Out
+                    </Button>
                   </div>
                 </div>
               </div>

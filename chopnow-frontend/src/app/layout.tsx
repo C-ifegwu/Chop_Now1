@@ -1,7 +1,10 @@
+export const dynamic = 'force-dynamic'
+
 import type { Metadata } from "next"
 import { Inter as FontSans } from "next/font/google"
 import "./globals.css"
 import { ThemeProvider } from "@/components/theme-provider"
+import { SessionProvider } from "next-auth/react"
 
 const fontSans = FontSans({
   subsets: ["latin"],
@@ -29,14 +32,16 @@ export default function RootLayout({
     <html lang="en" suppressHydrationWarning>
       <head />
       <body className={fontSans.className}>
-        <ThemeProvider
-          attribute="class"
-          defaultTheme="system"
-          enableSystem
-          disableTransitionOnChange
-        >
-          {children}
-        </ThemeProvider>
+        <SessionProvider>
+          <ThemeProvider
+            attribute="class"
+            defaultTheme="system"
+            enableSystem
+            disableTransitionOnChange
+          >
+            {children}
+          </ThemeProvider>
+        </SessionProvider>
       </body>
     </html>
   );
